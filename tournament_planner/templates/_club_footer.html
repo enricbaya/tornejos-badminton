@@ -2,8 +2,12 @@
 <footer class="club-footer">
     <div class="club-footer-row">
         <img class="club-footer-logo" src="{% static 'club/logo_blanc.png' %}" alt="Club Bàdminton Igualada">
-        <a class="club-footer-sponsor" href="#" onclick="return false;" title="Kentia Jardins">
+        <a class="club-footer-sponsor" href="https://kentiajardins.com/" target="_blank" rel="noopener" title="Kentia Jardins">
             {% trans "Sponsored by" %} <img src="{% static 'club/kentia.png' %}" alt="Kentia Jardins">
+        </a>
+        <a class="club-footer-instagram" href="https://www.instagram.com/club.bad.igu/" target="_blank" rel="noopener" title="{% trans "Follow us on Instagram" %}">
+            <span class="club-footer-instagram-label">{% trans "Follow us on Instagram" %}</span>
+            <span class="club-footer-instagram-handle">@club.bad.igu</span>
         </a>
     </div>
     <div class="club-footer-credit">

@@ -109,3 +109,15 @@ footer.club-footer {
     .col-abbr { display: inline; }
     .adv-text { display: none; }
 }
+
+/* Instagram al peu */
+.club-footer-sponsor { transition: transform 0.15s, box-shadow 0.15s; }
+.club-footer-sponsor:hover { transform: translateY(-1px); box-shadow: 0 0 0 2px var(--accent); text-decoration: none; }
+.club-footer-instagram {
+    display: inline-flex; flex-direction: column; align-items: flex-start; line-height: 1.2;
+    border: 1.5px solid var(--accent); border-radius: 8px; padding: 0.4rem 0.85rem;
+    color: #fff; text-decoration: none;
+}
+.club-footer-instagram:hover { background: var(--accent); color: #fff; text-decoration: none; }
+.club-footer-instagram-label { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.12em; opacity: 0.75; }
+.club-footer-instagram-handle { font-family: var(--heading-font); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.02em; }

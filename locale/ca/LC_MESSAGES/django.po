@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-04 17:40+0000\n"
+"POT-Creation-Date: 2026-10-04 17:53+0000\n"
 "PO-Revision-Date: 2026-10-04 17:00+0200\n"
 "Last-Translator: Club\n"
 "Language-Team: Català\n"
@@ -18,17 +18,14 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: matches/apps.py:9
-#| msgid "Matches played"
 msgid "Matches (legacy, unused)"
 msgstr "Partits (antic, sense ús)"
 
 #: matches/models.py:17
-#| msgid "Select match"
 msgid "Legacy match"
 msgstr "partit antic"
 
 #: matches/models.py:18
-#| msgid "Next matches"
 msgid "Legacy matches"
 msgstr "partits antics"
 
@@ -731,7 +728,13 @@ msgstr "Tornejos"
 msgid "Sponsored by"
 msgstr "Amb el suport de"
 
-#: tournament_planner/templates/_club_footer.html:10
+#: tournament_planner/templates/_club_footer.html:8
+#: tournament_planner/templates/_club_footer.html:9
+#: tournaments/templates/tournaments/bigscreen.html:347
+msgid "Follow us on Instagram"
+msgstr "Segueix-nos a Instagram"
+
+#: tournament_planner/templates/_club_footer.html:14
 msgid "Based on Badminton Tournament Planner by Morten Fuglsang"
 msgstr "Basat en Badminton Tournament Planner, de Morten Fuglsang"
 
@@ -739,7 +742,7 @@ msgstr "Basat en Badminton Tournament Planner, de Morten Fuglsang"
 msgid "Django site admin"
 msgstr ""
 
-#: tournament_planner/templates/admin/base_site.html:53
+#: tournament_planner/templates/admin/base_site.html:78
 msgid "Administration"
 msgstr "Administració"
 
