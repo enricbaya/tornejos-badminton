@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from players.models import Player
 from tournaments.models import Tournament
 
@@ -11,6 +12,10 @@ class Match(models.Model):
     player2 = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='player2_matches')
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
     score = models.CharField(max_length=50, blank=True, null=True)
+
+    class Meta:
+        verbose_name = _("Legacy match")
+        verbose_name_plural = _("Legacy matches")
 
     def __str__(self):
         """Return a human-readable match label.

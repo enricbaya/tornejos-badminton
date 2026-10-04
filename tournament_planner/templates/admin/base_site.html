@@ -7,6 +7,31 @@
 {{ block.super }}
 <link rel="icon" type="image/png" href="{% static 'club/favicon-64.png' %}">
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+/* Django's Catalan JS catalog has an untranslated "of" in the "N of M selected" counter
+   (admin/actions.js). Wrap ngettext so the counter reads "N de M seleccionats". */
+(function () {
+  var KEY = '%(sel)s of %(cnt)s selected';
+  function patch() {
+    if (typeof window.ngettext !== 'function' || window.ngettext.__club) return;
+    var orig = window.ngettext;
+    var wrapped = function (s, p, n) {
+      var r = orig(s, p, n);
+      return s === KEY ? r.replace(' of ', ' de ') : r;
+    };
+    wrapped.__club = true;
+    window.ngettext = wrapped;
+    if (window.django && typeof django.ngettext === 'function') django.ngettext = wrapped;
+  }
+  function fixCounters() {
+    document.querySelectorAll('.action-counter').forEach(function (el) {
+      el.textContent = el.textContent.replace(/^(\s*\d+) of /, '$1 de ');
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function () { patch(); fixCounters(); });
+  window.addEventListener('load', function () { patch(); fixCounters(); });
+})();
+</script>
 {% endblock %}
 
 {% block extrastyle %}

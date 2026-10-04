@@ -85,8 +85,8 @@ class Team(models.Model):
         ('double', _("Doubles")),
         ('mixed', _("Mixed doubles")),
     ]
-    player1 = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='team_player1')
-    player2 = models.ForeignKey(Player, on_delete=models.SET_NULL, related_name='team_player2', null=True, blank=True)
+    player1 = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='team_player1', verbose_name=_("Player 1"))
+    player2 = models.ForeignKey(Player, on_delete=models.SET_NULL, related_name='team_player2', null=True, blank=True, verbose_name=_("Player 2"))
     pair_type = models.CharField(
         max_length=10, choices=PAIR_TYPE_CHOICES, null=True, blank=True,
         verbose_name=_("Pair type"),
@@ -96,7 +96,7 @@ class Team(models.Model):
         max_length=30, blank=True, null=True,
         verbose_name=_("Division"),
     )
-    name = models.CharField(max_length=100, blank=True, null=True)
+    name = models.CharField(max_length=100, blank=True, null=True, verbose_name=_("Name"))
 
     class Meta:
         verbose_name = _("Team")

@@ -238,7 +238,7 @@ class Division(models.Model):
         ('playoff', _("Group + playoff bracket")),
         ('tree', _("Single elimination")),
     ]
-    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='divisions')
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='divisions', verbose_name=_("Tournament"))
     name = models.CharField(max_length=100, verbose_name=_("Division name"))
     discipline = models.CharField(
         max_length=10, choices=DISCIPLINE_CHOICES, default='single',
@@ -350,9 +350,9 @@ class Match(models.Model):
         ('in_progress', _('In Progress')),
         ('completed', _('Completed')),
     ]
-    division = models.ForeignKey(Division, on_delete=models.CASCADE, related_name='matches')
-    team1 = models.ForeignKey('players.Team', on_delete=models.SET_NULL, null=True, blank=True, related_name='team1_matches')
-    team2 = models.ForeignKey('players.Team', on_delete=models.SET_NULL, null=True, blank=True, related_name='team2_matches')
+    division = models.ForeignKey(Division, on_delete=models.CASCADE, related_name='matches', verbose_name=_("Division"))
+    team1 = models.ForeignKey('players.Team', on_delete=models.SET_NULL, null=True, blank=True, related_name='team1_matches', verbose_name=_("Team 1"))
+    team2 = models.ForeignKey('players.Team', on_delete=models.SET_NULL, null=True, blank=True, related_name='team2_matches', verbose_name=_("Team 2"))
     winner = models.ForeignKey('players.Team', on_delete=models.SET_NULL, null=True, blank=True, related_name='won_matches', verbose_name=_("Winner"))
     score = models.CharField(max_length=50, blank=True, null=True, verbose_name=_("Score"))
     match_round = models.IntegerField(default=1, verbose_name=_("Round"))
@@ -389,8 +389,8 @@ class Match(models.Model):
 
 class DivisionSeed(models.Model):
     """Record the optional seed number of a team within a division."""
-    division = models.ForeignKey(Division, on_delete=models.CASCADE, related_name='seeds')
-    team = models.ForeignKey('players.Team', on_delete=models.CASCADE, related_name='division_seeds')
+    division = models.ForeignKey(Division, on_delete=models.CASCADE, related_name='seeds', verbose_name=_("Division"))
+    team = models.ForeignKey('players.Team', on_delete=models.CASCADE, related_name='division_seeds', verbose_name=_("Team"))
     seed_number = models.PositiveIntegerField(verbose_name=_("Seed number"))
 
     class Meta:
@@ -415,10 +415,10 @@ class MedalOverride(models.Model):
         ('silver', _("Silver")),
         ('bronze', _("Bronze")),
     ]
-    division = models.ForeignKey(Division, on_delete=models.CASCADE, related_name='medal_overrides')
-    medal = models.CharField(max_length=10, choices=MEDAL_CHOICES)
-    team = models.ForeignKey('players.Team', on_delete=models.CASCADE, related_name='medal_overrides')
-    order = models.PositiveSmallIntegerField(default=1)
+    division = models.ForeignKey(Division, on_delete=models.CASCADE, related_name='medal_overrides', verbose_name=_("Division"))
+    medal = models.CharField(max_length=10, choices=MEDAL_CHOICES, verbose_name=_("Medal"))
+    team = models.ForeignKey('players.Team', on_delete=models.CASCADE, related_name='medal_overrides', verbose_name=_("Team"))
+    order = models.PositiveSmallIntegerField(default=1, verbose_name=_("Order"))
 
     class Meta:
         unique_together = [('division', 'medal', 'order')]

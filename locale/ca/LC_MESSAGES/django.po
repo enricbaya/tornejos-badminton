@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-04 15:54+0000\n"
+"POT-Creation-Date: 2026-10-04 17:40+0000\n"
 "PO-Revision-Date: 2026-10-04 17:00+0200\n"
 "Last-Translator: Club\n"
 "Language-Team: Català\n"
@@ -16,6 +16,21 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: matches/apps.py:9
+#| msgid "Matches played"
+msgid "Matches (legacy, unused)"
+msgstr "Partits (antic, sense ús)"
+
+#: matches/models.py:17
+#| msgid "Select match"
+msgid "Legacy match"
+msgstr "partit antic"
+
+#: matches/models.py:18
+#| msgid "Next matches"
+msgid "Legacy matches"
+msgstr "partits antics"
 
 #: players/apps.py:9
 msgid "Players and teams"
@@ -39,7 +54,7 @@ msgstr "En dobles els dos jugadors han de ser del mateix gènere."
 msgid "Mixed doubles requires one male and one female player."
 msgstr "En dobles mixtos cal un jugador i una jugadora."
 
-#: players/models.py:13 players/models.py:42
+#: players/models.py:13 players/models.py:42 players/models.py:99
 #: players/templates/players/division_categories.html:43 players/views.py:80
 #: tournament_planner/templates/home.html:20
 #: tournament_planner/templates/home.html:40 tournaments/models.py:69
@@ -77,7 +92,8 @@ msgid "Female"
 msgstr "Femení"
 
 #: players/models.py:48 players/models.py:97 players/views.py:83
-#: players/views.py:465
+#: players/views.py:465 tournaments/models.py:353 tournaments/models.py:392
+#: tournaments/models.py:418
 #: tournaments/templates/tournaments/_schedule_matches.html:60
 #: tournaments/templates/tournaments/tournament_detail.html:331
 #: tournaments/templates/tournaments/tournament_schedule_print.html:214
@@ -134,6 +150,14 @@ msgstr "Dobles"
 msgid "Mixed doubles"
 msgstr "Dobles mixtos"
 
+#: players/models.py:88 players/views.py:466
+msgid "Player 1"
+msgstr "Jugador 1"
+
+#: players/models.py:89 players/views.py:467
+msgid "Player 2"
+msgstr "Jugador 2"
+
 #: players/models.py:92
 msgid "Pair type"
 msgstr "Tipus de parella"
@@ -142,7 +166,8 @@ msgstr "Tipus de parella"
 msgid "Doubles: same gender · Mixed doubles: mixed gender"
 msgstr "Dobles: mateix gènere · Dobles mixtos: gèneres diferents"
 
-#: players/models.py:102 players/views.py:463
+#: players/models.py:102 players/views.py:463 tournaments/models.py:393
+#: tournaments/models.py:420
 #: tournaments/templates/tournaments/tournament_detail.html:414
 #: tournaments/templates/tournaments/tournament_detail.html:443
 #: tournaments/templates/tournaments/tournament_detail.html:477
@@ -655,14 +680,6 @@ msgstr "S'ha tret el descans de %(name)s."
 msgid "Type"
 msgstr "Tipus"
 
-#: players/views.py:466
-msgid "Player 1"
-msgstr "Jugador 1"
-
-#: players/views.py:467
-msgid "Player 2"
-msgstr "Jugador 2"
-
 #: players/views.py:502
 #, python-format
 msgid "Team \"%(name)s\" has been created."
@@ -844,7 +861,7 @@ msgstr "Club Bàdminton Igualada"
 msgid "Advanced administration"
 msgstr "Administració avançada"
 
-#: tournaments/apps.py:20
+#: tournaments/apps.py:48
 msgid "Login security"
 msgstr "Seguretat d'accés"
 
@@ -1087,6 +1104,7 @@ msgid "Logo is shown on printed programmes and schedules."
 msgstr "El logotip surt als programes i horaris impresos."
 
 #: tournaments/models.py:122 tournaments/models.py:145
+#: tournaments/models.py:241
 #: tournaments/templates/tournaments/public/landing.html:67
 #: tournaments/templates/tournaments/schedule.html:28
 #: tournaments/templates/tournaments/tournament_program_print.html:302
@@ -1298,12 +1316,10 @@ msgid "Participants"
 msgstr "Participants"
 
 #: tournaments/models.py:291
-#| msgid "Tournament days"
 msgid "Tournament division"
 msgstr "Categoria del torneig"
 
 #: tournaments/models.py:292
-#| msgid "Tournament days"
 msgid "Tournament divisions"
 msgstr "Categories del torneig"
 
@@ -1322,6 +1338,26 @@ msgstr "Pendent"
 #: tournaments/models.py:350
 msgid "In Progress"
 msgstr "En joc"
+
+#: tournaments/models.py:354
+#: tournaments/templates/tournaments/match_bracket_override.html:26
+#: tournaments/templates/tournaments/public/tournament.html:155
+#: tournaments/templates/tournaments/tournament_detail.html:623
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:280
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:312
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:352
+msgid "Team 1"
+msgstr "Participant 1"
+
+#: tournaments/models.py:355
+#: tournaments/templates/tournaments/match_bracket_override.html:38
+#: tournaments/templates/tournaments/public/tournament.html:155
+#: tournaments/templates/tournaments/tournament_detail.html:623
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:280
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:312
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:354
+msgid "Team 2"
+msgstr "Participant 2"
 
 #: tournaments/models.py:356
 #: tournaments/templates/tournaments/_schedule_matches.html:63
@@ -1453,6 +1489,14 @@ msgstr "Plata"
 #: tournaments/templates/tournaments/division_medals_edit.html:94
 msgid "Bronze"
 msgstr "Bronze"
+
+#: tournaments/models.py:419
+msgid "Medal"
+msgstr "Medalla"
+
+#: tournaments/models.py:421
+msgid "Order"
+msgstr "Ordre"
 
 #: tournaments/models.py:425
 msgid "Medal override"
@@ -1694,29 +1738,11 @@ msgid ""
 msgstr ""
 "Tria qui ha de jugar. Deixa un camp buit per mantenir el participant actual."
 
-#: tournaments/templates/tournaments/match_bracket_override.html:26
-#: tournaments/templates/tournaments/public/tournament.html:155
-#: tournaments/templates/tournaments/tournament_detail.html:623
-#: tournaments/templates/tournaments/tournament_wallchart_print.html:280
-#: tournaments/templates/tournaments/tournament_wallchart_print.html:312
-#: tournaments/templates/tournaments/tournament_wallchart_print.html:352
-msgid "Team 1"
-msgstr "Participant 1"
-
 #: tournaments/templates/tournaments/match_bracket_override.html:28
 #: tournaments/templates/tournaments/match_bracket_override.html:40
 #, python-format
 msgid "keep current (%(name)s)"
 msgstr "mantén l'actual (%(name)s)"
-
-#: tournaments/templates/tournaments/match_bracket_override.html:38
-#: tournaments/templates/tournaments/public/tournament.html:155
-#: tournaments/templates/tournaments/tournament_detail.html:623
-#: tournaments/templates/tournaments/tournament_wallchart_print.html:280
-#: tournaments/templates/tournaments/tournament_wallchart_print.html:312
-#: tournaments/templates/tournaments/tournament_wallchart_print.html:354
-msgid "Team 2"
-msgstr "Participant 2"
 
 #: tournaments/templates/tournaments/match_bracket_override.html:50
 msgid "Save change"
@@ -3322,3 +3348,23 @@ msgstr "Hash de la clau de sessió (sha256)"
 #. third-party (django-axes)
 msgid "User Agent"
 msgstr "Navegador"
+
+#. third-party (django-axes)
+msgid "0 of %(cnt)s selected"
+msgstr "0 de %(cnt)s seleccionats"
+
+#. third-party (django-axes)
+msgid "Can add %(model)s"
+msgstr "Pot afegir %(model)s"
+
+#. third-party (django-axes)
+msgid "Can change %(model)s"
+msgstr "Pot modificar %(model)s"
+
+#. third-party (django-axes)
+msgid "Can delete %(model)s"
+msgstr "Pot eliminar %(model)s"
+
+#. third-party (django-axes)
+msgid "Can view %(model)s"
+msgstr "Pot veure %(model)s"
