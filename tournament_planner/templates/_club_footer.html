@@ -6,7 +6,7 @@
             {% trans "Sponsored by" %} <img src="{% static 'club/kentia.png' %}" alt="Kentia Jardins">
         </a>
         <a class="club-footer-instagram" href="https://www.instagram.com/club.bad.igu/" target="_blank" rel="noopener" title="{% trans "Follow us on Instagram" %}">
-            <span class="club-footer-instagram-label">{% trans "Follow us on Instagram" %}</span>
+            {% include '_instagram_icon.html' %}
             <span class="club-footer-instagram-handle">@club.bad.igu</span>
         </a>
     </div>
