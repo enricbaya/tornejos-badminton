@@ -24,7 +24,7 @@
     <tbody>
     {% for tournament in tournaments %}
     <tr style="cursor:pointer;" onclick="window.location='{% url 'tournament_detail' tournament.pk %}'">
-        <td style="font-weight:600; color:#0d4f22;">{{ tournament.name }}</td>
+        <td style="font-weight:600; color:var(--brand-dark,#000);">{{ tournament.name }}</td>
         <td>{{ tournament.date }}</td>
         <td>{{ tournament.court_count }}</td>
         <td>{{ tournament.start_time|time:"H:i"|default:"–" }}</td>

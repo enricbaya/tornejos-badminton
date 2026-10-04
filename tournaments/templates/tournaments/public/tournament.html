@@ -39,7 +39,7 @@
 <h3>{% trans "Standings" %}</h3>
 <div class="pub-table-wrap"><table>
     <thead>
-        <tr><th>#</th><th>{% if division.discipline == 'single' %}{% trans "Player" %}{% else %}{% trans "Pair" %}{% endif %}</th><th>{% trans "Matches" %}</th><th>{% trans "Won" %}</th><th>{% trans "Lost" %}</th><th>{% trans "Points" %}</th></tr>
+        <tr><th>#</th><th>{% if division.discipline == 'single' %}{% trans "Player" %}{% else %}{% trans "Pair" %}{% endif %}</th><th><span class="col-full">{% trans "Matches" %}</span><span class="col-abbr">{% trans "P" context "standings" %}</span></th><th><span class="col-full">{% trans "Won" %}</span><span class="col-abbr">{% trans "W" context "standings" %}</span></th><th><span class="col-full">{% trans "Lost" %}</span><span class="col-abbr">{% trans "L" context "standings" %}</span></th><th><span class="col-full">{% trans "Points" %}</span><span class="col-abbr">{% trans "Pts" context "standings" %}</span></th></tr>
     </thead>
     <tbody>
         {% for row in standings %}
@@ -71,20 +71,20 @@
 <h3>{% trans "Group standings" %}</h3>
 {% for g_num, g_rows in dd.group_standings %}
 <div style="margin-bottom:1rem; overflow-x:auto; -webkit-overflow-scrolling:touch;">
-    <div style="font-weight:700; font-size:0.9rem; color:#16692c; margin-bottom:0.35rem;">{% blocktrans with n=g_num %}Group {{ n }}{% endblocktrans %}</div>
+    <div style="font-weight:700; font-size:0.9rem; color:var(--accent-text,#c8174f); margin-bottom:0.35rem;">{% blocktrans with n=g_num %}Group {{ n }}{% endblocktrans %}</div>
     <table>
         <thead>
-            <tr><th>#</th><th>{% if division.discipline == 'single' %}{% trans "Player" %}{% else %}{% trans "Pair" %}{% endif %}</th><th>{% trans "Matches" %}</th><th>{% trans "Won" %}</th><th>{% trans "Lost" %}</th><th>{% trans "Points" %}</th></tr>
+            <tr><th>#</th><th>{% if division.discipline == 'single' %}{% trans "Player" %}{% else %}{% trans "Pair" %}{% endif %}</th><th><span class="col-full">{% trans "Matches" %}</span><span class="col-abbr">{% trans "P" context "standings" %}</span></th><th><span class="col-full">{% trans "Won" %}</span><span class="col-abbr">{% trans "W" context "standings" %}</span></th><th><span class="col-full">{% trans "Lost" %}</span><span class="col-abbr">{% trans "L" context "standings" %}</span></th><th><span class="col-full">{% trans "Points" %}</span><span class="col-abbr">{% trans "Pts" context "standings" %}</span></th></tr>
         </thead>
         <tbody>
             {% for row in g_rows %}
-            <tr {% if forloop.counter <= division.advancing_count %}style="background:#f0fdf4;"{% endif %}>
+            <tr {% if forloop.counter <= division.advancing_count %}style="background:var(--brand-soft,#fdf0f4);"{% endif %}>
                 <td>
                     {% if forloop.counter == 1 %}<span class="rank-1">🥇</span>
                     {% elif forloop.counter == 2 %}<span class="rank-2">🥈</span>
                     {% elif forloop.counter == 3 %}<span class="rank-3">🥉</span>
                     {% else %}{{ forloop.counter }}{% endif %}
-                    {% if forloop.counter <= division.advancing_count %}<span style="font-size:0.7rem; color:#16a34a; margin-left:0.3rem;">↑ {% trans "advances" %}</span>{% endif %}
+                    {% if forloop.counter <= division.advancing_count %}<span class="adv-mark" title="{% trans "advances" %}">↑ <span class="adv-text">{% trans "advances" %}</span></span>{% endif %}
                 </td>
                 <td>
                     <strong>{{ row.team.name }}</strong>{{ seeds_dict|dict_get:row.team.pk }}
@@ -160,7 +160,7 @@
         {% if match.team2 or match.bracket_label %}
         <tr>
             {% if division.has_groups %}
-            <td style="font-size:0.8rem; color:{% if match.phase == 'playoff' %}#7c3aed{% else %}#16692c{% endif %}; font-weight:600;">
+            <td style="font-size:0.8rem; color:{% if match.phase == 'playoff' %}#111{% else %}var(--accent-text,#c8174f){% endif %}; font-weight:600;">
                 {% if match.phase == 'playoff' %}{% trans "Playoff" %}{% else %}{% blocktrans with n=match.group_number %}G{{ n }}{% endblocktrans %}{% endif %}
             </td>
             {% endif %}

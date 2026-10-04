@@ -96,11 +96,11 @@
                     {% if sort == col %}
                         {% if dir == 'asc' %}
                         <a href="{{ base_url }}&sort={{ col }}&dir=desc" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:0.3rem;">
-                            {{ label }} <span style="color:#16692c;">▲</span>
+                            {{ label }} <span style="color:var(--accent-text,#c8174f);">▲</span>
                         </a>
                         {% else %}
                         <a href="{{ base_url }}&sort={{ col }}&dir=asc" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:0.3rem;">
-                            {{ label }} <span style="color:#16692c;">▼</span>
+                            {{ label }} <span style="color:var(--accent-text,#c8174f);">▼</span>
                         </a>
                         {% endif %}
                     {% else %}

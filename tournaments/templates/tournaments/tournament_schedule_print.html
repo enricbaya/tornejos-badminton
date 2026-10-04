@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 {% load tournament_extras i18n %}
 <html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
@@ -35,14 +35,14 @@
     cursor: pointer;
     border: none;
   }
-  .btn-primary   { background: #16692c; color: #fff; }
-  .btn-secondary { background: #16692c; color: #fff; }
+  .btn-primary   { background: var(--brand,#141414); color: #fff; }
+  .btn-secondary { background: var(--brand,#141414); color: #fff; }
 
   /* ── Tournament header block ─── */
   .tournament-header {
     max-width: 900px;
     margin: 0 auto 2rem;
-    border: 2px solid #16692c;
+    border: 2px solid var(--accent,#EB1C60);
     border-radius: 8px;
     padding: 1rem 1.5rem;
     background: #fff;
@@ -59,7 +59,7 @@
   .tournament-header h2 {
     margin: 0 0 0.3rem;
     font-size: 1.5rem;
-    color: #16692c;
+    color: var(--accent-text,#c8174f);
   }
   .tournament-header p {
     margin: 0;
@@ -81,7 +81,7 @@
     border-collapse: collapse;
   }
   thead tr {
-    background: #16692c;
+    background: var(--brand,#141414);
     color: #fff;
   }
   thead th {
@@ -102,9 +102,9 @@
     background: #e8f5eb;
     font-weight: 700;
     font-size: 0.88rem;
-    color: #16692c;
+    color: var(--accent-text,#c8174f);
     padding: 0.35rem 0.75rem;
-    border-top: 2px solid #a7d7b4;
+    border-top: 2px solid var(--brand-soft-border,#f7c4d4);
     border-bottom: none;
   }
 
@@ -119,7 +119,7 @@
     border-top: 3px solid #0a3d18;
   }
 
-  .col-no    { font-weight: 700; color: #16692c; white-space: nowrap; }
+  .col-no    { font-weight: 700; color: var(--accent-text,#c8174f); white-space: nowrap; }
   .col-time  { font-weight: 700; white-space: nowrap; }
   .col-court { color: #444; white-space: nowrap; text-align: center; font-weight: 600; }
   .col-match { font-weight: 600; }
@@ -188,6 +188,8 @@
 <div class="tournament-header">
   {% if tournament.logo %}
   <img src="{{ tournament.logo.url }}" alt="Logo" class="tournament-header-logo">
+  {% else %}
+  <img src="{% static 'club/logo_negre.png' %}" alt="Club Bàdminton Igualada" class="tournament-header-logo">
   {% endif %}
   <div>
     <h2>{{ tournament.name }}</h2>

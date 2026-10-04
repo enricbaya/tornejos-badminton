@@ -1,0 +1,111 @@
+/* ── Club Bàdminton Igualada · imatge del club ─────────────────────────────
+   Blanc i negre amb detalls fúcsia (#EB1C60, el color de la samarreta).
+   Carregat després dels estils de cada plantilla base per sobreescriure'ls. */
+:root {
+    --brand: #141414;          /* negre: botons, capçaleres */
+    --brand-dark: #000000;
+    --accent: #EB1C60;         /* fúcsia del club */
+    --accent-dark: #c4124c;
+    --accent-text: #c8174f;    /* fúcsia amb prou contrast per a text sobre blanc */
+    --brand-soft: #fdf0f4;     /* fons rosat suau per a files destacades */
+    --brand-soft-border: #f7c4d4;
+    --page-bg: #f4f4f5;
+    --heading-font: 'Barlow', 'Inter', system-ui, sans-serif;
+}
+
+body { background: var(--page-bg); }
+
+/* Capçalera negra amb línia fúcsia */
+header {
+    background: #111 !important;
+    border-bottom: 3px solid var(--accent);
+    box-shadow: 0 2px 14px rgba(0,0,0,0.25) !important;
+}
+.header-brand a { gap: 0.65rem; }
+.header-brand img.club-mark { height: 34px; width: auto; }
+.club-brand-text { display: flex; flex-direction: column; line-height: 1.05; }
+.club-brand-text b {
+    font-family: var(--heading-font); font-weight: 800; font-size: 1.05rem;
+    letter-spacing: 0.04em; text-transform: uppercase; color: #fff;
+}
+.club-brand-text small {
+    font-family: var(--heading-font); font-weight: 600; font-size: 0.68rem;
+    letter-spacing: 0.32em; text-transform: uppercase; color: var(--accent);
+}
+nav a:hover { background: rgba(235,28,96,0.18) !important; color: #fff !important; }
+@media (max-width: 700px) {
+    .club-brand-text b { font-size: 0.92rem; }
+    nav { background: #111 !important; border-bottom: 3px solid var(--accent); }
+}
+
+/* Títols amb la tipografia del club */
+h1, h2 { font-family: var(--heading-font); color: #111; letter-spacing: 0; }
+h1 { font-weight: 800; font-size: 1.85rem; }
+h1::after {
+    content: ""; display: block; width: 48px; height: 4px; margin-top: 0.35rem;
+    background: var(--accent); border-radius: 2px;
+}
+.division-summary-title, .topbar-name { font-family: var(--heading-font); }
+
+a { color: var(--accent-text); }
+a:hover { color: var(--accent-dark); }
+
+/* Botons: negre, fúcsia en passar-hi per sobre */
+.btn-primary {
+    background: var(--brand) !important; border-color: var(--brand) !important; color: #fff !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25) !important;
+}
+.btn-primary:hover {
+    background: var(--accent) !important; border-color: var(--accent) !important;
+    box-shadow: 0 4px 12px rgba(235,28,96,0.35) !important;
+}
+.btn-secondary {
+    background: #fff !important; color: #111 !important; border-color: #d4d4d8 !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06) !important;
+}
+.btn-secondary:hover {
+    border-color: var(--accent) !important; color: var(--accent-text) !important;
+    box-shadow: 0 2px 8px rgba(235,28,96,0.18) !important;
+}
+.btn-danger {
+    background: #b91c1c !important; border-color: #b91c1c !important; color: #fff !important;
+    box-shadow: 0 1px 4px rgba(185,28,28,0.3) !important;
+}
+.btn-danger:hover { background: #991b1b !important; border-color: #991b1b !important; }
+
+/* Camps de formulari amb focus fúcsia */
+input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px rgba(235,28,96,0.15) !important;
+}
+
+/* Missatges d'èxit en to neutre amb vora fúcsia */
+.messages .success {
+    background: #fff !important; color: #111 !important;
+    border-color: var(--brand-soft-border) !important; border-left: 4px solid var(--accent) !important;
+}
+
+/* Peu: club + patrocinador */
+footer.club-footer {
+    background: #111; color: rgba(255,255,255,0.65); border-top: 3px solid var(--accent);
+    padding: 1.25rem 1rem; margin-top: 3rem; text-align: center; font-size: 0.78rem;
+}
+.club-footer-row { display: flex; align-items: center; justify-content: center; gap: 1.5rem; flex-wrap: wrap; }
+.club-footer-logo { height: 54px; width: auto; }
+.club-footer-sponsor {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: #fff; border-radius: 8px; padding: 0.35rem 0.8rem;
+    color: #555; text-decoration: none; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em;
+}
+.club-footer-sponsor img { height: 34px; width: auto; }
+.club-footer-credit { margin-top: 0.75rem; font-size: 0.7rem; opacity: 0.6; }
+.club-footer-credit a { color: inherit; text-decoration: underline; }
+
+/* Classificacions: abreviatures al mòbil i marca de classificat */
+.col-abbr { display: none; }
+.adv-mark { font-size: 0.7rem; color: var(--accent-text); margin-left: 0.3rem; font-weight: 700; white-space: nowrap; }
+@media (max-width: 640px) {
+    .col-full { display: none; }
+    .col-abbr { display: inline; }
+    .adv-text { display: none; }
+}

@@ -1,0 +1,13 @@
+{% load static %}{% load i18n %}
+<footer class="club-footer">
+    <div class="club-footer-row">
+        <img class="club-footer-logo" src="{% static 'club/logo_blanc.png' %}" alt="Club Bàdminton Igualada">
+        <a class="club-footer-sponsor" href="#" onclick="return false;" title="Kentia Jardins">
+            {% trans "Sponsored by" %} <img src="{% static 'club/kentia.png' %}" alt="Kentia Jardins">
+        </a>
+    </div>
+    <div class="club-footer-credit">
+        {% blocktrans %}Based on Badminton Tournament Planner by Morten Fuglsang{% endblocktrans %} &mdash;
+        <a href="https://github.com/MFuglsang/badminton_tournament_planner" target="_blank" rel="noopener">GitHub</a>
+    </div>
+</footer>

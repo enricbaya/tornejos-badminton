@@ -1,16 +1,14 @@
 {% extends 'base_public.html' %}
 {% load i18n %}
 {% load static %}
-{% block title %}{% trans "Log in" %} – Badminton Tournament Planner{% endblock %}
+{% block title %}{% trans "Log in" %} – Tornejos CBI{% endblock %}
 
 {% block extra_head %}
 <style>
 body {
-    background-image: linear-gradient(rgba(13,79,34,0.55), rgba(13,79,34,0.65)), url('/media/img/background.jpg');
-    background-size: cover;
-    background-position: center;
+    background: radial-gradient(circle at 85% 15%, rgba(235,28,96,0.35), transparent 45%),
+                linear-gradient(160deg, #1a1a1a 0%, #000 70%);
     background-attachment: fixed;
-    background-color: #0d4f22;
 }
 body > .container { background: transparent; }
 </style>
@@ -20,7 +18,7 @@ body > .container { background: transparent; }
 <div style="min-height:80vh; display:flex; align-items:center; justify-content:center;">
   <div class="card" style="width:100%; max-width:400px;">
     <div style="text-align:center; margin-bottom:1.5rem;">
-      <img src="{% static 'img/logo_transp.png' %}" alt="Badminton Tournament Planner" style="height:80px; margin-bottom:0.75rem;">
+      <img src="{% static 'club/logo_negre.png' %}" alt="Club Bàdminton Igualada" style="height:130px; margin-bottom:0.5rem;">
       <p style="color:#64748b; margin:0.4rem 0 0; font-size:0.9rem;">{% trans "Log in with your club credentials" %}</p>
     </div>
 

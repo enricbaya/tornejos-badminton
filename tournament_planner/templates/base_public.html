@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Badminton Tournament Planner{% endblock %}</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F3F8;</text></svg>">
+    <title>{% block title %}Tornejos · Club Bàdminton Igualada{% endblock %}</title>
     <!-- PWA -->
     <link rel="manifest" href="{% static 'manifest.json' %}">
-    <meta name="theme-color" content="#0d4f22">
+    <meta name="theme-color" content="#111111">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Turnering">
-    <link rel="apple-touch-icon" href="{% static 'img/logo_transp.png' %}">
+    <meta name="apple-mobile-web-app-title" content="Tornejos CBI">
     <!-- /PWA -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,7 +29,7 @@
             flex-direction: column;
         }
         header {
-            background: #0d4f22;
+            background: var(--brand-dark,#000);
             color: white;
             padding: 0 2rem;
             height: 58px;
@@ -43,7 +41,7 @@
         .header-brand a { color: white; text-decoration: none; display: flex; align-items: center; }
         .header-brand img { height: 46px; }
         .container { max-width: 1220px; margin: 0 auto; padding: 2rem 1.5rem; flex: 1; width: 100%; }
-        h1 { font-size: 1.65rem; font-weight: 700; color: #0d4f22; margin: 0 0 0.2rem; }
+        h1 { font-size: 1.65rem; font-weight: 700; color: var(--brand-dark,#000); margin: 0 0 0.2rem; }
         .card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
         .btn {
             display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;
@@ -57,12 +55,12 @@
         .btn:hover { text-decoration: none; transform: translateY(-1px); }
         .btn:active { transform: translateY(0); box-shadow: none !important; }
         .btn-primary {
-            background: #16692c; color: white; border-color: #16692c;
-            box-shadow: 0 1px 4px rgba(22,105,44,0.28), inset 0 1px 0 rgba(255,255,255,0.1);
+            background: var(--brand,#141414); color: white; border-color: var(--accent-text,#c8174f);
+            box-shadow: 0 1px 4px rgba(20,20,20,0.28), inset 0 1px 0 rgba(255,255,255,0.1);
         }
         .btn-primary:hover {
-            background: #125824; border-color: #125824; color: white;
-            box-shadow: 0 4px 12px rgba(22,105,44,0.32);
+            background: var(--accent,#EB1C60); border-color: var(--accent,#EB1C60); color: white;
+            box-shadow: 0 4px 12px rgba(20,20,20,0.32);
         }
         label { display: block; font-weight: 600; font-size: 0.875rem; margin-bottom: 0.3rem; }
         input[type=text], input[type=password] {
@@ -71,12 +69,13 @@
             font-size: 0.95rem; margin-bottom: 1rem; box-sizing: border-box;
         }
     </style>
+    {% include '_club_head.html' %}
     {% block extra_head %}{% endblock %}
 </head>
 <body>
     <header>
         <div class="header-brand">
-            <a href="/"><img src="{% static 'img/logo_transp.png' %}" alt="Badminton Tournament Planner"></a>
+            {% include '_club_brand.html' %}
         </div>
         {# Language switcher #}
         <form action="{% url 'set_language' %}" method="post" style="display:inline; margin:0;">
@@ -95,6 +94,7 @@
     <div class="container">
         {% block content %}{% endblock %}
     </div>
+    {% include '_club_footer.html' %}
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

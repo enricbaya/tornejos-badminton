@@ -1,4 +1,4 @@
-{% load i18n %}<!DOCTYPE html>
+{% load i18n %}{% load static %}<!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
 <meta charset="UTF-8">
@@ -32,8 +32,8 @@
     text-decoration: none;
     color: #fff;
   }
-  .btn-primary { background: #16692c; }
-  .btn-secondary { background: #16692c; }
+  .btn-primary { background: var(--brand,#141414); }
+  .btn-secondary { background: var(--brand,#141414); }
 
   /* ── Signs container (screen preview) ── */
   .signs-container {
@@ -175,7 +175,9 @@
   <div class="court-sign">
     {% if tournament.logo %}
     <img src="{{ tournament.logo.url }}" alt="{{ tournament.name }} logo" class="sign-logo">
-    {% endif %}
+    {% else %}
+  <img src="{% static 'club/logo_negre.png' %}" alt="Club Bàdminton Igualada" class="sign-logo">
+  {% endif %}
     <div class="sign-tournament-name">{{ tournament.name }}</div>
     {% if tournament.days.count > 1 %}
     <div class="sign-tournament-name" style="font-size:0.9rem; font-weight:400; letter-spacing:0.02em; color:#555; margin-top:-0.3rem;">

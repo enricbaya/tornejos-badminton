@@ -11,7 +11,7 @@
                       font-size:0.83rem; font-family:inherit; width:180px; outline:none;
                       transition:border-color 0.15s, box-shadow 0.15s; background:#fff;"
                oninput="schedFilter(this.value)"
-               onfocus="this.style.borderColor='#16692c'; this.style.boxShadow='0 0 0 3px rgba(22,105,44,0.12)';"
+               onfocus="this.style.borderColor='var(--accent,#EB1C60)'; this.style.boxShadow='0 0 0 3px rgba(20,20,20,0.12)';"
                onblur="this.style.borderColor='#d1d9e6'; this.style.boxShadow='none';">
     </div>
 </div>
@@ -99,9 +99,9 @@
 .sched-day-header {
     font-size: 0.88rem;
     font-weight: 700;
-    color: #0d4f22;
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
+    color: var(--brand-dark,#000);
+    background: var(--brand-soft,#fdf0f4);
+    border: 1px solid var(--brand-soft-border,#f7c4d4);
     border-radius: 6px;
     padding: 0.45rem 0.9rem;
     margin: 1.1rem 0 0.5rem;
@@ -117,7 +117,7 @@
 .sched-time-label {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #16692c;
+    color: var(--accent-text,#c8174f);
     min-width: 3.5rem;
     padding-top: 0.65rem;
     flex-shrink: 0;
@@ -172,7 +172,7 @@
 .sched-upcoming {
     background: white;
 }
-.sched-card-no  { font-weight: 700; min-width: 2.8rem; color: #16692c; font-size: 0.82rem; }
+.sched-card-no  { font-weight: 700; min-width: 2.8rem; color: var(--accent-text,#c8174f); font-size: 0.82rem; }
 .sched-card-court { font-size: 0.75rem; color: #94a3b8; min-width: 4rem; background: #f1f5f9; padding: 0.15rem 0.5rem; border-radius: 4px; }
 .sched-card-teams { flex: 1; color: #1e293b; }
 .sched-card-result { font-size: 0.8rem; color: #475569; }

@@ -14,14 +14,14 @@
 
     {% if messages %}
     {% for msg in messages %}
-    <div class="alert" style="background:{% if msg.tags == 'success' %}#f0fdf4{% else %}#fefce8{% endif %}; border-left:4px solid {% if msg.tags == 'success' %}#16692c{% else %}#ca8a04{% endif %}; padding:0.7rem 1rem; border-radius:6px; margin-bottom:1rem;">
+    <div class="alert" style="background:{% if msg.tags == 'success' %}var(--brand-soft,#fdf0f4){% else %}#fefce8{% endif %}; border-left:4px solid {% if msg.tags == 'success' %}var(--accent,#EB1C60){% else %}#ca8a04{% endif %}; padding:0.7rem 1rem; border-radius:6px; margin-bottom:1rem;">
         {{ msg }}
     </div>
     {% endfor %}
     {% endif %}
 
     <div class="card" style="margin-bottom:1.5rem;">
-        <h2 style="margin-top:0; font-size:1rem; color:#16692c;">{% trans "Add category" %}</h2>
+        <h2 style="margin-top:0; font-size:1rem; color:var(--accent-text,#c8174f);">{% trans "Add category" %}</h2>
         <form method="post" style="display:flex; gap:0.6rem; align-items:flex-end; flex-wrap:wrap;">
             {% csrf_token %}
             <div class="form-group" style="margin:0; flex:1; min-width:160px;">
@@ -35,11 +35,11 @@
     </div>
 
     <div class="card" style="margin-bottom:1.5rem;">
-        <h2 style="margin-top:0; font-size:1rem; color:#16692c;">{% trans "Your categories" %}</h2>
+        <h2 style="margin-top:0; font-size:1rem; color:var(--accent-text,#c8174f);">{% trans "Your categories" %}</h2>
         {% if categories %}
         <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
             <thead>
-                <tr style="background:#f0fdf4; border-bottom:2px solid #bbf7d0;">
+                <tr style="background:var(--brand-soft,#fdf0f4); border-bottom:2px solid var(--brand-soft-border,#f7c4d4);">
                     <th style="padding:0.5rem 0.7rem; text-align:left;">{% trans "Name" %}</th>
                     <th style="padding:0.5rem 0.7rem; text-align:right;">{% trans "Delete" %}</th>
                 </tr>

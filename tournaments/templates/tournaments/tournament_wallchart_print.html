@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 {% load tournament_extras i18n %}
 <html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
@@ -35,14 +35,14 @@
     cursor: pointer;
     border: none;
   }
-  .btn-primary   { background: #16692c; color: #fff; }
-  .btn-secondary { background: #16692c; color: #fff; }
+  .btn-primary   { background: var(--brand,#141414); color: #fff; }
+  .btn-secondary { background: var(--brand,#141414); color: #fff; }
 
   /* ── Tournament header ─── */
   .tourn-header {
     max-width: 960px;
     margin: 0 auto 1.5rem;
-    border: 2px solid #16692c;
+    border: 2px solid var(--accent,#EB1C60);
     border-radius: 6px;
     padding: 0.85rem 1.25rem;
     background: #fff;
@@ -51,7 +51,7 @@
     gap: 1.25rem;
   }
   .tourn-header-logo { flex-shrink:0; max-height:60px; max-width:120px; object-fit:contain; }
-  .tourn-header h2 { margin:0 0 0.2rem; font-size:1.4rem; color:#16692c; }
+  .tourn-header h2 { margin:0 0 0.2rem; font-size:1.4rem; color:var(--accent-text,#c8174f); }
   .tourn-header p  { margin:0; color:#555; font-size:0.82rem; }
 
   /* ── Layout: single column, full width ─── */
@@ -66,14 +66,14 @@
   /* ── Division block ─── */
   .div-block {
     background: #fff;
-    border: 2px solid #16692c;
+    border: 2px solid var(--accent,#EB1C60);
     border-radius: 6px;
     overflow: hidden;
     break-inside: avoid;
     page-break-inside: avoid;
   }
   .div-heading {
-    background: #16692c;
+    background: var(--brand,#141414);
     color: #fff;
     padding: 0.5rem 0.85rem;
     display: flex;
@@ -86,7 +86,7 @@
   /* ── Participants ─── */
   .participants {
     padding: 0.5rem 0.85rem 0.35rem;
-    border-bottom: 1px solid #d1fae5;
+    border-bottom: 1px solid var(--brand-soft-border,#f7c4d4);
     font-size: 0.8rem;
     color: #374151;
     line-height: 1.6;
@@ -99,24 +99,24 @@
     border-collapse: collapse;
   }
   .match-table thead th {
-    background: #f0fdf4;
+    background: var(--brand-soft,#fdf0f4);
     padding: 0.3rem 0.5rem;
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: #064e3b;
-    border-bottom: 1px solid #bbf7d0;
+    border-bottom: 1px solid var(--brand-soft-border,#f7c4d4);
     text-align: left;
     white-space: nowrap;
   }
   .match-table thead th.result-th {
     text-align: center;
   }
-  .match-table tbody tr { border-bottom: 1px solid #f0fdf4; }
+  .match-table tbody tr { border-bottom: 1px solid var(--brand-soft,#fdf0f4); }
   .match-table tbody tr:last-child { border-bottom: none; }
   .match-table tbody td { padding: 0.3rem 0.5rem; vertical-align: middle; }
 
-  .col-no   { font-weight: 700; color: #16692c; white-space: nowrap; width: 2rem; }
+  .col-no   { font-weight: 700; color: var(--accent-text,#c8174f); white-space: nowrap; width: 2rem; }
   .col-time { white-space: nowrap; color: #374151; font-weight: 600; width: 3rem; }
   .col-team { font-weight: 600; font-size: 0.85rem; }
   .col-vs   { text-align: center; color: #94a3b8; font-size: 0.75rem; width: 1.5rem; }
@@ -146,20 +146,20 @@
 
   /* ── Phase separator row ─── */
   .phase-sep td {
-    background: #dcfce7;
+    background: var(--brand-soft,#fdf0f4);
     font-size: 0.72rem;
     font-weight: 700;
     color: #064e3b;
     padding: 0.2rem 0.5rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    border-top: 1px solid #86efac;
-    border-bottom: 1px solid #86efac;
+    border-top: 1px solid var(--brand-soft-border,#f7c4d4);
+    border-bottom: 1px solid var(--brand-soft-border,#f7c4d4);
   }
 
   /* ── Group sections ─── */
   .group-section {
-    border-top: 1px solid #d1fae5;
+    border-top: 1px solid var(--brand-soft-border,#f7c4d4);
     padding: 0.5rem 0.85rem 0.35rem;
   }
   .group-heading {
@@ -169,19 +169,19 @@
     letter-spacing: 0.06em;
     color: #064e3b;
     margin-bottom: 0.3rem;
-    border-bottom: 1px solid #bbf7d0;
+    border-bottom: 1px solid var(--brand-soft-border,#f7c4d4);
     padding-bottom: 0.15rem;
   }
   .phase-heading {
-    background: #dcfce7;
+    background: var(--brand-soft,#fdf0f4);
     font-size: 0.72rem;
     font-weight: 700;
     color: #064e3b;
     padding: 0.25rem 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    border-top: 1px solid #86efac;
-    border-bottom: 1px solid #86efac;
+    border-top: 1px solid var(--brand-soft-border,#f7c4d4);
+    border-bottom: 1px solid var(--brand-soft-border,#f7c4d4);
   }
 
   /* ── Empty ─── */
@@ -231,6 +231,8 @@
 <div class="tourn-header">
   {% if tournament.logo %}
   <img src="{{ tournament.logo.url }}" alt="Logo" class="tourn-header-logo">
+  {% else %}
+  <img src="{% static 'club/logo_negre.png' %}" alt="Club Bàdminton Igualada" class="tourn-header-logo">
   {% endif %}
   <div>
     <h2>{{ tournament.name }}</h2>

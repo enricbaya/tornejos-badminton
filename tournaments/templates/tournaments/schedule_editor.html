@@ -43,9 +43,9 @@
 <table id="editor-grid" style="border-collapse:collapse; min-width:600px; width:100%;">
   <thead>
     <tr>
-      <th style="background:#0d4f22; color:#fff; padding:.5rem .75rem; text-align:left; white-space:nowrap; min-width:70px;">{% trans "Time" %}</th>
+      <th style="background:var(--brand-dark,#000); color:#fff; padding:.5rem .75rem; text-align:left; white-space:nowrap; min-width:70px;">{% trans "Time" %}</th>
       {% for court in courts %}
-      <th style="background:#0d4f22; color:#fff; padding:.5rem .75rem; text-align:center; min-width:160px;">
+      <th style="background:var(--brand-dark,#000); color:#fff; padding:.5rem .75rem; text-align:center; min-width:160px;">
         {% trans "Court" %} {{ court }}
       </th>
       {% endfor %}
@@ -56,7 +56,7 @@
     {% with day_label=day_headers|dict_get:slot %}
     {% if day_label %}
     <tr>
-      <td colspan="{{ courts|length|add:1 }}" style="padding:.45rem .75rem; background:#0d4f22; color:#fff; font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em;">
+      <td colspan="{{ courts|length|add:1 }}" style="padding:.45rem .75rem; background:var(--brand-dark,#000); color:#fff; font-size:.8rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em;">
         {{ day_label }}
       </td>
     </tr>
@@ -74,7 +74,7 @@
         <div class="match-card" data-match-id="{{ match.id }}" data-match-label="#{{ match.match_number }}">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:.25rem;">
             <div>
-              <span style="font-size:.75rem; font-weight:600; color:#0d4f22; text-transform:uppercase; letter-spacing:.03em;">
+              <span style="font-size:.75rem; font-weight:600; color:var(--brand-dark,#000); text-transform:uppercase; letter-spacing:.03em;">
                 {{ match.division.name }}{% if match.phase == 'playoff' %} · {% trans "Playoff" %}{% endif %}
               </span>
               <div style="font-size:.85rem; font-weight:500; line-height:1.4;">
@@ -94,7 +94,7 @@
         {% else %}
         {% if not tournament.schedule_locked %}
         <button class="add-btn" title="{% trans "Assign match here" %}"
-                style="width:100%; min-height:46px; background:#f0fdf4; border:1.5px dashed #86efac; border-radius:6px;
+                style="width:100%; min-height:46px; background:var(--brand-soft,#fdf0f4); border:1.5px dashed var(--brand-soft-border,#f7c4d4); border-radius:6px;
                        color:#16a34a; font-size:1.1rem; cursor:pointer; transition:background .15s;">
           +
         </button>
@@ -116,7 +116,7 @@
     display:none; position:fixed; top:0; right:0; width:min(420px,100vw); height:100vh;
     background:#fff; box-shadow:-4px 0 24px rgba(0,0,0,.18); z-index:1000;
     display:none; flex-direction:column; overflow:hidden;">
-  <div style="background:#0d4f22; color:#fff; padding:1rem 1.25rem; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+  <div style="background:var(--brand-dark,#000); color:#fff; padding:1rem 1.25rem; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
     <div>
       <div style="font-weight:600; font-size:1rem;" id="panel-title">{% trans "Select match" %}</div>
       <div style="font-size:.82rem; opacity:.8;" id="panel-subtitle"></div>
@@ -166,12 +166,12 @@
 
 <style>
 .match-card {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  background: var(--brand-soft,#fdf0f4);
+  border: 1px solid var(--brand-soft-border,#f7c4d4);
   border-radius: 6px;
   padding: .35rem .5rem;
 }
-.add-btn:hover { background: #dcfce7 !important; }
+.add-btn:hover { background: var(--brand-soft,#fdf0f4) !important; }
 .suggestion-item {
   padding: .65rem .85rem;
   border-radius: 8px;
@@ -182,8 +182,8 @@
   transition: background .12s, border-color .12s;
   list-style: none;
 }
-.suggestion-item:hover { background: #f0fdf4; border-color: #86efac; }
-.suggestion-item .s-division { font-size: .73rem; font-weight: 600; color: #0d4f22; text-transform: uppercase; letter-spacing: .03em; }
+.suggestion-item:hover { background: var(--brand-soft,#fdf0f4); border-color: var(--brand-soft-border,#f7c4d4); }
+.suggestion-item .s-division { font-size: .73rem; font-weight: 600; color: var(--brand-dark,#000); text-transform: uppercase; letter-spacing: .03em; }
 .suggestion-item .s-teams { font-size: .9rem; font-weight: 500; color: #1e293b; line-height: 1.35; }
 .suggestion-item .s-meta { font-size: .75rem; color: #64748b; }
 .priority-badge {

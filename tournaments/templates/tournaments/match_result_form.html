@@ -8,8 +8,8 @@
     .score-box { -moz-appearance: textfield; }
     .score-box:focus {
         outline: none;
-        border-color: #16692c !important;
-        box-shadow: 0 0 0 3px rgba(22,105,44,0.15) !important;
+        border-color: var(--accent-text,#c8174f) !important;
+        box-shadow: 0 0 0 3px rgba(20,20,20,0.15) !important;
         opacity: 1 !important;
     }
     .score-grid {
@@ -39,9 +39,9 @@
     .set3-active  { opacity: 1;    transition: opacity 0.2s, border-color 0.2s; }
     .winner-pill {
         display: inline-block;
-        background: #f0fdf4;
-        border: 1.5px solid #bbf7d0;
-        color: #16692c;
+        background: var(--brand-soft,#fdf0f4);
+        border: 1.5px solid var(--brand-soft-border,#f7c4d4);
+        color: var(--accent-text,#c8174f);
         border-radius: 20px;
         padding: 0.2rem 0.75rem;
         font-size: 0.82rem;
@@ -53,7 +53,7 @@
 <div class="content-col-sm">
     <div class="card">
         <h1 style="margin-top:0; font-size:1.3rem;">{% trans "Register result" %}</h1>
-        <div style="background:#f0fdf4; border-left:4px solid #16692c; padding:0.65rem 1rem; border-radius:4px; margin-bottom:1.5rem; font-size:0.875rem;">
+        <div style="background:var(--brand-soft,#fdf0f4); border-left:4px solid var(--accent,#EB1C60); padding:0.65rem 1rem; border-radius:4px; margin-bottom:1.5rem; font-size:0.875rem;">
             <strong>{% trans "Match:" %}</strong> {{ match.team1.name }} vs {{ match.team2.name|default:"Bye" }}<br>
             <strong>{% trans "Division:" %}</strong> {{ match.division.name }} &nbsp;·&nbsp; <strong>{% trans "Round:" %}</strong> {{ match.match_round }}
         </div>
@@ -185,7 +185,7 @@
         document.querySelectorAll('.set3-col').forEach(function (el) {
             el.classList.toggle('set3-dimmed', !need);
             el.classList.toggle('set3-active', need);
-            if (el.tagName === 'INPUT') el.style.borderColor = need ? '#16692c' : '#d1d9e6';
+            if (el.tagName === 'INPUT') el.style.borderColor = need ? 'var(--accent,#EB1C60)' : '#d1d9e6';
         });
     }
 

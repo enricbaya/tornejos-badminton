@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 {% load tournament_extras i18n %}
 <html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
@@ -35,14 +35,14 @@
     cursor: pointer;
     border: none;
   }
-  .btn-primary   { background: #16692c; color: #fff; }
-  .btn-secondary { background: #16692c; color: #fff; }
+  .btn-primary   { background: var(--brand,#141414); color: #fff; }
+  .btn-secondary { background: var(--brand,#141414); color: #fff; }
 
   /* ── Tournament header block ─── */
   .tournament-header {
     max-width: 800px;
     margin: 0 auto 2rem;
-    border: 2px solid #16692c;
+    border: 2px solid var(--accent,#EB1C60);
     border-radius: 8px;
     padding: 1rem 1.5rem;
     background: #fff;
@@ -60,7 +60,7 @@
   .tournament-header h2 {
     margin: 0 0 0.4rem;
     font-size: 1.6rem;
-    color: #16692c;
+    color: var(--accent-text,#c8174f);
   }
   .tournament-header p {
     margin: 0;
@@ -80,7 +80,7 @@
     break-inside: avoid;
   }
   .division-heading {
-    background: #16692c;
+    background: var(--brand,#141414);
     color: #fff;
     padding: 0.65rem 1.2rem;
     display: flex;
@@ -122,7 +122,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #16692c;
+    background: var(--brand,#141414);
     flex-shrink: 0;
   }
 
@@ -154,7 +154,7 @@
   tbody tr { border-bottom: 1px solid #f1f5f9; }
   tbody tr:last-child { border-bottom: none; }
   tbody td { padding: 0.4rem 0.6rem; vertical-align: middle; }
-  .match-no { font-weight: 700; color: #16692c; white-space: nowrap; }
+  .match-no { font-weight: 700; color: var(--accent-text,#c8174f); white-space: nowrap; }
   .round-col { color: #888; white-space: nowrap; font-size: 0.83rem; }
   .tid-col { white-space: nowrap; font-weight: 600; }
   .court-col { color: #555; white-space: nowrap; }
@@ -191,10 +191,10 @@
   .group-heading {
     font-weight: 700;
     font-size: 0.88rem;
-    color: #16692c;
+    color: var(--accent-text,#c8174f);
     margin-bottom: 0.35rem;
     padding-bottom: 0.2rem;
-    border-bottom: 1px solid #d1fae5;
+    border-bottom: 1px solid var(--brand-soft-border,#f7c4d4);
   }
 
 
@@ -251,7 +251,7 @@
   }
   .bracket-team:last-child { border-bottom: none; }
   .bracket-team.winner {
-    background: #f0fdf4; font-weight: 700; color: #166534;
+    background: var(--brand-soft,#fdf0f4); font-weight: 700; color: #166534;
     border-left: 3px solid #22c55e; padding-left: calc(0.6rem - 3px);
   }
   .bracket-team.bye { color: #94a3b8; font-style: italic; font-weight: 400; }
@@ -305,6 +305,8 @@
 <div class="tournament-header">
   {% if tournament.logo %}
   <img src="{{ tournament.logo.url }}" alt="Logo" class="tournament-header-logo">
+  {% else %}
+  <img src="{% static 'club/logo_negre.png' %}" alt="Club Bàdminton Igualada" class="tournament-header-logo">
   {% endif %}
   <div class="tournament-header-text">
     <h2>{{ tournament.name }}</h2>
