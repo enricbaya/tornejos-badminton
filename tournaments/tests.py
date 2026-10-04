@@ -1899,12 +1899,12 @@ class PublicViewTest(TestCase):
 
     def test_public_landing_is_cached_with_explicit_ttl(self):
         response = self.client.get(reverse('public_landing'))
-        self.assertEqual(response['Cache-Control'], 'max-age=30')
+        self.assertEqual(response['Cache-Control'], 'max-age=20')
 
     def test_public_tournament_and_schedule_are_cached_with_explicit_ttl(self):
         for name in ('public_tournament', 'public_schedule'):
             response = self.client.get(reverse(name, args=[self.tournament.pk]))
-            self.assertEqual(response['Cache-Control'], 'max-age=30')
+            self.assertEqual(response['Cache-Control'], 'max-age=10')
 
     def test_public_tournament_returns_200_without_login(self):
         response = self.client.get(reverse('public_tournament', args=[self.tournament.pk]))

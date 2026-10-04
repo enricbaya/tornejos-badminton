@@ -14,6 +14,7 @@ from django.utils import translation
 from django.core.cache import cache
 
 from .models import Tournament, TournamentDay, Division, Match, DivisionSeed, MedalOverride
+from .cache_utils import page_version_key
 
 # Dedicated logger so admins can route auth events to a separate handler
 # (rsyslog, fail2ban, SIEM, etc.) via the LOGGING dict in settings.py.
@@ -90,7 +91,7 @@ def invalidate_public_cache(tournament_id):
         ('tournament', tournament_id),
         ('schedule', tournament_id),
     ):
-        key = f'public-page-version:{name}:{page_tournament_id or "all"}'
+        key = page_version_key(name, page_tournament_id)
         try:
             cache.incr(key)
         except ValueError:

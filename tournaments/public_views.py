@@ -36,7 +36,7 @@ def _activate_club_language(request, tournament):
         pass
 
 
-@cache_page_with_status(20)  # short TTL: tournament list changes rarely, but keep it bounded
+@cache_page_with_status(20, page='landing')  # short TTL: tournament list changes rarely, but keep it bounded
 def public_landing(request):
     """
     Landing page: choose a club (owner) and then a tournament.
@@ -65,7 +65,7 @@ def public_landing(request):
     })
 
 
-@cache_page_with_status(10)  # short TTL: results and player status update continuously during play
+@cache_page_with_status(10, page='tournament')  # short TTL: results and player status update continuously during play
 def public_tournament(request, pk):
     """
     Read-only tournament overview: standings and match results per division.
@@ -120,7 +120,7 @@ def public_tournament(request, pk):
     })
 
 
-@cache_page_with_status(10)  # short TTL: scheduled times/status badges change continuously during play
+@cache_page_with_status(10, page='schedule')  # short TTL: scheduled times/status badges change continuously during play
 def public_schedule(request, pk):
     """
     Read-only schedule view — same data as the admin schedule but without

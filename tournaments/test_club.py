@@ -178,3 +178,42 @@ class CatalanTest(TestCase):
         self.assertContains(r, 'Crea una categoria nova')
         r = Client(HTTP_ACCEPT_LANGUAGE='ca').get(reverse('public_tournament', args=[t.pk]))
         self.assertContains(r, 'Horari')
+
+
+# ---------------------------------------------------------------------------
+# Public page cache: versioned invalidation and language-aware keys
+# ---------------------------------------------------------------------------
+
+from django.core.cache import cache  # noqa: E402
+from django.test import override_settings  # noqa: E402
+
+LOCMEM = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 'LOCATION': 'club-tests'}}
+
+
+@override_settings(CACHES=LOCMEM)
+class PublicCacheTest(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.user = make_user(username='clubcache')
+        self.tournament = Tournament.objects.create(
+            name="Cache", date=datetime.date.today(), division_model='youth', owner=self.user)
+        self.url = reverse('public_tournament', args=[self.tournament.pk])
+
+    def test_second_request_is_a_hit(self):
+        self.assertEqual(Client().get(self.url)['X-Cache'], 'MISS')
+        self.assertEqual(Client().get(self.url)['X-Cache'], 'HIT')
+
+    def test_changes_invalidate_the_cache_immediately(self):
+        Client().get(self.url)
+        Division.objects.create(tournament=self.tournament, name="Nova categoria")
+        r = Client().get(self.url)
+        self.assertEqual(r['X-Cache'], 'MISS')
+        self.assertContains(r, "Nova categoria")
+
+    def test_language_choice_gets_its_own_cache_entry(self):
+        c_ca = Client(); c_ca.cookies['django_language'] = 'ca'
+        c_en = Client(); c_en.cookies['django_language'] = 'en'
+        self.assertContains(c_ca.get(self.url), 'Horari')
+        r = c_en.get(self.url)
+        self.assertEqual(r['X-Cache'], 'MISS')
+        self.assertContains(r, 'Time schedule')
