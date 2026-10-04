@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-04 14:47+0000\n"
+"POT-Creation-Date: 2026-10-04 15:05+0000\n"
 "PO-Revision-Date: 2026-10-04 17:00+0200\n"
 "Last-Translator: Club\n"
 "Language-Team: Català\n"
@@ -790,40 +790,40 @@ msgstr "Contrasenya"
 msgid "Contact the system administrator to create a club account."
 msgstr "Demana a l'administrador del sistema que et creï un compte de club."
 
-#: tournaments/format_suggestion.py:48
+#: tournaments/format_suggestion.py:47
 msgid "One round-robin: everyone plays everyone"
 msgstr "Una lligueta: tothom juga contra tothom"
 
-#: tournaments/format_suggestion.py:50 tournaments/models.py:234
+#: tournaments/format_suggestion.py:49 tournaments/models.py:234
 msgid "Single elimination"
 msgstr "Eliminatòria directa"
 
-#: tournaments/format_suggestion.py:52
+#: tournaments/format_suggestion.py:51
 #, python-format
 msgid "%(g)s round-robin groups of %(sizes)s, no playoff"
 msgstr "%(g)s lliguetes de %(sizes)s, sense fase final"
 
-#: tournaments/format_suggestion.py:55
+#: tournaments/format_suggestion.py:54
 msgid "final"
 msgstr "final"
 
-#: tournaments/format_suggestion.py:55
+#: tournaments/format_suggestion.py:54
 msgid "semi-finals"
 msgstr "semifinals"
 
-#: tournaments/format_suggestion.py:55
+#: tournaments/format_suggestion.py:54
 msgid "quarter-finals"
 msgstr "quarts de final"
 
-#: tournaments/format_suggestion.py:55
+#: tournaments/format_suggestion.py:54
 msgid "round of 16"
 msgstr "vuitens de final"
 
-#: tournaments/format_suggestion.py:56
+#: tournaments/format_suggestion.py:55
 msgid "playoff"
 msgstr "fase final"
 
-#: tournaments/format_suggestion.py:57
+#: tournaments/format_suggestion.py:56
 #, python-format
 msgid "%(g)s groups of %(sizes)s + %(stage)s (top %(a)s of each group)"
 msgstr "%(g)s grups de %(sizes)s + %(stage)s (els %(a)s primers de cada grup)"
@@ -1362,7 +1362,7 @@ msgstr "%(name)s ja està jugant un partit"
 msgid "%(name)s is still resting (approx. %(min)s min)"
 msgstr "%(name)s encara descansa (uns %(min)s min)"
 
-#: tournaments/player_status.py:148
+#: tournaments/player_status.py:148 tournaments/test_club.py:170
 #, python-format
 msgid "%(name)s has not arrived yet"
 msgstr "%(name)s encara no s'ha presentat"
@@ -1447,8 +1447,6 @@ msgid "Match in progress"
 msgstr "Partit en joc"
 
 #: tournaments/templates/tournaments/_schedule_matches.html:94
-#| msgid ""
-#| "No matches to schedule. Generate match programmes for divisions first."
 msgid ""
 "No schedule yet. Generate match programmes for all divisions, then press "
 "'Generate time schedule'."
@@ -2405,8 +2403,24 @@ msgstr "Partits jugats"
 
 #: tournaments/templates/tournaments/tournament_detail.html:443
 #: tournaments/templates/tournaments/tournament_detail.html:477
+#: tournaments/templates/tournaments/tournament_run.html:505
+#: tournaments/templates/tournaments/tournament_run.html:532
+msgctxt "standings"
+msgid "P"
+msgstr "PJ"
+
+#: tournaments/templates/tournaments/tournament_detail.html:443
+#: tournaments/templates/tournaments/tournament_detail.html:477
 msgid "Matches won"
 msgstr "Partits guanyats"
+
+#: tournaments/templates/tournaments/tournament_detail.html:443
+#: tournaments/templates/tournaments/tournament_detail.html:477
+#: tournaments/templates/tournaments/tournament_run.html:505
+#: tournaments/templates/tournaments/tournament_run.html:532
+msgctxt "standings"
+msgid "W"
+msgstr "G"
 
 #: tournaments/templates/tournaments/tournament_detail.html:443
 #: tournaments/templates/tournaments/tournament_detail.html:477
@@ -2415,8 +2429,24 @@ msgstr "Partits perduts"
 
 #: tournaments/templates/tournaments/tournament_detail.html:443
 #: tournaments/templates/tournaments/tournament_detail.html:477
+#: tournaments/templates/tournaments/tournament_run.html:505
+#: tournaments/templates/tournaments/tournament_run.html:532
+msgctxt "standings"
+msgid "L"
+msgstr "P"
+
+#: tournaments/templates/tournaments/tournament_detail.html:443
+#: tournaments/templates/tournaments/tournament_detail.html:477
 msgid "Competition points"
 msgstr "Punts de classificació"
+
+#: tournaments/templates/tournaments/tournament_detail.html:443
+#: tournaments/templates/tournaments/tournament_detail.html:477
+#: tournaments/templates/tournaments/tournament_run.html:506
+#: tournaments/templates/tournaments/tournament_run.html:532
+msgctxt "standings"
+msgid "Pts"
+msgstr "Pts"
 
 #: tournaments/templates/tournaments/tournament_detail.html:443
 #: tournaments/templates/tournaments/tournament_detail.html:477
@@ -2495,7 +2525,6 @@ msgstr ""
 "Arrossega jugadors o parelles d'un grup a un altre per equilibrar el nivell."
 
 #: tournaments/templates/tournaments/tournament_detail.html:580
-#| msgid "Save draw and regenerate match programme"
 msgid "Click 'Save draw' to regenerate the match programme with the new draw."
 msgstr ""
 "Prem «Desa el sorteig» per tornar a generar el programa amb els grups nous."
@@ -3043,7 +3072,7 @@ msgstr "La pista %(court)s ja està ocupada."
 #: tournaments/views.py:983
 #, python-format
 msgid "Match #%(n)s is now in progress."
-msgstr "El partit #%(n)s ja està en joc."
+msgstr "El partit #%(n)s ha començat."
 
 #: tournaments/views.py:1005
 #, python-format
@@ -3082,11 +3111,11 @@ msgstr ""
 
 #: tournaments/views.py:1770
 msgid "The schedule is now locked."
-msgstr "L'horari ja està bloquejat."
+msgstr "S'ha bloquejat l'horari."
 
 #: tournaments/views.py:1772
 msgid "The schedule is now unlocked."
-msgstr "L'horari ja està desbloquejat."
+msgstr "S'ha desbloquejat l'horari."
 
 #: tournaments/views.py:1782
 msgid "You must type RESET SCHEDULE to confirm."

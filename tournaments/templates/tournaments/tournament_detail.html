@@ -440,7 +440,7 @@ var MATCH_LOOKUP = {
 <h3>{% trans "Standings" %}</h3>
 <table style="max-width:780px;">
     <thead>
-        <tr><th>#</th><th>{% if division.discipline == 'single' %}{% trans "Player" %}{% else %}{% trans "Team" %}{% endif %}</th><th title="{% trans 'Matches played' %}">P</th><th title="{% trans 'Matches won' %}">W</th><th title="{% trans 'Matches lost' %}">L</th><th title="{% trans 'Competition points' %}">Pts</th><th title="{% trans 'Sets won/lost' %}">{% trans "Sets" %}</th><th title="{% trans 'Points for/against' %}">{% trans "Points" %}</th></tr>
+        <tr><th>#</th><th>{% if division.discipline == 'single' %}{% trans "Player" %}{% else %}{% trans "Team" %}{% endif %}</th><th title="{% trans 'Matches played' %}">{% trans "P" context "standings" %}</th><th title="{% trans 'Matches won' %}">{% trans "W" context "standings" %}</th><th title="{% trans 'Matches lost' %}">{% trans "L" context "standings" %}</th><th title="{% trans 'Competition points' %}">{% trans "Pts" context "standings" %}</th><th title="{% trans 'Sets won/lost' %}">{% trans "Sets" %}</th><th title="{% trans 'Points for/against' %}">{% trans "Points" %}</th></tr>
     </thead>
     <tbody>
         {% for row in standings %}
@@ -474,7 +474,7 @@ var MATCH_LOOKUP = {
     <div style="font-weight:700; font-size:0.9rem; color:#16692c; margin-bottom:0.35rem;">{% trans "Group" %} {{ g_num }}</div>
     <table style="max-width:780px;">
         <thead>
-            <tr><th>#</th><th>{% if division.discipline == 'single' %}{% trans "Player" %}{% else %}{% trans "Team" %}{% endif %}</th><th title="{% trans 'Matches played' %}">P</th><th title="{% trans 'Matches won' %}">W</th><th title="{% trans 'Matches lost' %}">L</th><th title="{% trans 'Competition points' %}">Pts</th><th title="{% trans 'Sets won/lost' %}">{% trans "Sets" %}</th><th title="{% trans 'Points for/against' %}">{% trans "Points" %}</th></tr>
+            <tr><th>#</th><th>{% if division.discipline == 'single' %}{% trans "Player" %}{% else %}{% trans "Team" %}{% endif %}</th><th title="{% trans 'Matches played' %}">{% trans "P" context "standings" %}</th><th title="{% trans 'Matches won' %}">{% trans "W" context "standings" %}</th><th title="{% trans 'Matches lost' %}">{% trans "L" context "standings" %}</th><th title="{% trans 'Competition points' %}">{% trans "Pts" context "standings" %}</th><th title="{% trans 'Sets won/lost' %}">{% trans "Sets" %}</th><th title="{% trans 'Points for/against' %}">{% trans "Points" %}</th></tr>
         </thead>
         <tbody>
             {% for row in g_rows %}

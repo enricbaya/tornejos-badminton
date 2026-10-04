@@ -4,9 +4,8 @@ The goal for school tournaments is that every child plays several matches while
 the whole day still fits on the available courts:
 
 * up to 6 participants  → one round-robin (everyone plays everyone)
-* 7–11                  → 2 groups + semi-finals and final
-* 12–20                 → 4 groups + quarter-finals
-* 21 or more            → 8 groups + round of 16
+* 7 or more             → groups of 4–5 + knockout with the best 2 of each group
+                          (only the group winners when there are more than 4 groups)
 
 The alternative "several groups without playoff" is always offered for divisions
 with 7+ participants, for days where finals are not wanted.
@@ -72,6 +71,7 @@ def _option(tournament_type, n, group_count=1, advance_count=0):
 def suggest_formats(n):
     """Return a list of format options for ``n`` participants, best suggestion first.
 
+    Groups aim for 4–5 participants so every child plays at least 3 group matches.
     Each option is a dict with tournament_type, group_count, advance_count,
     label, matches (total) and min_matches_per_team.
     """
@@ -79,14 +79,11 @@ def suggest_formats(n):
         return []
     if n <= 6:
         return [_option('group', n)]
-    if n <= 11:
-        groups = 2
-    elif n <= 20:
-        groups = 4
-    else:
-        groups = 8
+    groups = max(2, round(n / 4.5))
+    # Keep the knockout at 8 players or fewer: top 2 per group up to 4 groups, else only the winner.
+    advance = 2 if groups <= 4 else 1
     options = [
-        _option('playoff', n, group_count=groups, advance_count=2),
+        _option('playoff', n, group_count=groups, advance_count=advance),
         _option('groups', n, group_count=groups),
     ]
     if n <= 8:

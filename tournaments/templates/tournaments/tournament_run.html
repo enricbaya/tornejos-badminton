@@ -502,8 +502,8 @@
           <table class="standings-compact">
             <thead><tr>
               <th>#</th><th>{% trans "Player" %} / {% trans "Team" %}</th>
-              <th title="{% trans 'Matches played' %}">P</th><th title="{% trans 'Won' %}">W</th><th title="{% trans 'Lost' %}">L</th>
-              <th title="{% trans 'Points' %}">Pts</th><th>{% trans "Sets" %}</th><th>{% trans "Score" %}</th>
+              <th title="{% trans 'Matches played' %}">{% trans "P" context "standings" %}</th><th title="{% trans 'Won' %}">{% trans "W" context "standings" %}</th><th title="{% trans 'Lost' %}">{% trans "L" context "standings" %}</th>
+              <th title="{% trans 'Points' %}">{% trans "Pts" context "standings" %}</th><th>{% trans "Sets" %}</th><th>{% trans "Score" %}</th>
             </tr></thead>
             <tbody>
               {% for row in dd.standings %}
@@ -529,7 +529,7 @@
           <table class="standings-compact" style="margin-bottom:0.75rem;">
             <thead><tr>
               <th>#</th><th>{% trans "Player" %} / {% trans "Team" %}</th>
-              <th>P</th><th>W</th><th>L</th><th>Pts</th><th>{% trans "Sets" %}</th><th>{% trans "Score" %}</th>
+              <th>{% trans "P" context "standings" %}</th><th>{% trans "W" context "standings" %}</th><th>{% trans "L" context "standings" %}</th><th>{% trans "Pts" context "standings" %}</th><th>{% trans "Sets" %}</th><th>{% trans "Score" %}</th>
             </tr></thead>
             <tbody>
               {% for row in g_rows %}
