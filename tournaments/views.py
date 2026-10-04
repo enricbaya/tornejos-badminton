@@ -1518,9 +1518,18 @@ def tournament_bigscreen(request, pk):
     _apply_seed_labels(matches, seed_lookup)
     playing_pks, resting = get_busy_info()
     apply_status_to_matches(matches, playing_pks, resting)
+    # Courts: what is being played right now on each court
+    court_count = max((d.court_count for d in tournament.days.all()), default=0)
+    active = {
+        str(m.court): m for m in Match.objects
+        .filter(division__tournament=tournament, status='in_progress')
+        .select_related('division', 'team1', 'team2')
+    }
+    courts = [{'number': c, 'match': active.get(str(c))} for c in range(1, court_count + 1)]
     return render(request, 'tournaments/bigscreen.html', {
         'tournament': tournament,
         'matches': matches,
+        'courts': courts,
     })
 
 
@@ -1602,7 +1611,9 @@ def tournament_run(request, pk):
     _apply_seed_labels(next_matches, seed_lookup)
     apply_status_to_matches(next_matches, playing_pks, resting)
     # Exclude matches where a player is currently playing (not just resting)
-    next_matches = [m for m in next_matches if m.t1_status != 'playing' and m.t2_status != 'playing'][:5]
+    # Show at least one upcoming match per court (min. 5) so every free court has a candidate.
+    _n_next = max(5, max((d.court_count for d in tournament.days.all()), default=4))
+    next_matches = [m for m in next_matches if m.t1_status != 'playing' and m.t2_status != 'playing'][:_n_next]
 
     # Matches currently in progress
     active_matches = list(

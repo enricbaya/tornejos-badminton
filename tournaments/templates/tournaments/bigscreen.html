@@ -204,6 +204,28 @@
     color: var(--muted);
     margin-bottom: 0.25rem;
   }
+
+  /* Courts now playing */
+  .courts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+  .court-tile {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-left: 6px solid var(--gold);
+    border-radius: 8px;
+    padding: 0.55rem 0.8rem;
+    display: flex; gap: 0.8rem; align-items: center;
+  }
+  .court-tile.free { border-left-color: var(--green); opacity: 0.6; }
+  .court-num { font-size: 2.1rem; font-weight: 800; color: var(--gold); min-width: 2.4rem; text-align: center; }
+  .court-tile.free .court-num { color: var(--green); }
+  .court-players { font-size: 1.05rem; font-weight: 600; line-height: 1.25; }
+  .court-players .vs-small { color: var(--muted); font-size: 0.8rem; font-weight: 400; }
+  .court-div { font-size: 0.78rem; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -222,6 +244,27 @@
 </div>
 
 <div class="main">
+  {% if courts %}
+  <div class="upcoming-label">{% trans "Now on court" %}</div>
+  <div class="courts-grid">
+    {% for court in courts %}
+    {% if court.match %}
+    <div class="court-tile">
+      <div class="court-num">{{ court.number }}</div>
+      <div>
+        <div class="court-players">{{ court.match.team1.name }} <span class="vs-small">vs</span> {{ court.match.team2.name }}</div>
+        <div class="court-div">{{ court.match.division.name }}{% if court.match.match_number %} · #{{ court.match.match_number }}{% endif %}</div>
+      </div>
+    </div>
+    {% else %}
+    <div class="court-tile free">
+      <div class="court-num">{{ court.number }}</div>
+      <div class="court-players">{% trans "Free" %}</div>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
   {% if matches %}
   <div class="upcoming-label">{% trans "Upcoming matches" %}</div>
   {% for match in matches %}
@@ -287,7 +330,7 @@
   setInterval(updateClock, 10000);
 
   // ── Auto-refresh page every 60 seconds ─────────────────────────────────
-  setTimeout(() => location.reload(), 60000);
+  setTimeout(() => location.reload(), 30000);
 </script>
 
 <footer style="text-align:center; padding:0.6rem 1rem; font-size:0.75rem; color:rgba(255,255,255,0.35); letter-spacing:0.03em; position:fixed; bottom:0; left:0; right:0;">
