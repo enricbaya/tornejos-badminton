@@ -79,7 +79,7 @@ class Tournament(models.Model):
     scoring_model = models.CharField(
         max_length=20,
         choices=SCORING_MODEL_CHOICES,
-        default='best_of_3_21',
+        default='best_of_5_15',
         verbose_name=_("Scoring model")
     )
     single_match_duration = models.IntegerField(

@@ -85,19 +85,19 @@
                     <div class="set-header set3-col set3-dimmed">{% trans "Set 3" %}</div>
 
                     <div class="team-name-cell" title="{{ match.team1.name }}">{{ match.team1.name }}</div>
-                    <input class="score-box" data-team="1" data-set="1" type="number" min="0" max="30" placeholder="–"
+                    <input class="score-box" data-team="1" data-set="1" type="number" min="0" max="{{ form.max_set_score }}" placeholder="–"
                            style="text-align:center; padding:0.6rem 0.2rem; font-size:1.35rem; font-weight:700; border-radius:7px; border:1.5px solid #d1d9e6; width:100%; background:white;">
-                    <input class="score-box" data-team="1" data-set="2" type="number" min="0" max="30" placeholder="–"
+                    <input class="score-box" data-team="1" data-set="2" type="number" min="0" max="{{ form.max_set_score }}" placeholder="–"
                            style="text-align:center; padding:0.6rem 0.2rem; font-size:1.35rem; font-weight:700; border-radius:7px; border:1.5px solid #d1d9e6; width:100%; background:white;">
-                    <input class="score-box set3-col set3-dimmed" data-team="1" data-set="3" type="number" min="0" max="30" placeholder="–"
+                    <input class="score-box set3-col set3-dimmed" data-team="1" data-set="3" type="number" min="0" max="{{ form.max_set_score }}" placeholder="–"
                            style="text-align:center; padding:0.6rem 0.2rem; font-size:1.35rem; font-weight:700; border-radius:7px; border:1.5px solid #d1d9e6; width:100%; background:white;">
 
                     <div class="team-name-cell" title="{{ match.team2.name }}">{{ match.team2.name }}</div>
-                    <input class="score-box" data-team="2" data-set="1" type="number" min="0" max="30" placeholder="–"
+                    <input class="score-box" data-team="2" data-set="1" type="number" min="0" max="{{ form.max_set_score }}" placeholder="–"
                            style="text-align:center; padding:0.6rem 0.2rem; font-size:1.35rem; font-weight:700; border-radius:7px; border:1.5px solid #d1d9e6; width:100%; background:white;">
-                    <input class="score-box" data-team="2" data-set="2" type="number" min="0" max="30" placeholder="–"
+                    <input class="score-box" data-team="2" data-set="2" type="number" min="0" max="{{ form.max_set_score }}" placeholder="–"
                            style="text-align:center; padding:0.6rem 0.2rem; font-size:1.35rem; font-weight:700; border-radius:7px; border:1.5px solid #d1d9e6; width:100%; background:white;">
-                    <input class="score-box set3-col set3-dimmed" data-team="2" data-set="3" type="number" min="0" max="30" placeholder="–"
+                    <input class="score-box set3-col set3-dimmed" data-team="2" data-set="3" type="number" min="0" max="{{ form.max_set_score }}" placeholder="–"
                            style="text-align:center; padding:0.6rem 0.2rem; font-size:1.35rem; font-weight:700; border-radius:7px; border:1.5px solid #d1d9e6; width:100%; background:white;">
                 </div>
                 <div id="winner-indicator" style="margin-top:0.5rem; min-height:1.6rem;"></div>

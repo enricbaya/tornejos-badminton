@@ -316,9 +316,11 @@ class MatchResultForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         match = self.instance
         self.points_to_win = 21
-        if match and match.division.tournament.scoring_model == 'best_of_5_15':
-            self.points_to_win = 15
         self.max_set_score = 30
+        if match and match.division.tournament.scoring_model == 'best_of_5_15':
+            # BWF 3x15 (from 2027): 2-point lead from 14-14, capped at 21 (20-20 → next point wins).
+            self.points_to_win = 15
+            self.max_set_score = 21
         if match:
             pks = [match.team1.pk]
             if match.team2:
