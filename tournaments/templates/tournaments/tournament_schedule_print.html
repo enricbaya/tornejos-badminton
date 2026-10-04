@@ -239,7 +239,7 @@
         {% elif match.feeder1_num and match.feeder2_num %}
           <em style="color:#555;">{% blocktrans with f1=match.feeder1_num f2=match.feeder2_num %}Winner of match {{ f1 }} vs winner of match {{ f2 }}{% endblocktrans %}</em>
         {% elif match.bracket_label %}
-          <em style="color:#888;">{{ match.bracket_label }}</em>
+          <em style="color:#888;">{{ match.bracket_label|bracket_label_i18n }}</em>
         {% else %}
           <em style="color:#aaa;">TBD vs TBD</em>
         {% endif %}

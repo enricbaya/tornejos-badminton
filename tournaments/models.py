@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 class UserProfile(models.Model):
     """Store per-club preferences such as default language and tier."""
     LANGUAGE_CHOICES = [
+        ('ca', 'Català'),
         ('da', 'Dansk'),
         ('en', 'English'),
     ]
@@ -27,7 +28,7 @@ class UserProfile(models.Model):
     language = models.CharField(
         max_length=10,
         choices=LANGUAGE_CHOICES,
-        default='da',
+        default='ca',
         verbose_name=_("Default language"),
     )
     tier = models.CharField(
@@ -206,16 +207,16 @@ class TournamentDay(models.Model):
         return count
 
     def __str__(self):
+        from django.utils.translation import gettext
         if self.end_time:
-            return (
-                f"Dag {self.day_number} \u2013 {self.date} "
-                f"({self.start_time.strftime('%H:%M')}\u2013{self.end_time.strftime('%H:%M')}, "
-                f"{self.court_count} baner, {self.buffer_minutes} min. buffer)"
-            )
-        return (
-            f"Dag {self.day_number} \u2013 {self.date} "
-            f"(fra {self.start_time.strftime('%H:%M')}, {self.court_count} baner, l\u00f8ber over)"
-        )
+            return gettext("Day %(n)s – %(date)s (%(start)s–%(end)s, %(courts)s courts, %(buffer)s min. buffer)") % {
+                'n': self.day_number, 'date': self.date, 'start': self.start_time.strftime('%H:%M'),
+                'end': self.end_time.strftime('%H:%M'), 'courts': self.court_count, 'buffer': self.buffer_minutes,
+            }
+        return gettext("Day %(n)s – %(date)s (from %(start)s, %(courts)s courts, open end)") % {
+            'n': self.day_number, 'date': self.date, 'start': self.start_time.strftime('%H:%M'),
+            'courts': self.court_count,
+        }
 
 
 class Division(models.Model):

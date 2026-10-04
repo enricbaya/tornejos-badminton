@@ -143,3 +143,38 @@ class FormatSuggestionTest(TestCase):
                {'tournament_type': 'playoff', 'group_count': 4, 'advance_count': 2})
         d.refresh_from_db()
         self.assertEqual((d.tournament_type, d.group_count, d.advance_count), ('playoff', 4, 2))
+
+
+# ---------------------------------------------------------------------------
+# Catalan
+# ---------------------------------------------------------------------------
+
+from django.utils import translation  # noqa: E402
+
+from .templatetags.tournament_extras import bracket_label_i18n  # noqa: E402
+
+
+class CatalanTest(TestCase):
+    def test_bracket_labels_in_catalan(self):
+        with translation.override('ca'):
+            self.assertEqual(bracket_label_i18n('Nr.1 gr.1 vs Nr.2 gr.2'), '1r del grup 1 vs 2n del grup 2')
+            self.assertEqual(bracket_label_i18n('Nr.1 gr.3 (fri)'), '1r del grup 3 (exempt)')
+            self.assertEqual(bracket_label_i18n('V-kamp #12 vs V-kamp #13'), 'Guanyador del #12 vs Guanyador del #13')
+        with translation.override('en'):
+            self.assertEqual(bracket_label_i18n('Nr.2 gr.1'), '2nd of group 1')
+        self.assertIsNone(bracket_label_i18n(None))
+
+    def test_player_status_messages_translated(self):
+        with translation.override('ca'):
+            from django.utils.translation import gettext as _
+            self.assertEqual(_('%(name)s has not arrived yet') % {'name': 'Pau'}, "Pau encara no s'ha presentat")
+
+    def test_pages_render_in_catalan(self):
+        user = make_user(username='clubca')
+        c = Client(); c.force_login(user)
+        c.cookies['django_language'] = 'ca'
+        t = Tournament.objects.create(name="Tardor", date=datetime.date.today(), division_model='youth', owner=user)
+        r = c.get(reverse('tournament_detail', args=[t.pk]))
+        self.assertContains(r, 'Crea una categoria nova')
+        r = Client(HTTP_ACCEPT_LANGUAGE='ca').get(reverse('public_tournament', args=[t.pk]))
+        self.assertContains(r, 'Horari')

@@ -400,10 +400,10 @@
               {% if slot.match %}
               <div class="bracket-card">
                 {% if slot.match.bracket_label and not slot.match.team1 and not slot.match.team2 %}
-                  <div class="bracket-team" style="color:#888; font-style:italic;">{{ slot.match.bracket_label }}</div>
+                  <div class="bracket-team" style="color:#888; font-style:italic;">{{ slot.match.bracket_label|bracket_label_i18n }}</div>
                 {% else %}
                   <div class="bracket-team{% if slot.match.winner_id == slot.match.team1_id %} winner{% endif %}">
-                    {% if slot.match.team1 %}{{ slot.match.team1.name }}{{ slot.match.t1_seed }}{% elif slot.match.bracket_label %}{{ slot.match.bracket_label }}{% else %}TBD{% endif %}
+                    {% if slot.match.team1 %}{{ slot.match.team1.name }}{{ slot.match.t1_seed }}{% elif slot.match.bracket_label %}{{ slot.match.bracket_label|bracket_label_i18n }}{% else %}TBD{% endif %}
                   </div>
                   {% if slot.match.team2 %}
                   <div class="bracket-team{% if slot.match.winner_id == slot.match.team2_id %} winner{% endif %}">
@@ -446,7 +446,7 @@
             {% for match in dd.playoff_matches %}
             <tr>
               <td class="match-no">{{ match.match_number }}</td>
-              <td class="round-col">{{ match.bracket_label|default:"" }}</td>
+              <td class="round-col">{{ match.bracket_label|bracket_label_i18n|default:"" }}</td>
               {% if match.scheduled_time %}<td class="tid-col">{% if days_count > 1 %}<span class="match-date">{{ match.scheduled_time|date:"j/n" }}</span> {% endif %}{{ match.scheduled_time|time:"H:i" }}</td>{% elif dd.playoff_matches.0.scheduled_time %}<td class="tid-col">–</td>{% endif %}
               <td class="teams-col">
                 {% if match.team1 and match.team2 %}
@@ -454,7 +454,7 @@
                 {% elif match.feeder1_num and match.feeder2_num %}
                 <span style="color:#555; font-style:italic;">{% trans "Winner match" %} {{ match.feeder1_num }} vs {% trans "winner match" %} {{ match.feeder2_num }}</span>
                 {% elif match.bracket_label %}
-                <span style="color:#888; font-style:italic;">{{ match.bracket_label }}</span>
+                <span style="color:#888; font-style:italic;">{{ match.bracket_label|bracket_label_i18n }}</span>
                 {% else %}
                 <span style="color:#aaa;">TBD vs TBD</span>
                 {% endif %}
@@ -481,10 +481,10 @@
               {% if slot.match %}
               <div class="bracket-card">
                 {% if slot.match.bracket_label and not slot.match.team1 and not slot.match.team2 %}
-                  <div class="bracket-team" style="color:#888; font-style:italic;">{{ slot.match.bracket_label }}</div>
+                  <div class="bracket-team" style="color:#888; font-style:italic;">{{ slot.match.bracket_label|bracket_label_i18n }}</div>
                 {% else %}
                   <div class="bracket-team{% if slot.match.winner_id == slot.match.team1_id %} winner{% endif %}">
-                    {% if slot.match.team1 %}{{ slot.match.team1.name }}{{ slot.match.t1_seed }}{% elif slot.match.bracket_label %}{{ slot.match.bracket_label }}{% else %}TBD{% endif %}
+                    {% if slot.match.team1 %}{{ slot.match.team1.name }}{{ slot.match.t1_seed }}{% elif slot.match.bracket_label %}{{ slot.match.bracket_label|bracket_label_i18n }}{% else %}TBD{% endif %}
                   </div>
                   {% if slot.match.team2 %}
                   <div class="bracket-team{% if slot.match.winner_id == slot.match.team2_id %} winner{% endif %}">
@@ -525,7 +525,7 @@
             {% for match in dd.matches %}
             <tr>
               <td class="match-no">{{ match.match_number }}</td>
-              <td class="round-col">{{ match.bracket_label|default:"R"|add:match.match_round|stringformat:"s" }}</td>
+              <td class="round-col">{{ match.bracket_label|bracket_label_i18n|default:"R"|add:match.match_round|stringformat:"s" }}</td>
               {% if match.scheduled_time %}<td class="tid-col">{% if days_count > 1 %}<span class="match-date">{{ match.scheduled_time|date:"j/n" }}</span> {% endif %}{{ match.scheduled_time|time:"H:i" }}</td>{% elif dd.matches.0.scheduled_time %}<td class="tid-col">–</td>{% endif %}
               <td class="court-col">{{ match.court|default:"–" }}</td>
               <td class="teams-col">
@@ -534,7 +534,7 @@
                 {% elif match.feeder1_num and match.feeder2_num %}
                 <span style="color:#555; font-style:italic;">{% trans "Winner match" %} {{ match.feeder1_num }} vs {% trans "winner match" %} {{ match.feeder2_num }}</span>
                 {% elif match.bracket_label %}
-                <span style="color:#888; font-style:italic;">{{ match.bracket_label }}</span>
+                <span style="color:#888; font-style:italic;">{{ match.bracket_label|bracket_label_i18n }}</span>
                 {% else %}
                 <span style="color:#aaa;">TBD vs TBD</span>
                 {% endif %}
@@ -581,7 +581,7 @@
                 {% elif match.feeder1_num and match.feeder2_num %}
                 <span style="color:#555; font-style:italic;">{% trans "Winner match" %} {{ match.feeder1_num }} vs {% trans "winner match" %} {{ match.feeder2_num }}</span>
                 {% elif match.bracket_label %}
-                <span style="color:#888; font-style:italic;">{{ match.bracket_label }}</span>
+                <span style="color:#888; font-style:italic;">{{ match.bracket_label|bracket_label_i18n }}</span>
                 {% else %}
                 <span style="color:#aaa;">TBD vs TBD</span>
                 {% endif %}

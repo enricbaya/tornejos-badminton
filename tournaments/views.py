@@ -1859,7 +1859,7 @@ def schedule_editor(request, pk):
                 if first_in_day:
                     first_in_day = False
                     if multi_day:
-                        day_headers[key] = f"Dag {day_obj.day_number} \u2013 {day_obj.date.strftime('%d. %b')}"
+                        day_headers[key] = _("Day %(n)s") % {'n': day_obj.day_number} + f" \u2013 {day_obj.date.strftime('%d/%m')}"
                 current += slot_td
 
         # Place scheduled matches into the nearest slot row

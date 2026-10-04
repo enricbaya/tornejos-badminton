@@ -1,0 +1,3131 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 14:47+0000\n"
+"PO-Revision-Date: 2026-10-04 17:00+0200\n"
+"Last-Translator: Club\n"
+"Language-Team: Català\n"
+"Language: ca\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: players/forms.py:16
+msgid "— Select division —"
+msgstr "— Tria categoria —"
+
+#: players/forms.py:77
+msgid "Select pair type (doubles or mixed doubles) when adding two players."
+msgstr ""
+"Tria el tipus de parella (dobles o dobles mixtos) quan afegeixis dos "
+"jugadors."
+
+#: players/forms.py:79
+msgid "Doubles requires two players of the same gender."
+msgstr "En dobles els dos jugadors han de ser del mateix gènere."
+
+#: players/forms.py:81
+msgid "Mixed doubles requires one male and one female player."
+msgstr "En dobles mixtos cal un jugador i una jugadora."
+
+#: players/models.py:13 players/models.py:40
+#: players/templates/players/division_categories.html:43 players/views.py:80
+#: tournament_planner/templates/home.html:20
+#: tournament_planner/templates/home.html:40 tournaments/models.py:69
+#: tournaments/templates/tournaments/tournament_form.html:54
+#: tournaments/templates/tournaments/tournament_list.html:16
+msgid "Name"
+msgstr "Nom"
+
+#: players/models.py:14
+msgid "Sort order"
+msgstr "Ordre"
+
+#: players/models.py:19 players/models.py:63 tournaments/models.py:117
+msgid "Club user"
+msgstr "Usuari del club"
+
+#: players/models.py:41 players/views.py:82
+msgid "Age"
+msgstr "Edat"
+
+#: players/models.py:43
+msgid "Male"
+msgstr "Masculí"
+
+#: players/models.py:44
+msgid "Female"
+msgstr "Femení"
+
+#: players/models.py:46 players/models.py:90 players/views.py:83
+#: players/views.py:465
+#: tournaments/templates/tournaments/_schedule_matches.html:60
+#: tournaments/templates/tournaments/tournament_detail.html:331
+#: tournaments/templates/tournaments/tournament_schedule_print.html:212
+msgid "Division"
+msgstr "Categoria"
+
+#: players/models.py:47 players/views.py:81
+#: tournaments/templates/tournaments/tournament_detail.html:343
+msgid "Gender"
+msgstr "Gènere"
+
+#: players/models.py:50
+msgid "Resting until"
+msgstr "Descansa fins a"
+
+#: players/models.py:51
+msgid "The player is resting and cannot start new matches before this time."
+msgstr ""
+"El jugador està descansant i no pot començar cap partit abans d'aquesta "
+"hora."
+
+#: players/models.py:55
+msgid "Arrived"
+msgstr "Present"
+
+#: players/models.py:56
+msgid "Whether the player has checked in at the judge table."
+msgstr "Si el jugador s'ha presentat a la taula del jutge àrbitre."
+
+#: players/models.py:78 tournaments/models.py:227
+msgid "Doubles"
+msgstr "Dobles"
+
+#: players/models.py:79 tournaments/models.py:228
+msgid "Mixed doubles"
+msgstr "Dobles mixtos"
+
+#: players/models.py:85
+msgid "Pair type"
+msgstr "Tipus de parella"
+
+#: players/models.py:86
+msgid "Doubles: same gender · Mixed doubles: mixed gender"
+msgstr "Dobles: mateix gènere · Dobles mixtos: gèneres diferents"
+
+#: players/templates/players/division_categories.html:3
+#: players/templates/players/division_categories.html:7
+msgid "Divisions / categories"
+msgstr "Categories"
+
+#: players/templates/players/division_categories.html:8
+msgid "Player list"
+msgstr "Llista de jugadors"
+
+#: players/templates/players/division_categories.html:12
+msgid ""
+"Here you define the divisions/categories used to group players and teams "
+"(e.g. U9, U11, A, B, C, Beginner …). These choices appear in forms "
+"throughout the site."
+msgstr ""
+"Aquí defineixes les categories que serveixen per agrupar jugadors i parelles"
+" (p. ex. Benjamí, Aleví, Infantil, Sènior…). Apareixen als formularis de "
+"tota l'aplicació."
+
+#: players/templates/players/division_categories.html:24
+msgid "Add category"
+msgstr "Afegeix categoria"
+
+#: players/templates/players/division_categories.html:28
+msgid "Name (e.g. U13, A, Beginner)"
+msgstr "Nom (p. ex. Aleví, Infantil, Sènior)"
+
+#: players/templates/players/division_categories.html:30
+msgid "Type category name…"
+msgstr "Escriu el nom de la categoria…"
+
+#: players/templates/players/division_categories.html:33
+msgid "Add"
+msgstr "Afegeix"
+
+#: players/templates/players/division_categories.html:38
+msgid "Your categories"
+msgstr "Les teves categories"
+
+#: players/templates/players/division_categories.html:44
+#: players/templates/players/division_categories.html:60
+#: players/templates/players/player_confirm_delete.html:3
+#: players/templates/players/team_list.html:94
+#: tournaments/templates/tournaments/tournament_detail.html:259
+msgid "Delete"
+msgstr "Elimina"
+
+#: players/templates/players/division_categories.html:56
+#, python-format
+msgid "Delete category %(name)s?"
+msgstr "Vols eliminar la categoria %(name)s?"
+
+#: players/templates/players/division_categories.html:69
+msgid "No categories yet."
+msgstr "Encara no hi ha categories."
+
+#: players/templates/players/division_categories.html:75
+msgid "Default categories"
+msgstr "Categories per defecte"
+
+#: players/templates/players/division_categories.html:77
+msgid "Click to add the typical badminton categories at once:"
+msgstr "Clica per afegir de cop les categories habituals de bàdminton:"
+
+#: players/templates/players/division_categories.html:82
+msgid "Add default categories"
+msgstr "Afegeix les categories per defecte"
+
+#: players/templates/players/player_confirm_delete.html:7
+#: tournaments/templates/tournaments/tournament_confirm_delete.html:7
+msgid "Confirm deletion"
+msgstr "Confirma l'eliminació"
+
+#: players/templates/players/player_confirm_delete.html:8
+#, python-format
+msgid "Are you sure you want to delete %(t)s <strong>%(obj)s</strong>?"
+msgstr "Segur que vols eliminar %(t)s <strong>%(obj)s</strong>?"
+
+#: players/templates/players/player_confirm_delete.html:9
+#: tournaments/templates/tournaments/tournament_confirm_delete.html:11
+msgid "This action cannot be undone."
+msgstr "Aquesta acció no es pot desfer."
+
+#: players/templates/players/player_confirm_delete.html:13
+msgid "Yes, delete"
+msgstr "Sí, elimina"
+
+#: players/templates/players/player_confirm_delete.html:14
+#: players/templates/players/player_form.html:19
+#: players/templates/players/team_form.html:31
+#: tournaments/templates/tournaments/division_medals_edit.html:112
+#: tournaments/templates/tournaments/match_bracket_override.html:52
+#: tournaments/templates/tournaments/match_result_form.html:116
+#: tournaments/templates/tournaments/match_result_form.html:118
+#: tournaments/templates/tournaments/match_walkover_form.html:28
+#: tournaments/templates/tournaments/schedule.html:131
+#: tournaments/templates/tournaments/schedule_editor.html:142
+#: tournaments/templates/tournaments/schedule_editor.html:160
+#: tournaments/templates/tournaments/tournament_confirm_delete.html:29
+#: tournaments/templates/tournaments/tournament_confirm_reset.html:29
+#: tournaments/templates/tournaments/tournament_form.html:196
+#: tournaments/templates/tournaments/tournament_import.html:20
+#: tournaments/templates/tournaments/tournament_run.html:716
+msgid "Cancel"
+msgstr "Cancel·la"
+
+#: players/templates/players/player_form.html:3
+msgid "Edit player"
+msgstr "Edita el jugador"
+
+#: players/templates/players/player_form.html:3
+#: players/templates/players/player_form.html:6
+#: players/templates/players/player_list.html:8
+#: tournaments/templates/tournaments/tournament_detail.html:365
+msgid "Add player"
+msgstr "Afegeix jugador"
+
+#: players/templates/players/player_form.html:6
+#: players/templates/players/team_form.html:6
+#, python-format
+msgid "Edit %(name)s"
+msgstr "Edita %(name)s"
+
+#: players/templates/players/player_form.html:18
+#: players/templates/players/team_form.html:30
+#: tournaments/templates/tournaments/tournament_detail.html:257
+#: tournaments/templates/tournaments/tournament_detail.html:305
+msgid "Save"
+msgstr "Desa"
+
+#: players/templates/players/player_list.html:3
+#: players/templates/players/player_list.html:6
+#: players/templates/players/player_schedule_print.html:180
+#: tournament_planner/templates/base.html:363
+#: tournament_planner/templates/home.html:10 tournaments/forms.py:231
+msgid "Players"
+msgstr "Jugadors"
+
+#: players/templates/players/player_list.html:9
+msgid "Divisions/categories"
+msgstr "Categories"
+
+#: players/templates/players/player_list.html:14
+msgid "Upload Excel"
+msgstr "Puja un Excel"
+
+#: players/templates/players/player_list.html:18
+msgid "Download template"
+msgstr "Descarrega la plantilla"
+
+#: players/templates/players/player_list.html:27
+#: players/templates/players/team_list.html:12
+#: tournaments/templates/tournaments/tournament_detail.html:326
+#: tournaments/templates/tournaments/tournament_detail.html:372
+msgid "Search name…"
+msgstr "Cerca un nom…"
+
+#: players/templates/players/player_list.html:30
+#: players/templates/players/team_list.html:15
+msgid "All divisions"
+msgstr "Totes les categories"
+
+#: players/templates/players/player_list.html:38
+msgid "All genders"
+msgstr "Tots els gèneres"
+
+#: players/templates/players/player_list.html:48
+#: players/templates/players/team_list.html:31
+msgid "Search"
+msgstr "Cerca"
+
+#: players/templates/players/player_list.html:51
+msgid "Delete the selected players? This cannot be undone."
+msgstr "Vols eliminar els jugadors seleccionats? No es pot desfer."
+
+#: players/templates/players/player_list.html:51
+msgid "Delete selected"
+msgstr "Elimina els seleccionats"
+
+#: players/templates/players/player_list.html:53
+#: players/templates/players/team_list.html:33
+msgid "Clear"
+msgstr "Neteja"
+
+#: players/templates/players/player_list.html:56
+msgid "player(s)"
+msgstr "jugador(s)"
+
+#: players/templates/players/player_list.html:64
+msgid "Club player quota"
+msgstr "Límit de jugadors del club"
+
+#: players/templates/players/player_list.html:66
+msgid "Limit reached"
+msgstr "Límit assolit"
+
+#: players/templates/players/player_list.html:68
+msgid "remaining"
+msgstr "disponibles"
+
+#: players/templates/players/player_list.html:90
+msgid "Select all"
+msgstr "Selecciona-ho tot"
+
+#: players/templates/players/player_list.html:128
+msgid "Playing"
+msgstr "Jugant"
+
+#: players/templates/players/player_list.html:130
+#: tournaments/templates/tournaments/_status_badge.html:6
+msgid "Rest period"
+msgstr "Descans"
+
+#: players/templates/players/player_list.html:131
+msgid "Clear rest period"
+msgstr "Treu el descans"
+
+#: players/templates/players/player_list.html:131
+msgid "Rest"
+msgstr "Descans"
+
+#: players/templates/players/player_list.html:139
+msgid "Schedule"
+msgstr "Horari"
+
+#: players/templates/players/player_list.html:140
+#: players/templates/players/team_list.html:93
+#: tournaments/templates/tournaments/division_medals.html:80
+#: tournaments/templates/tournaments/division_medals.html:86
+#: tournaments/templates/tournaments/tournament_list.html:35
+#: tournaments/templates/tournaments/tournament_run.html:483
+msgid "Edit"
+msgstr "Edita"
+
+#: players/templates/players/player_list.html:151
+msgid "No players found."
+msgstr "No s'ha trobat cap jugador."
+
+#: players/templates/players/player_list.html:153
+#: players/templates/players/team_list.html:106
+msgid "Clear filter"
+msgstr "Treu el filtre"
+
+#: players/templates/players/player_list.html:155
+msgid "Add the first player"
+msgstr "Afegeix el primer jugador"
+
+#: players/templates/players/player_schedule_print.html:6
+#: players/templates/players/player_schedule_print.html:166
+#, python-format
+msgid "Schedule – %(name)s"
+msgstr "Horari – %(name)s"
+
+#: players/templates/players/player_schedule_print.html:172
+msgid "All tournaments"
+msgstr "Tots els tornejos"
+
+#: players/templates/players/player_schedule_print.html:179
+#: tournaments/templates/tournaments/scoresheet.html:188
+#: tournaments/templates/tournaments/tournament_program_print.html:300
+#: tournaments/templates/tournaments/tournament_schedule_print.html:182
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:226
+msgid "Print / Save PDF"
+msgstr "Imprimeix / Desa en PDF"
+
+#: players/templates/players/player_schedule_print.html:201
+#: tournaments/templates/tournaments/schedule_editor.html:46
+#: tournaments/templates/tournaments/tournament_program_print.html:368
+#: tournaments/templates/tournaments/tournament_program_print.html:441
+#: tournaments/templates/tournaments/tournament_program_print.html:519
+#: tournaments/templates/tournaments/tournament_program_print.html:562
+#: tournaments/templates/tournaments/tournament_schedule_print.html:209
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:277
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:309
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:349
+msgid "Time"
+msgstr "Hora"
+
+#: players/templates/players/player_schedule_print.html:202
+msgid "Opponent"
+msgstr "Rival"
+
+#: players/templates/players/player_schedule_print.html:203
+msgid "Division / Round"
+msgstr "Categoria / Ronda"
+
+#: players/templates/players/player_schedule_print.html:204
+#: tournaments/models.py:353
+#: tournaments/templates/tournaments/public/tournament.html:155
+#: tournaments/templates/tournaments/tournament_detail.html:623
+#: tournaments/templates/tournaments/tournament_detail.html:676
+msgid "Status"
+msgstr "Estat"
+
+#: players/templates/players/player_schedule_print.html:225
+#: tournaments/models.py:349
+#: tournaments/templates/tournaments/_schedule_matches.html:61
+#: tournaments/templates/tournaments/match_bracket_override.html:12
+#: tournaments/templates/tournaments/match_walkover_form.html:10
+#: tournaments/templates/tournaments/public/tournament.html:155
+#: tournaments/templates/tournaments/schedule_editor.html:246
+#: tournaments/templates/tournaments/tournament_detail.html:623
+#: tournaments/templates/tournaments/tournament_detail.html:676
+#: tournaments/templates/tournaments/tournament_program_print.html:367
+#: tournaments/templates/tournaments/tournament_program_print.html:440
+#: tournaments/templates/tournaments/tournament_program_print.html:518
+#: tournaments/templates/tournaments/tournament_program_print.html:561
+msgid "Round"
+msgstr "Ronda"
+
+#: players/templates/players/player_schedule_print.html:229
+#: tournaments/models.py:342
+#: tournaments/templates/tournaments/_schedule_matches.html:5
+#: tournaments/templates/tournaments/public/tournament.html:184
+#: tournaments/templates/tournaments/tournament_detail.html:645
+#: tournaments/templates/tournaments/tournament_detail.html:698
+msgid "Completed"
+msgstr "Acabat"
+
+#: players/templates/players/player_schedule_print.html:232
+#: tournaments/templates/tournaments/_schedule_matches.html:6
+#: tournaments/templates/tournaments/_schedule_matches.html:73
+#: tournaments/templates/tournaments/public/tournament.html:185
+#: tournaments/templates/tournaments/tournament_detail.html:647
+#: tournaments/templates/tournaments/tournament_detail.html:700
+#: tournaments/templates/tournaments/tournament_run.html:623
+msgid "In progress"
+msgstr "En joc"
+
+#: players/templates/players/player_schedule_print.html:234
+#: tournaments/templates/tournaments/_schedule_matches.html:7
+msgid "Upcoming"
+msgstr "Pendent"
+
+#: players/templates/players/player_schedule_print.html:245
+#, python-format
+msgid "No matches with a scheduled time found for %(name)s."
+msgstr "No hi ha partits amb hora assignada per a %(name)s."
+
+#: players/templates/players/player_schedule_print.html:246
+msgid "Make sure the tournament has a time schedule generated."
+msgstr "Comprova que el torneig tingui l'horari generat."
+
+#: players/templates/players/team_form.html:3
+msgid "Edit team"
+msgstr "Edita la parella"
+
+#: players/templates/players/team_form.html:3
+#: players/templates/players/team_form.html:6
+#: players/templates/players/team_list.html:7
+#: tournaments/templates/tournaments/tournament_detail.html:388
+msgid "Add team"
+msgstr "Afegeix parella"
+
+#: players/templates/players/team_form.html:12
+msgid "Filter players by division"
+msgstr "Filtra els jugadors per categoria"
+
+#: players/templates/players/team_form.html:14
+msgid "Show all players"
+msgstr "Mostra tots els jugadors"
+
+#: players/templates/players/team_list.html:3
+#: players/templates/players/team_list.html:6
+#: tournament_planner/templates/base.html:364
+#: tournament_planner/templates/home.html:11 tournaments/forms.py:259
+msgid "Teams"
+msgstr "Parelles"
+
+#: players/templates/players/team_list.html:22
+msgid "All types"
+msgstr "Tots els tipus"
+
+#: players/templates/players/team_list.html:36
+msgid "team(s)"
+msgstr "parella(es)"
+
+#: players/templates/players/team_list.html:104
+msgid "No teams found."
+msgstr "No s'ha trobat cap parella."
+
+#: players/templates/players/team_list.html:108
+msgid "Add the first team"
+msgstr "Afegeix la primera parella"
+
+#: players/views.py:112 tournaments/views.py:294
+msgid "No file selected."
+msgstr "No has seleccionat cap fitxer."
+
+#: players/views.py:116
+msgid "Please upload an Excel file (.xlsx)."
+msgstr "Puja un fitxer Excel (.xlsx)."
+
+#: players/views.py:123
+msgid "Could not read the file. Please upload a valid Excel file (.xlsx)."
+msgstr "No s'ha pogut llegir el fitxer. Puja un Excel vàlid (.xlsx)."
+
+#: players/views.py:137
+#, python-format
+msgid ""
+"The spreadsheet is missing required columns: %(cols)s. Expected columns: "
+"name, age, gender, division."
+msgstr ""
+"Al full li falten columnes obligatòries: %(cols)s. Columnes esperades: name,"
+" age, gender, division."
+
+#: players/views.py:169
+#, python-format
+msgid "Row %(n)s: name is required."
+msgstr "Fila %(n)s: el nom és obligatori."
+
+#: players/views.py:184
+#, python-format
+msgid "Row %(n)s (%(name)s): age must be a whole number between 1 and 100."
+msgstr ""
+"Fila %(n)s (%(name)s): l'edat ha de ser un nombre enter entre 1 i 100."
+
+#: players/views.py:194
+#, python-format
+msgid "Row %(n)s (%(name)s): gender must be M, K or F."
+msgstr "Fila %(n)s (%(name)s): el gènere ha de ser M, K o F."
+
+#: players/views.py:228
+#, python-format
+msgid "%(n)s player(s) added."
+msgstr "S'han afegit %(n)s jugador(s)."
+
+#: players/views.py:230
+#, python-format
+msgid ""
+"%(n)s player(s) had an unrecognised division and were added without one."
+msgstr ""
+"%(n)s jugador(s) tenien una categoria desconeguda i s'han afegit sense "
+"categoria."
+
+#: players/views.py:233
+#, python-format
+msgid ""
+"%(n)s player(s) were not added — the club has reached its player limit. Need"
+" more? Contact us for a custom plan."
+msgstr ""
+"No s'han afegit %(n)s jugador(s): el club ha arribat al límit de jugadors."
+
+#: players/views.py:238
+#, python-format
+msgid "%(count)s row(s) had errors and were skipped: %(details)s"
+msgstr "%(count)s fila(es) tenien errors i s'han saltat: %(details)s"
+
+#: players/views.py:248
+msgid "No players were added."
+msgstr "No s'ha afegit cap jugador."
+
+#: players/views.py:274
+#, python-format
+msgid ""
+"Your club has reached its player limit of %(limit)s players. Need more? "
+"Contact us for a custom plan."
+msgstr "El club ha arribat al límit de %(limit)s jugadors."
+
+#: players/views.py:284
+#, python-format
+msgid "Player \"%(name)s\" has been created."
+msgstr "S'ha creat el jugador «%(name)s»."
+
+#: players/views.py:306
+#, python-format
+msgid "Player \"%(name)s\" has been updated."
+msgstr "S'ha actualitzat el jugador «%(name)s»."
+
+#: players/views.py:331
+#, python-format
+msgid ""
+"\"%(name)s\" cannot be deleted because they are registered in a tournament."
+msgstr "No es pot eliminar «%(name)s» perquè està inscrit en un torneig."
+
+#: players/views.py:336
+#, python-format
+msgid "Player \"%(name)s\" has been deleted."
+msgstr "S'ha eliminat el jugador «%(name)s»."
+
+#: players/views.py:338
+msgid "player"
+msgstr "el jugador"
+
+#: players/views.py:346
+msgid "No players selected."
+msgstr "No has seleccionat cap jugador."
+
+#: players/views.py:361
+#, python-format
+msgid "%(n)s player(s) deleted."
+msgstr "S'han eliminat %(n)s jugador(s)."
+
+#: players/views.py:364
+#, python-format
+msgid ""
+"%(n)s player(s) could not be deleted because they are registered in a "
+"tournament: %(names)s."
+msgstr ""
+"No s'han pogut eliminar %(n)s jugador(s) perquè estan inscrits en un "
+"torneig: %(names)s."
+
+#: players/views.py:392
+#, python-format
+msgid "Rest period for %(name)s has been cleared."
+msgstr "S'ha tret el descans de %(name)s."
+
+#: players/views.py:463
+#: tournaments/templates/tournaments/tournament_detail.html:414
+#: tournaments/templates/tournaments/tournament_detail.html:443
+#: tournaments/templates/tournaments/tournament_detail.html:477
+#: tournaments/templates/tournaments/tournament_run.html:504
+#: tournaments/templates/tournaments/tournament_run.html:531
+msgid "Team"
+msgstr "Parella"
+
+#: players/views.py:464 tournament_planner/templates/home.html:20
+#: tournament_planner/templates/home.html:40
+msgid "Type"
+msgstr "Tipus"
+
+#: players/views.py:466
+msgid "Player 1"
+msgstr "Jugador 1"
+
+#: players/views.py:467
+msgid "Player 2"
+msgstr "Jugador 2"
+
+#: players/views.py:502
+#, python-format
+msgid "Team \"%(name)s\" has been created."
+msgstr "S'ha creat la parella «%(name)s»."
+
+#: players/views.py:528
+#, python-format
+msgid "Team \"%(name)s\" has been updated."
+msgstr "S'ha actualitzat la parella «%(name)s»."
+
+#: players/views.py:553
+#, python-format
+msgid "Team \"%(name)s\" has been deleted."
+msgstr "S'ha eliminat la parella «%(name)s»."
+
+#: players/views.py:555
+msgid "pair"
+msgstr "la parella"
+
+#: players/views.py:643
+#, python-format
+msgid "Category \"%(name)s\" has been added."
+msgstr "S'ha afegit la categoria «%(name)s»."
+
+#: players/views.py:667
+#, python-format
+msgid "Category \"%(name)s\" has been deleted."
+msgstr "S'ha eliminat la categoria «%(name)s»."
+
+#: players/views.py:691
+#, python-format
+msgid "%(n)s default categories have been added."
+msgstr "S'han afegit %(n)s categories per defecte."
+
+#: players/views.py:693
+msgid "All default categories already exist."
+msgstr "Ja hi són totes les categories per defecte."
+
+#: tournament_planner/templates/base.html:362
+#: tournaments/templates/tournaments/tournament_list.html:3
+#: tournaments/templates/tournaments/tournament_list.html:6
+msgid "Tournaments"
+msgstr "Tornejos"
+
+#: tournament_planner/templates/base.html:383
+msgid "Log out"
+msgstr "Surt"
+
+#: tournament_planner/templates/base_viewer.html:39
+msgid "Choose tournament"
+msgstr "Tria el torneig"
+
+#: tournament_planner/templates/base_viewer.html:40
+#: tournaments/templates/tournaments/public/landing.html:76
+#: tournaments/templates/tournaments/public/public_schedule.html:10
+msgid "Match overview"
+msgstr "Resum de partits"
+
+#: tournament_planner/templates/base_viewer.html:41
+#: tournaments/templates/tournaments/public/landing.html:75
+#: tournaments/templates/tournaments/public/public_schedule.html:4
+#: tournaments/templates/tournaments/public/public_schedule.html:8
+#: tournaments/templates/tournaments/public/tournament.html:10
+#: tournaments/templates/tournaments/schedule.html:4
+#: tournaments/templates/tournaments/schedule.html:8
+#: tournaments/templates/tournaments/schedule_editor.html:13
+#: tournaments/templates/tournaments/tournament_detail.html:39
+#: tournaments/templates/tournaments/tournament_run.html:691
+#: tournaments/templates/tournaments/tournament_schedule_print.html:6
+#: tournaments/templates/tournaments/tournament_schedule_print.html:181
+#: tournaments/templates/tournaments/tournament_schedule_print.html:184
+#: tournaments/templates/tournaments/tournament_schedule_print.html:260
+msgid "Time schedule"
+msgstr "Horari"
+
+#: tournament_planner/templates/base_viewer.html:42
+#: tournament_planner/templates/registration/login.html:4
+#: tournament_planner/templates/registration/login.html:44
+msgid "Log in"
+msgstr "Entra"
+
+#: tournament_planner/templates/home.html:3
+msgid "Home"
+msgstr "Inici"
+
+#: tournament_planner/templates/home.html:7
+msgid "Plan and manage your badminton tournaments with ease."
+msgstr "Planifica i gestiona els teus tornejos de bàdminton fàcilment."
+
+#: tournament_planner/templates/home.html:9
+msgid "View all tournaments"
+msgstr "Mostra tots els tornejos"
+
+#: tournament_planner/templates/home.html:17
+#: tournaments/templates/tournaments/public/landing.html:83
+msgid "Upcoming tournaments"
+msgstr "Propers tornejos"
+
+#: tournament_planner/templates/home.html:20
+#: tournament_planner/templates/home.html:40 tournaments/models.py:70
+#: tournaments/models.py:146
+#: tournaments/templates/tournaments/public/tournament.html:14
+#: tournaments/templates/tournaments/tournament_detail.html:82
+#: tournaments/templates/tournaments/tournament_form.html:60
+#: tournaments/templates/tournaments/tournament_form.html:99
+#: tournaments/templates/tournaments/tournament_list.html:17
+#: tournaments/templates/tournaments/tournament_program_print.html:312
+#: tournaments/templates/tournaments/tournament_schedule_print.html:195
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:238
+msgid "Date"
+msgstr "Data"
+
+#: tournament_planner/templates/home.html:32
+#: tournaments/templates/tournaments/public/landing.html:97
+msgid "No upcoming tournaments."
+msgstr "No hi ha propers tornejos."
+
+#: tournament_planner/templates/home.html:34
+#: tournament_planner/templates/home.html:54
+msgid "View all"
+msgstr "Mostra-ho tot"
+
+#: tournament_planner/templates/home.html:37
+msgid "Recent tournaments"
+msgstr "Tornejos recents"
+
+#: tournament_planner/templates/home.html:52
+msgid "No past tournaments yet."
+msgstr "Encara no hi ha tornejos passats."
+
+#: tournament_planner/templates/registration/login.html:24
+msgid "Log in with your club credentials"
+msgstr "Entra amb l'usuari del club"
+
+#: tournament_planner/templates/registration/login.html:29
+msgid "Incorrect username or password. Please try again."
+msgstr "Usuari o contrasenya incorrectes. Torna-ho a provar."
+
+#: tournament_planner/templates/registration/login.html:35
+msgid "Username"
+msgstr "Usuari"
+
+#: tournament_planner/templates/registration/login.html:39
+msgid "Password"
+msgstr "Contrasenya"
+
+#: tournament_planner/templates/registration/login.html:48
+msgid "Contact the system administrator to create a club account."
+msgstr "Demana a l'administrador del sistema que et creï un compte de club."
+
+#: tournaments/format_suggestion.py:48
+msgid "One round-robin: everyone plays everyone"
+msgstr "Una lligueta: tothom juga contra tothom"
+
+#: tournaments/format_suggestion.py:50 tournaments/models.py:234
+msgid "Single elimination"
+msgstr "Eliminatòria directa"
+
+#: tournaments/format_suggestion.py:52
+#, python-format
+msgid "%(g)s round-robin groups of %(sizes)s, no playoff"
+msgstr "%(g)s lliguetes de %(sizes)s, sense fase final"
+
+#: tournaments/format_suggestion.py:55
+msgid "final"
+msgstr "final"
+
+#: tournaments/format_suggestion.py:55
+msgid "semi-finals"
+msgstr "semifinals"
+
+#: tournaments/format_suggestion.py:55
+msgid "quarter-finals"
+msgstr "quarts de final"
+
+#: tournaments/format_suggestion.py:55
+msgid "round of 16"
+msgstr "vuitens de final"
+
+#: tournaments/format_suggestion.py:56
+msgid "playoff"
+msgstr "fase final"
+
+#: tournaments/format_suggestion.py:57
+#, python-format
+msgid "%(g)s groups of %(sizes)s + %(stage)s (top %(a)s of each group)"
+msgstr "%(g)s grups de %(sizes)s + %(stage)s (els %(a)s primers de cada grup)"
+
+#: tournaments/forms.py:24
+#, python-format
+msgid "Invalid format: '%(part)s'. Write each set as e.g. 21-15"
+msgstr "Format incorrecte: «%(part)s». Escriu cada set com p. ex. 15-11"
+
+#: tournaments/forms.py:28
+msgid "No set score found"
+msgstr "No s'ha trobat cap resultat de set"
+
+#: tournaments/forms.py:35
+#, python-format
+msgid "%(a)s-%(b)s: a set cannot end in a draw"
+msgstr "%(a)s-%(b)s: un set no pot acabar en empat"
+
+#: tournaments/forms.py:38
+#, python-format
+msgid "%(a)s-%(b)s: the winner must have at least %(points)s points"
+msgstr "%(a)s-%(b)s: el guanyador ha de tenir com a mínim %(points)s punts"
+
+#: tournaments/forms.py:42
+#, python-format
+msgid "%(a)s-%(b)s: maximum score is %(max)s-%(other)s"
+msgstr "%(a)s-%(b)s: el resultat màxim és %(max)s-%(other)s"
+
+#: tournaments/forms.py:52
+#, python-format
+msgid ""
+"%(a)s-%(b)s: at %(deuce)s-%(deuce)s play continues to 2 points difference "
+"(e.g. %(example_winner)s-%(example_loser)s)"
+msgstr ""
+"%(a)s-%(b)s: a %(deuce)s iguals cal guanyar per 2 punts de diferència (p. "
+"ex. %(example_winner)s-%(example_loser)s)"
+
+#: tournaments/forms.py:56
+#, python-format
+msgid ""
+"%(a)s-%(b)s: invalid set result (in extended play the difference must be "
+"exactly 2 points)"
+msgstr ""
+"%(a)s-%(b)s: resultat de set incorrecte (a partir de l'empat la diferència "
+"ha de ser exactament de 2 punts)"
+
+#: tournaments/forms.py:101
+#, python-format
+msgid "The logo file is too large (max %(mb)d MB)."
+msgstr "El fitxer del logotip és massa gran (màxim %(mb)d MB)."
+
+#: tournaments/forms.py:115
+msgid "The logo could not be read as a valid image."
+msgstr "No s'ha pogut llegir el logotip com a imatge vàlida."
+
+#: tournaments/forms.py:125
+#, python-format
+msgid "Unsupported image format '%(fmt)s'. Allowed: PNG, JPEG, GIF, WEBP."
+msgstr ""
+"Format d'imatge no admès «%(fmt)s». Formats permesos: PNG, JPEG, GIF, WEBP."
+
+#: tournaments/forms.py:138
+msgid "e.g. Mens singles A, Womens doubles B …"
+msgstr "p. ex. Aleví masculí, Infantil, Sènior dobles…"
+
+#: tournaments/forms.py:354
+msgid "A badminton match is best of 3 sets – provide 2 or 3 sets."
+msgstr "Un partit de bàdminton és al millor de 3 sets: indica 2 o 3 sets."
+
+#: tournaments/forms.py:361
+#, python-format
+msgid "Invalid set: %(err)s"
+msgstr "Set incorrecte: %(err)s"
+
+#: tournaments/forms.py:368
+#, python-format
+msgid ""
+"The winner must have exactly 2 set wins (current count: %(t1)s–%(t2)s)."
+msgstr "El guanyador ha de guanyar exactament 2 sets (ara: %(t1)s–%(t2)s)."
+
+#: tournaments/forms.py:378
+msgid "Third set is unnecessary: one player already won the first two sets."
+msgstr "El tercer set sobra: un jugador ja ha guanyat els dos primers."
+
+#: tournaments/forms.py:416
+#, python-format
+msgid ""
+"Winner does not match the score: according to the result %(winner)s won "
+"(%(t1)s–%(t2)s sets), but you selected %(selected)s as winner."
+msgstr ""
+"El guanyador no coincideix amb el resultat: segons el resultat ha guanyat "
+"%(winner)s (%(t1)s–%(t2)s sets), però has triat %(selected)s."
+
+#: tournaments/forms.py:428
+msgid "Winner (the player who shows up)"
+msgstr "Guanyador (qui s'ha presentat)"
+
+#: tournaments/models.py:16
+msgid "Small"
+msgstr "Petit"
+
+#: tournaments/models.py:17
+msgid "Medium"
+msgstr "Mitjà"
+
+#: tournaments/models.py:18
+msgid "Large"
+msgstr "Gran"
+
+#: tournaments/models.py:19
+msgid "Unlimited"
+msgstr "Il·limitat"
+
+#: tournaments/models.py:26
+msgid "User"
+msgstr "Usuari"
+
+#: tournaments/models.py:32
+msgid "Default language"
+msgstr "Idioma per defecte"
+
+#: tournaments/models.py:38
+msgid "Club tier"
+msgstr "Nivell del club"
+
+#: tournaments/models.py:39
+msgid "Determines how many players the club may register."
+msgstr "Determina quants jugadors pot inscriure el club."
+
+#: tournaments/models.py:60
+msgid "User profile"
+msgstr "Perfil d'usuari"
+
+#: tournaments/models.py:61
+msgid "User profiles"
+msgstr "Perfils d'usuari"
+
+#: tournaments/models.py:72
+msgid "Youth divisions (U9-U19)"
+msgstr "Categories per edat"
+
+#: tournaments/models.py:73
+msgid "Mixed divisions (A, B, C)"
+msgstr "Categories per nivell (A, B, C)"
+
+#: tournaments/models.py:75
+#: tournaments/templates/tournaments/tournament_form.html:65
+msgid "Division model"
+msgstr "Model de categories"
+
+#: tournaments/models.py:77
+msgid "Best of 3 sets to 21"
+msgstr "Al millor de 3 sets a 21"
+
+#: tournaments/models.py:78
+msgid "Best of 3 sets to 15"
+msgstr "Al millor de 3 sets a 15 (BWF 2027)"
+
+#: tournaments/models.py:84
+#: tournaments/templates/tournaments/tournament_form.html:70
+msgid "Scoring model"
+msgstr "Sistema de puntuació"
+
+#: tournaments/models.py:87
+msgid "Duration of a singles match in minutes"
+msgstr "Durada d'un partit individual, en minuts"
+
+#: tournaments/models.py:89
+msgid "Singles match duration"
+msgstr "Durada partit individual"
+
+#: tournaments/models.py:92
+msgid "Duration of a doubles match in minutes"
+msgstr "Durada d'un partit de dobles, en minuts"
+
+#: tournaments/models.py:94
+msgid "Doubles match duration"
+msgstr "Durada partit de dobles"
+
+#: tournaments/models.py:97
+msgid "Minimum rest period for players between matches in minutes"
+msgstr "Descans mínim dels jugadors entre partits, en minuts"
+
+#: tournaments/models.py:99
+msgid "Player break time"
+msgstr "Descans entre partits"
+
+#: tournaments/models.py:103
+msgid "Schedule locked"
+msgstr "Horari bloquejat"
+
+#: tournaments/models.py:104
+msgid "When locked, the match schedule cannot be changed."
+msgstr "Amb l'horari bloquejat no es pot modificar."
+
+#: tournaments/models.py:109
+#: tournaments/templates/tournaments/tournament_form.html:76
+msgid "Logo"
+msgstr "Logotip"
+
+#: tournaments/models.py:110
+msgid "Logo is shown on printed programmes and schedules."
+msgstr "El logotip surt als programes i horaris impresos."
+
+#: tournaments/models.py:140
+#: tournaments/templates/tournaments/public/landing.html:65
+#: tournaments/templates/tournaments/schedule.html:28
+#: tournaments/templates/tournaments/tournament_program_print.html:302
+#: tournaments/templates/tournaments/tournament_schedule_print.html:185
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:228
+msgid "Tournament"
+msgstr "Torneig"
+
+#: tournaments/models.py:143
+msgid "Day number"
+msgstr "Número de jornada"
+
+#: tournaments/models.py:144
+msgid "1-based display number for this day."
+msgstr "Número de la jornada (comença per 1)."
+
+#: tournaments/models.py:147
+msgid "Start time"
+msgstr "Hora d'inici"
+
+#: tournaments/models.py:150
+msgid "End time"
+msgstr "Hora de final"
+
+#: tournaments/models.py:152
+msgid ""
+"Leave blank for unlimited ending (day runs until all matches complete)."
+msgstr ""
+"Deixa-ho en blanc si no hi ha hora de final (la jornada dura fins que "
+"s'acabin els partits)."
+
+#: tournaments/models.py:157
+msgid "Number of courts"
+msgstr "Nombre de pistes"
+
+#: tournaments/models.py:158
+msgid "Number of courts available on this day."
+msgstr "Pistes disponibles aquesta jornada."
+
+#: tournaments/models.py:162
+msgid "Buffer (minutes)"
+msgstr "Marge (minuts)"
+
+#: tournaments/models.py:164
+msgid ""
+"Time reserved at the end of the day to absorb delays. Matches are not placed"
+" in this period."
+msgstr ""
+"Temps reservat al final de la jornada per absorbir retards. No s'hi "
+"programen partits."
+
+#: tournaments/models.py:172
+msgid "Tournament day"
+msgstr "Jornada"
+
+#: tournaments/models.py:173
+#: tournaments/templates/tournaments/tournament_form.html:89
+msgid "Tournament days"
+msgstr "Jornades"
+
+#: tournaments/models.py:178
+msgid "Day number must be 1 or greater."
+msgstr "El número de jornada ha de ser 1 o més."
+
+#: tournaments/models.py:180
+msgid "Buffer must not be negative."
+msgstr "El marge no pot ser negatiu."
+
+#: tournaments/models.py:183
+msgid "End time must be after start time."
+msgstr "L'hora de final ha de ser posterior a la d'inici."
+
+#: tournaments/models.py:188
+msgid "Buffer is larger than or equal to the available time window."
+msgstr "El marge és més gran o igual que la franja disponible."
+
+#: tournaments/models.py:212
+#, python-format
+msgid ""
+"Day %(n)s – %(date)s (%(start)s–%(end)s, %(courts)s courts, %(buffer)s min. "
+"buffer)"
+msgstr ""
+"Jornada %(n)s – %(date)s (%(start)s–%(end)s, %(courts)s pistes, %(buffer)s "
+"min de marge)"
+
+#: tournaments/models.py:216
+#, python-format
+msgid "Day %(n)s – %(date)s (from %(start)s, %(courts)s courts, open end)"
+msgstr ""
+"Jornada %(n)s – %(date)s (des de les %(start)s, %(courts)s pistes, sense "
+"hora de final)"
+
+#: tournaments/models.py:226
+msgid "Singles"
+msgstr "Individual"
+
+#: tournaments/models.py:231
+msgid "Group (round-robin)"
+msgstr "Lligueta (tots contra tots)"
+
+#: tournaments/models.py:232
+msgid "Several groups (round-robin, no playoff)"
+msgstr "Diverses lliguetes (sense fase final)"
+
+#: tournaments/models.py:233
+msgid "Group + playoff bracket"
+msgstr "Grups + fase final"
+
+#: tournaments/models.py:237
+msgid "Division name"
+msgstr "Nom de la categoria"
+
+#: tournaments/models.py:240
+msgid "Discipline"
+msgstr "Modalitat"
+
+#: tournaments/models.py:244
+msgid "Tournament type"
+msgstr "Format de competició"
+
+#: tournaments/models.py:247
+#: tournaments/templates/tournaments/tournament_detail.html:133
+msgid "Number of groups"
+msgstr "Nombre de grups"
+
+#: tournaments/models.py:248
+msgid ""
+"Number of groups in the group stage (only for formats with several groups)."
+msgstr ""
+"Nombre de grups de la primera fase (només per a formats amb diversos grups)."
+
+#: tournaments/models.py:251
+#: tournaments/templates/tournaments/tournament_detail.html:137
+msgid "Players advancing per group"
+msgstr "Classificats per grup"
+
+#: tournaments/models.py:252
+msgid ""
+"Number of players/teams advancing from each group to the playoff bracket."
+msgstr ""
+"Nombre de jugadors o parelles de cada grup que passen a la fase final."
+
+#: tournaments/models.py:256
+#: tournaments/templates/tournaments/tournament_detail.html:142
+msgid "Schedule priority"
+msgstr "Prioritat a l'horari"
+
+#: tournaments/models.py:257
+#: tournaments/templates/tournaments/tournament_detail.html:142
+#: tournaments/templates/tournaments/tournament_detail.html:253
+msgid ""
+"1 = schedule earliest · 10 = schedule latest. Use this to ensure younger "
+"divisions finish first."
+msgstr ""
+"1 = es programa primer · 10 = es programa al final. Si poses la mateixa "
+"prioritat a totes les categories, les pistes s'aprofiten millor."
+
+#: tournaments/models.py:262
+msgid "Group phase day"
+msgstr "Jornada de la fase de grups"
+
+#: tournaments/models.py:263
+msgid "Day where group matches are played. Empty = scheduler decides freely."
+msgstr ""
+"Jornada en què es juguen els partits de grup. Buit = ho decideix el "
+"planificador."
+
+#: tournaments/models.py:268
+msgid "Playoff day"
+msgstr "Jornada de la fase final"
+
+#: tournaments/models.py:269
+msgid ""
+"Day where playoff matches are played. Empty = scheduler decides freely."
+msgstr ""
+"Jornada en què es juga la fase final. Buit = ho decideix el planificador."
+
+#: tournaments/models.py:272
+msgid "Gold medals"
+msgstr "Medalles d'or"
+
+#: tournaments/models.py:273
+msgid "Number of teams awarded gold (typically 1)."
+msgstr "Nombre de participants que reben or (normalment 1)."
+
+#: tournaments/models.py:276
+msgid "Silver medals"
+msgstr "Medalles de plata"
+
+#: tournaments/models.py:277
+msgid "Number of teams awarded silver (typically 1)."
+msgstr "Nombre de participants que reben plata (normalment 1)."
+
+#: tournaments/models.py:280
+msgid "Bronze medals"
+msgstr "Medalles de bronze"
+
+#: tournaments/models.py:281
+msgid ""
+"0, 1 or 2. Use 2 for bracket tournaments where both semi-final losers "
+"receive bronze."
+msgstr ""
+"0, 1 o 2. Posa 2 en quadres eliminatoris si els dos perdedors de semifinals "
+"reben bronze."
+
+#: tournaments/models.py:283
+#: tournaments/templates/tournaments/tournament_program_print.html:331
+msgid "Participants"
+msgstr "Participants"
+
+#: tournaments/models.py:301
+msgid "Group phase day and playoff day cannot be the same day."
+msgstr "La fase de grups i la fase final no poden ser el mateix dia."
+
+#: tournaments/models.py:340
+#: tournaments/templates/tournaments/bigscreen.html:287
+#: tournaments/templates/tournaments/public/tournament.html:186
+#: tournaments/templates/tournaments/tournament_detail.html:649
+#: tournaments/templates/tournaments/tournament_detail.html:702
+msgid "Pending"
+msgstr "Pendent"
+
+#: tournaments/models.py:341
+msgid "In Progress"
+msgstr "En joc"
+
+#: tournaments/models.py:347
+#: tournaments/templates/tournaments/_schedule_matches.html:63
+#: tournaments/templates/tournaments/public/tournament.html:155
+#: tournaments/templates/tournaments/tournament_detail.html:623
+#: tournaments/templates/tournaments/tournament_detail.html:676
+msgid "Winner"
+msgstr "Guanyador"
+
+#: tournaments/models.py:348
+#: tournaments/templates/tournaments/_schedule_matches.html:62
+#: tournaments/templates/tournaments/public/tournament.html:155
+#: tournaments/templates/tournaments/tournament_detail.html:623
+#: tournaments/templates/tournaments/tournament_detail.html:676
+#: tournaments/templates/tournaments/tournament_run.html:506
+#: tournaments/templates/tournaments/tournament_run.html:532
+msgid "Score"
+msgstr "Resultat"
+
+#: tournaments/models.py:350
+msgid "Match Number"
+msgstr "Número de partit"
+
+#: tournaments/models.py:351
+msgid "Bracket Slot"
+msgstr "Posició al quadre"
+
+#: tournaments/models.py:352
+msgid "Bracket Label"
+msgstr "Etiqueta del quadre"
+
+#: tournaments/models.py:354
+msgid "Walk-over"
+msgstr "No presentat (WO)"
+
+#: tournaments/models.py:355
+msgid "Scheduled Time"
+msgstr "Hora programada"
+
+#: tournaments/models.py:356
+#: tournaments/templates/tournaments/schedule_editor.html:49
+#: tournaments/templates/tournaments/schedule_editor.html:216
+#: tournaments/templates/tournaments/scoresheet.html:200
+#: tournaments/templates/tournaments/tournament_court_signs_print.html:188
+#: tournaments/templates/tournaments/tournament_program_print.html:520
+#: tournaments/templates/tournaments/tournament_program_print.html:563
+#: tournaments/templates/tournaments/tournament_run.html:286
+#: tournaments/templates/tournaments/tournament_run.html:293
+#: tournaments/templates/tournaments/tournament_run.html:427
+#: tournaments/templates/tournaments/tournament_run.html:629
+#: tournaments/templates/tournaments/tournament_schedule_print.html:210
+msgid "Court"
+msgstr "Pista"
+
+#: tournaments/models.py:357
+msgid "Started at"
+msgstr "Començat a les"
+
+#: tournaments/models.py:358
+msgid "Group number"
+msgstr "Número de grup"
+
+#: tournaments/models.py:361
+#: tournaments/templates/tournaments/tournament_program_print.html:350
+msgid "Group stage"
+msgstr "Fase de grups"
+
+#: tournaments/models.py:361
+msgid "Playoff bracket"
+msgstr "Fase final"
+
+#: tournaments/models.py:362
+#: tournaments/templates/tournaments/public/tournament.html:154
+msgid "Phase"
+msgstr "Fase"
+
+#: tournaments/models.py:380
+msgid "Seed number"
+msgstr "Cap de sèrie"
+
+#: tournaments/models.py:398
+#: tournaments/templates/tournaments/division_medals.html:101
+#: tournaments/templates/tournaments/division_medals_edit.html:54
+msgid "Gold"
+msgstr "Or"
+
+#: tournaments/models.py:399
+#: tournaments/templates/tournaments/division_medals.html:119
+#: tournaments/templates/tournaments/division_medals_edit.html:74
+msgid "Silver"
+msgstr "Plata"
+
+#: tournaments/models.py:400
+#: tournaments/templates/tournaments/division_medals.html:137
+#: tournaments/templates/tournaments/division_medals_edit.html:94
+msgid "Bronze"
+msgstr "Bronze"
+
+#: tournaments/player_status.py:143
+#, python-format
+msgid "%(name)s is already playing a match"
+msgstr "%(name)s ja està jugant un partit"
+
+#: tournaments/player_status.py:146
+#, python-format
+msgid "%(name)s is still resting (approx. %(min)s min)"
+msgstr "%(name)s encara descansa (uns %(min)s min)"
+
+#: tournaments/player_status.py:148
+#, python-format
+msgid "%(name)s has not arrived yet"
+msgstr "%(name)s encara no s'ha presentat"
+
+#: tournaments/schedule_planner.py:266
+msgid ""
+"The tournament has no days configured. Add at least one day before "
+"scheduling."
+msgstr ""
+"El torneig no té cap jornada. Afegeix-ne almenys una abans de fer l'horari."
+
+#: tournaments/schedule_planner.py:280
+#, python-format
+msgid ""
+"Day %(n)s: buffer (%(buf)d min.) is greater than or equal to the time "
+"window."
+msgstr ""
+"Jornada %(n)s: el marge (%(buf)d min) és més gran o igual que la franja "
+"horària."
+
+#: tournaments/schedule_planner.py:317
+#, python-format
+msgid ""
+"Day %(n)s (%(date)s): matches require %(req)d court-minutes but only "
+"%(avail)d are available (incl. %(buf)d min. buffer)."
+msgstr ""
+"Jornada %(n)s (%(date)s): els partits necessiten %(req)d minuts de pista "
+"però només n'hi ha %(avail)d disponibles (inclosos %(buf)d min de marge)."
+
+#: tournaments/scheduler.py:108
+msgid "Final"
+msgstr "Final"
+
+#: tournaments/scheduler.py:109
+msgid "Semifinal"
+msgstr "Semifinal"
+
+#: tournaments/scheduler.py:110
+msgid "Quarterfinal"
+msgstr "Quarts de final"
+
+#: tournaments/scheduler.py:111
+msgid "Round of 16"
+msgstr "Vuitens de final"
+
+#: tournaments/scheduler.py:115
+#, python-format
+msgid "Round %(n)s"
+msgstr "Ronda %(n)s"
+
+#: tournaments/templates/tournaments/_schedule_matches.html:9
+msgid "Search player…"
+msgstr "Cerca jugador…"
+
+#: tournaments/templates/tournaments/_schedule_matches.html:19
+msgid "No matches match the search."
+msgstr "Cap partit coincideix amb la cerca."
+
+#: tournaments/templates/tournaments/_schedule_matches.html:28
+#: tournaments/templates/tournaments/public/tournament.html:16
+#: tournaments/templates/tournaments/tournament_detail.html:87
+#: tournaments/templates/tournaments/tournament_detail.html:270
+#: tournaments/templates/tournaments/tournament_detail.html:271
+#: tournaments/templates/tournaments/tournament_detail.html:286
+#: tournaments/templates/tournaments/tournament_detail.html:299
+#: tournaments/templates/tournaments/tournament_program_print.html:314
+#: tournaments/templates/tournaments/tournament_run.html:343
+#: tournaments/templates/tournaments/tournament_run.html:367
+#: tournaments/templates/tournaments/tournament_schedule_print.html:197
+#: tournaments/templates/tournaments/tournament_schedule_print.html:221
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:240
+msgid "Day"
+msgstr "Jornada"
+
+#: tournaments/templates/tournaments/_schedule_matches.html:54
+#: tournaments/templates/tournaments/_schedule_matches.html:72
+#: tournaments/templates/tournaments/_schedule_matches.html:81
+#: tournaments/templates/tournaments/_status_badge.html:4
+#: tournaments/templates/tournaments/bigscreen.html:281
+#: tournaments/templates/tournaments/bigscreen.html:286
+msgid "Match in progress"
+msgstr "Partit en joc"
+
+#: tournaments/templates/tournaments/_schedule_matches.html:94
+#| msgid ""
+#| "No matches to schedule. Generate match programmes for divisions first."
+msgid ""
+"No schedule yet. Generate match programmes for all divisions, then press "
+"'Generate time schedule'."
+msgstr ""
+"Encara no hi ha horari. Genera el programa de partits de totes les "
+"categories i després prem «Genera l'horari»."
+
+#: tournaments/templates/tournaments/bigscreen.html:240
+#: tournaments/templates/tournaments/tournament_run.html:651
+msgid "Next matches"
+msgstr "Propers partits"
+
+#: tournaments/templates/tournaments/bigscreen.html:248
+msgid "Now on court"
+msgstr "Ara a pista"
+
+#: tournaments/templates/tournaments/bigscreen.html:262
+#: tournaments/templates/tournaments/schedule_editor.html:144
+msgid "Free"
+msgstr "Lliure"
+
+#: tournaments/templates/tournaments/bigscreen.html:269
+msgid "Upcoming matches"
+msgstr "Propers partits"
+
+#: tournaments/templates/tournaments/bigscreen.html:302
+msgid "No upcoming matches"
+msgstr "No hi ha propers partits"
+
+#: tournaments/templates/tournaments/bigscreen.html:303
+msgid "All scheduled matches are completed or in progress"
+msgstr "Tots els partits programats estan acabats o en joc"
+
+#: tournaments/templates/tournaments/division_medals.html:6
+#: tournaments/templates/tournaments/division_medals.html:78
+#: tournaments/templates/tournaments/tournament_detail.html:147
+#: tournaments/templates/tournaments/tournament_run.html:386
+msgid "Medals"
+msgstr "Medalles"
+
+#: tournaments/templates/tournaments/division_medals.html:79
+#: tournaments/templates/tournaments/schedule_editor.html:14
+#: tournaments/templates/tournaments/tournament_court_signs_print.html:169
+#: tournaments/templates/tournaments/tournament_detail.html:33
+msgid "Print"
+msgstr "Imprimeix"
+
+#: tournaments/templates/tournaments/division_medals.html:81
+#: tournaments/templates/tournaments/scoresheet.html:189
+#: tournaments/templates/tournaments/tournament_court_signs_print.html:170
+msgid "Back"
+msgstr "Enrere"
+
+#: tournaments/templates/tournaments/division_medals.html:86
+msgid "Showing manual overrides."
+msgstr "Es mostren els canvis manuals."
+
+#: tournaments/templates/tournaments/division_medals.html:86
+#: tournaments/templates/tournaments/scoresheet.html:234
+#: tournaments/templates/tournaments/tournament_detail.html:156
+msgid "or"
+msgstr "o"
+
+#: tournaments/templates/tournaments/division_medals.html:86
+msgid "Reset to automatic calculation?"
+msgstr "Vols tornar al càlcul automàtic?"
+
+#: tournaments/templates/tournaments/division_medals.html:86
+msgid "reset to automatic"
+msgstr "torna al càlcul automàtic"
+
+#: tournaments/templates/tournaments/division_medals.html:92
+msgid ""
+"Not all matches have been completed yet – the medal overview may be "
+"incomplete."
+msgstr ""
+"Encara no s'han acabat tots els partits: el medaller pot estar incomplet."
+
+#: tournaments/templates/tournaments/division_medals.html:102
+#: tournaments/templates/tournaments/division_medals.html:120
+#: tournaments/templates/tournaments/division_medals.html:138
+#, python-format
+msgid "%(count)s medal"
+msgstr "%(count)s medalla"
+
+#: tournaments/templates/tournaments/division_medals.html:153
+msgid ""
+"No medal configuration for this division (gold/silver/bronze all set to 0)."
+msgstr ""
+"Aquesta categoria no té medalles configurades (or, plata i bronze a 0)."
+
+#: tournaments/templates/tournaments/division_medals.html:155
+msgid "No matches have been completed yet."
+msgstr "Encara no s'ha acabat cap partit."
+
+#: tournaments/templates/tournaments/division_medals_edit.html:6
+#: tournaments/templates/tournaments/division_medals_edit.html:38
+msgid "Edit medals"
+msgstr "Edita les medalles"
+
+#: tournaments/templates/tournaments/division_medals_edit.html:43
+msgid ""
+"There are active manual overrides for this division. Save to update, or "
+"click 'Reset to automatic'."
+msgstr ""
+"Aquesta categoria té canvis manuals. Desa per actualitzar-los o prem «Torna "
+"al càlcul automàtic»."
+
+#: tournaments/templates/tournaments/division_medals_edit.html:60
+#: tournaments/templates/tournaments/division_medals_edit.html:80
+#: tournaments/templates/tournaments/division_medals_edit.html:100
+msgid "None"
+msgstr "Cap"
+
+#: tournaments/templates/tournaments/division_medals_edit.html:111
+msgid "Save overrides"
+msgstr "Desa els canvis"
+
+#: tournaments/templates/tournaments/division_medals_edit.html:119
+msgid "Reset to automatic"
+msgstr "Torna al càlcul automàtic"
+
+#: tournaments/templates/tournaments/match_bracket_override.html:3
+msgid "Change bracket team"
+msgstr "Canvia participant del quadre"
+
+#: tournaments/templates/tournaments/match_bracket_override.html:7
+msgid "Change team in bracket"
+msgstr "Canvia participant al quadre"
+
+#: tournaments/templates/tournaments/match_bracket_override.html:13
+#: tournaments/templates/tournaments/schedule_editor.html:140
+#: tournaments/templates/tournaments/scoresheet.html:198
+#: tournaments/templates/tournaments/tournament_detail.html:220
+#: tournaments/templates/tournaments/tournament_detail.html:676
+#: tournaments/templates/tournaments/tournament_program_print.html:369
+#: tournaments/templates/tournaments/tournament_program_print.html:442
+#: tournaments/templates/tournaments/tournament_program_print.html:521
+#: tournaments/templates/tournaments/tournament_program_print.html:564
+#: tournaments/templates/tournaments/tournament_schedule_print.html:211
+msgid "Match"
+msgstr "Partit"
+
+#: tournaments/templates/tournaments/match_bracket_override.html:18
+msgid ""
+"Select the teams that should play. Leave a field empty to keep the current "
+"team."
+msgstr ""
+"Tria qui ha de jugar. Deixa un camp buit per mantenir el participant actual."
+
+#: tournaments/templates/tournaments/match_bracket_override.html:26
+#: tournaments/templates/tournaments/public/tournament.html:155
+#: tournaments/templates/tournaments/tournament_detail.html:623
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:278
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:310
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:350
+msgid "Team 1"
+msgstr "Participant 1"
+
+#: tournaments/templates/tournaments/match_bracket_override.html:28
+#: tournaments/templates/tournaments/match_bracket_override.html:40
+#, python-format
+msgid "keep current (%(name)s)"
+msgstr "mantén l'actual (%(name)s)"
+
+#: tournaments/templates/tournaments/match_bracket_override.html:38
+#: tournaments/templates/tournaments/public/tournament.html:155
+#: tournaments/templates/tournaments/tournament_detail.html:623
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:278
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:310
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:352
+msgid "Team 2"
+msgstr "Participant 2"
+
+#: tournaments/templates/tournaments/match_bracket_override.html:50
+msgid "Save change"
+msgstr "Desa el canvi"
+
+#: tournaments/templates/tournaments/match_result_form.html:3
+#: tournaments/templates/tournaments/match_result_form.html:55
+#: tournaments/templates/tournaments/partials/_result_entry_modal.html:4
+#: tournaments/templates/tournaments/tournament_run.html:293
+#: tournaments/templates/tournaments/tournament_run.html:294
+msgid "Register result"
+msgstr "Entra el resultat"
+
+#: tournaments/templates/tournaments/match_result_form.html:57
+msgid "Match:"
+msgstr "Partit:"
+
+#: tournaments/templates/tournaments/match_result_form.html:58
+msgid "Division:"
+msgstr "Categoria:"
+
+#: tournaments/templates/tournaments/match_result_form.html:58
+msgid "Round:"
+msgstr "Ronda:"
+
+#: tournaments/templates/tournaments/match_result_form.html:80
+msgid "Set scores"
+msgstr "Resultat per sets"
+
+#: tournaments/templates/tournaments/match_result_form.html:83
+#: tournaments/templates/tournaments/scoresheet.html:205
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:279
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:311
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:353
+msgid "Set 1"
+msgstr "Set 1"
+
+#: tournaments/templates/tournaments/match_result_form.html:84
+#: tournaments/templates/tournaments/scoresheet.html:206
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:280
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:312
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:354
+msgid "Set 2"
+msgstr "Set 2"
+
+#: tournaments/templates/tournaments/match_result_form.html:85
+#: tournaments/templates/tournaments/scoresheet.html:207
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:281
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:313
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:355
+msgid "Set 3"
+msgstr "Set 3"
+
+#: tournaments/templates/tournaments/match_result_form.html:114
+msgid "Save result"
+msgstr "Desa el resultat"
+
+#: tournaments/templates/tournaments/match_walkover_form.html:12
+msgid "Select the player/pair that"
+msgstr "Tria el jugador o la parella que"
+
+#: tournaments/templates/tournaments/match_walkover_form.html:12
+msgid "showed up"
+msgstr "s'ha presentat"
+
+#: tournaments/templates/tournaments/match_walkover_form.html:12
+msgid "and is awarded the walk-over win"
+msgstr "i guanya per no presentació (WO)"
+
+#: tournaments/templates/tournaments/match_walkover_form.html:27
+msgid "Register WO win"
+msgstr "Registra la victòria per WO"
+
+#: tournaments/templates/tournaments/partials/_result_entry_modal.html:5
+msgid "Close"
+msgstr "Tanca"
+
+#: tournaments/templates/tournaments/partials/_team_arrival_names.html:2
+msgid "Arrived — click to undo"
+msgstr "Present — clica per desfer"
+
+#: tournaments/templates/tournaments/partials/_team_arrival_names.html:2
+msgid "Not arrived — click to check in"
+msgstr "No present — clica per marcar l'arribada"
+
+#: tournaments/templates/tournaments/partials/_team_arrival_names.html:2
+msgid "Playing now"
+msgstr "Jugant ara"
+
+#: tournaments/templates/tournaments/partials/_team_arrival_names.html:2
+msgid "Resting after a match"
+msgstr "Descansant després d'un partit"
+
+#: tournaments/templates/tournaments/public/landing.html:3
+#: tournaments/templates/tournaments/public/landing.html:141
+msgid "Select tournament"
+msgstr "Tria el torneig"
+
+#: tournaments/templates/tournaments/public/landing.html:41
+msgid "Tournament overview"
+msgstr "Tornejos"
+
+#: tournaments/templates/tournaments/public/landing.html:42
+msgid ""
+"Select a club and tournament to view the match overview and time schedule."
+msgstr "Tria el club i el torneig per veure els partits i l'horari."
+
+#: tournaments/templates/tournaments/public/landing.html:48
+msgid "Select club and tournament"
+msgstr "Tria el club i el torneig"
+
+#: tournaments/templates/tournaments/public/landing.html:51
+msgid "No tournaments available yet."
+msgstr "Encara no hi ha tornejos."
+
+#: tournaments/templates/tournaments/public/landing.html:55
+msgid "Club"
+msgstr "Club"
+
+#: tournaments/templates/tournaments/public/landing.html:57
+msgid "Select club"
+msgstr "Tria el club"
+
+#: tournaments/templates/tournaments/public/landing.html:67
+#: tournaments/templates/tournaments/public/landing.html:141
+msgid "Select club first"
+msgstr "Primer tria el club"
+
+#: tournaments/templates/tournaments/public/landing.html:92
+#: tournaments/templates/tournaments/public/landing.html:109
+msgid "View"
+msgstr "Mostra"
+
+#: tournaments/templates/tournaments/public/landing.html:101
+msgid "Past tournaments"
+msgstr "Tornejos passats"
+
+#: tournaments/templates/tournaments/public/public_schedule.html:16
+msgid "The tournament does not have a time schedule yet."
+msgstr "El torneig encara no té horari."
+
+#: tournaments/templates/tournaments/public/tournament.html:15
+#: tournaments/templates/tournaments/tournament_detail.html:83
+#: tournaments/templates/tournaments/tournament_program_print.html:313
+#: tournaments/templates/tournaments/tournament_schedule_print.html:196
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:239
+msgid "Scoring"
+msgstr "Puntuació"
+
+#: tournaments/templates/tournaments/public/tournament.html:16
+#: tournaments/templates/tournaments/tournament_form.html:102
+#: tournaments/templates/tournaments/tournament_list.html:18
+#: tournaments/templates/tournaments/tournament_program_print.html:314
+#: tournaments/templates/tournaments/tournament_schedule_print.html:197
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:240
+msgid "Courts"
+msgstr "Pistes"
+
+#: tournaments/templates/tournaments/public/tournament.html:18
+#: tournaments/templates/tournaments/tournament_detail.html:104
+msgid "Programme locked"
+msgstr "Programa bloquejat"
+
+#: tournaments/templates/tournaments/public/tournament.html:32
+#, python-format
+msgid "%(counter)s participant"
+msgid_plural "%(counter)s participants"
+msgstr[0] "%(counter)s participant"
+msgstr[1] "%(counter)s participants"
+
+#: tournaments/templates/tournaments/public/tournament.html:39
+#: tournaments/templates/tournaments/tournament_detail.html:440
+#: tournaments/templates/tournaments/tournament_run.html:395
+msgid "Standings"
+msgstr "Classificació"
+
+#: tournaments/templates/tournaments/public/tournament.html:42
+#: tournaments/templates/tournaments/public/tournament.html:77
+#: tournaments/templates/tournaments/tournament_detail.html:414
+#: tournaments/templates/tournaments/tournament_detail.html:443
+#: tournaments/templates/tournaments/tournament_detail.html:477
+#: tournaments/templates/tournaments/tournament_run.html:504
+#: tournaments/templates/tournaments/tournament_run.html:531
+msgid "Player"
+msgstr "Jugador"
+
+#: tournaments/templates/tournaments/public/tournament.html:42
+#: tournaments/templates/tournaments/public/tournament.html:77
+msgid "Pair"
+msgstr "Parella"
+
+#: tournaments/templates/tournaments/public/tournament.html:42
+#: tournaments/templates/tournaments/public/tournament.html:77
+#: tournaments/templates/tournaments/tournament_detail.html:94
+#: tournaments/templates/tournaments/tournament_detail.html:613
+#: tournaments/templates/tournaments/tournament_program_print.html:512
+#: tournaments/templates/tournaments/tournament_program_print.html:555
+#: tournaments/templates/tournaments/tournament_run.html:393
+#: tournaments/templates/tournaments/tournament_schedule_print.html:198
+msgid "Matches"
+msgstr "Partits"
+
+#: tournaments/templates/tournaments/public/tournament.html:42
+#: tournaments/templates/tournaments/public/tournament.html:77
+#: tournaments/templates/tournaments/tournament_run.html:505
+msgid "Won"
+msgstr "Guanyats"
+
+#: tournaments/templates/tournaments/public/tournament.html:42
+#: tournaments/templates/tournaments/public/tournament.html:77
+#: tournaments/templates/tournaments/tournament_run.html:505
+msgid "Lost"
+msgstr "Perduts"
+
+#: tournaments/templates/tournaments/public/tournament.html:42
+#: tournaments/templates/tournaments/public/tournament.html:77
+#: tournaments/templates/tournaments/tournament_detail.html:443
+#: tournaments/templates/tournaments/tournament_detail.html:477
+#: tournaments/templates/tournaments/tournament_run.html:506
+msgid "Points"
+msgstr "Punts"
+
+#: tournaments/templates/tournaments/public/tournament.html:55
+#: tournaments/templates/tournaments/public/tournament.html:91
+msgid "Player on court"
+msgstr "Jugant a pista"
+
+#: tournaments/templates/tournaments/public/tournament.html:71
+#: tournaments/templates/tournaments/tournament_detail.html:471
+msgid "Group standings"
+msgstr "Classificació per grups"
+
+#: tournaments/templates/tournaments/public/tournament.html:74
+#, python-format
+msgid "Group %(n)s"
+msgstr "Grup %(n)s"
+
+#: tournaments/templates/tournaments/public/tournament.html:87
+#: tournaments/templates/tournaments/tournament_detail.html:484
+msgid "advances"
+msgstr "es classifica"
+
+#: tournaments/templates/tournaments/public/tournament.html:109
+#: tournaments/templates/tournaments/public/tournament.html:164
+#: tournaments/templates/tournaments/schedule_editor.html:78
+#: tournaments/templates/tournaments/schedule_editor.html:243
+#: tournaments/templates/tournaments/tournament_detail.html:503
+#: tournaments/templates/tournaments/tournament_program_print.html:390
+#: tournaments/templates/tournaments/tournament_run.html:399
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:304
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:363
+msgid "Playoff"
+msgstr "Fase final"
+
+#: tournaments/templates/tournaments/public/tournament.html:109
+msgid "Tournament bracket"
+msgstr "Quadre"
+
+#: tournaments/templates/tournaments/public/tournament.html:131
+#: tournaments/templates/tournaments/tournament_detail.html:519
+#: tournaments/templates/tournaments/tournament_detail.html:526
+#: tournaments/templates/tournaments/tournament_program_print.html:413
+#: tournaments/templates/tournaments/tournament_program_print.html:494
+#: tournaments/templates/tournaments/tournament_run.html:580
+msgid "Bye"
+msgstr "Exempt"
+
+#: tournaments/templates/tournaments/public/tournament.html:138
+msgid "Awaiting…"
+msgstr "Pendent…"
+
+#: tournaments/templates/tournaments/public/tournament.html:149
+#: tournaments/templates/tournaments/tournament_detail.html:617
+#: tournaments/templates/tournaments/tournament_program_print.html:6
+#: tournaments/templates/tournaments/tournament_program_print.html:299
+#: tournaments/templates/tournaments/tournament_run.html:692
+msgid "Match programme"
+msgstr "Programa de partits"
+
+#: tournaments/templates/tournaments/public/tournament.html:164
+#, python-format
+msgid "G%(n)s"
+msgstr "G%(n)s"
+
+#: tournaments/templates/tournaments/public/tournament.html:202
+msgid "This tournament has no divisions yet."
+msgstr "Aquest torneig encara no té categories."
+
+#: tournaments/templates/tournaments/schedule.html:11
+#: tournaments/templates/tournaments/schedule_editor.html:11
+msgid "Locked"
+msgstr "Bloquejat"
+
+#: tournaments/templates/tournaments/schedule.html:14
+#: tournaments/templates/tournaments/schedule.html:136
+msgid "Unlock"
+msgstr "Desbloqueja"
+
+#: tournaments/templates/tournaments/schedule.html:19
+msgid "Generate new"
+msgstr "Genera de nou"
+
+#: tournaments/templates/tournaments/schedule.html:19
+msgid "Generate"
+msgstr "Genera"
+
+#: tournaments/templates/tournaments/schedule.html:19
+msgid "time schedule"
+msgstr "l'horari"
+
+#: tournaments/templates/tournaments/schedule.html:24
+msgid "Lock schedule"
+msgstr "Bloqueja l'horari"
+
+#: tournaments/templates/tournaments/schedule.html:29
+#: tournaments/templates/tournaments/tournament_run.html:276
+msgid "Big screen"
+msgstr "Pantalla gran"
+
+#: tournaments/templates/tournaments/schedule.html:30
+#: tournaments/templates/tournaments/tournament_detail.html:44
+msgid "Print time schedule"
+msgstr "Imprimeix l'horari"
+
+#: tournaments/templates/tournaments/schedule.html:31
+msgid "Manual editor"
+msgstr "Editor manual"
+
+#: tournaments/templates/tournaments/schedule.html:37
+msgid ""
+"No days configured. Add at least one tournament day before generating the "
+"time schedule."
+msgstr ""
+"No hi ha cap jornada. Afegeix-ne almenys una abans de generar l'horari."
+
+#: tournaments/templates/tournaments/schedule.html:43
+msgid ""
+"Some matches are missing a time slot. Click 'Generate new time schedule' to "
+"schedule all matches."
+msgstr ""
+"Hi ha partits sense hora. Prem «Genera de nou l'horari» per programar-los "
+"tots."
+
+#: tournaments/templates/tournaments/schedule.html:52
+msgid "Optimising time schedule…"
+msgstr "Optimitzant l'horari…"
+
+#: tournaments/templates/tournaments/schedule.html:54
+msgid "Up to 2 minutes"
+msgstr "Fins a 2 minuts"
+
+#: tournaments/templates/tournaments/schedule.html:116
+msgid "Unlock time schedule?"
+msgstr "Vols desbloquejar l'horari?"
+
+#: tournaments/templates/tournaments/schedule.html:120
+msgid ""
+"If you unlock the schedule, it can be changed or regenerated. "
+"<strong>Existing match times and order may be lost.</strong>"
+msgstr ""
+"Si desbloqueges l'horari, es podrà modificar o tornar a generar. <strong>Es "
+"poden perdre les hores i l'ordre actuals dels partits.</strong>"
+
+#: tournaments/templates/tournaments/schedule.html:123
+#: tournaments/templates/tournaments/tournament_confirm_delete.html:21
+#: tournaments/templates/tournaments/tournament_confirm_reset.html:21
+msgid "Write"
+msgstr "Escriu"
+
+#: tournaments/templates/tournaments/schedule.html:123
+msgid "in the field below to confirm:"
+msgstr "al camp de sota per confirmar:"
+
+#: tournaments/templates/tournaments/schedule_editor.html:4
+#: tournaments/templates/tournaments/schedule_editor.html:8
+msgid "Manual time schedule"
+msgstr "Horari manual"
+
+#: tournaments/templates/tournaments/schedule_editor.html:17
+msgid "Reset times"
+msgstr "Esborra les hores"
+
+#: tournaments/templates/tournaments/schedule_editor.html:24
+msgid "Configure at least one tournament day before using the editor."
+msgstr "Configura almenys una jornada abans de fer servir l'editor."
+
+#: tournaments/templates/tournaments/schedule_editor.html:30
+msgid "Slot interval:"
+msgstr "Interval entre franges:"
+
+#: tournaments/templates/tournaments/schedule_editor.html:34
+msgid "Update"
+msgstr "Actualitza"
+
+#: tournaments/templates/tournaments/schedule_editor.html:38
+msgid "missing a time slot"
+msgstr "sense hora"
+
+#: tournaments/templates/tournaments/schedule_editor.html:82
+#: tournaments/templates/tournaments/tournament_run.html:436
+#: tournaments/templates/tournaments/tournament_run.html:671
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:289
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:325
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:375
+msgid "vs"
+msgstr "vs"
+
+#: tournaments/templates/tournaments/schedule_editor.html:88
+msgid "Free slot"
+msgstr "Franja lliure"
+
+#: tournaments/templates/tournaments/schedule_editor.html:96
+msgid "Assign match here"
+msgstr "Assigna un partit aquí"
+
+#: tournaments/templates/tournaments/schedule_editor.html:121
+msgid "Select match"
+msgstr "Tria el partit"
+
+#: tournaments/templates/tournaments/schedule_editor.html:126
+msgid "Loading suggestions…"
+msgstr "Carregant suggeriments…"
+
+#: tournaments/templates/tournaments/schedule_editor.html:129
+msgid "No available matches for this time slot."
+msgstr "No hi ha partits disponibles per a aquesta franja."
+
+#: tournaments/templates/tournaments/schedule_editor.html:130
+msgid ""
+"All unscheduled matches have player conflicts or the court is occupied."
+msgstr ""
+"Tots els partits sense hora tenen jugadors ocupats o la pista està ocupada."
+
+#: tournaments/templates/tournaments/schedule_editor.html:138
+msgid "Free slot?"
+msgstr "Vols alliberar la franja?"
+
+#: tournaments/templates/tournaments/schedule_editor.html:140
+msgid "will be removed from the schedule."
+msgstr "es traurà de l'horari."
+
+#: tournaments/templates/tournaments/schedule_editor.html:153
+msgid "Reset time schedule?"
+msgstr "Vols esborrar l'horari?"
+
+#: tournaments/templates/tournaments/schedule_editor.html:157
+msgid ""
+"All times and courts will be removed from <strong>all matches</strong> in "
+"the tournament. The matches and results are preserved."
+msgstr ""
+"S'esborraran les hores i pistes de <strong>tots els partits</strong> del "
+"torneig. Els partits i els resultats es mantenen."
+
+#: tournaments/templates/tournaments/schedule_editor.html:162
+msgid "Reset"
+msgstr "Esborra"
+
+#: tournaments/templates/tournaments/schedule_editor.html:217
+msgid "Only matches without conflicts are shown"
+msgstr "Només es mostren els partits sense conflictes"
+
+#: tournaments/templates/tournaments/schedule_editor.html:253
+msgid "Error loading suggestions."
+msgstr "Error en carregar els suggeriments."
+
+#: tournaments/templates/tournaments/schedule_editor.html:284
+msgid "Error assigning match."
+msgstr "Error en assignar el partit."
+
+#: tournaments/templates/tournaments/schedule_editor.html:290
+#: tournaments/templates/tournaments/schedule_editor.html:327
+#: tournaments/templates/tournaments/schedule_editor.html:362
+msgid "Network error – please try again."
+msgstr "Error de xarxa: torna-ho a provar."
+
+#: tournaments/templates/tournaments/schedule_editor.html:322
+msgid "Error freeing slot."
+msgstr "Error en alliberar la franja."
+
+#: tournaments/templates/tournaments/schedule_editor.html:357
+msgid "Error resetting schedule."
+msgstr "Error en esborrar l'horari."
+
+#: tournaments/templates/tournaments/scoresheet.html:7
+#: tournaments/templates/tournaments/scoresheet.html:187
+#: tournaments/templates/tournaments/tournament_detail.html:45
+#: tournaments/templates/tournaments/tournament_run.html:694
+msgid "Score sheets"
+msgstr "Actes"
+
+#: tournaments/templates/tournaments/scoresheet.html:229
+msgid "Winner:"
+msgstr "Guanyador:"
+
+#: tournaments/templates/tournaments/scoresheet.html:247
+msgid ""
+"No matches with match numbers yet. Generate the match programme for a "
+"division first."
+msgstr ""
+"Encara no hi ha partits numerats. Primer genera el programa de partits "
+"d'alguna categoria."
+
+#: tournaments/templates/tournaments/tournament_confirm_delete.html:3
+#: tournaments/templates/tournaments/tournament_confirm_delete.html:28
+#: tournaments/templates/tournaments/tournament_detail.html:65
+msgid "Delete tournament"
+msgstr "Elimina el torneig"
+
+#: tournaments/templates/tournaments/tournament_confirm_delete.html:8
+#, python-format
+msgid ""
+"Are you sure you want to delete the tournament <strong>%(name)s</strong>?"
+msgstr "Segur que vols eliminar el torneig <strong>%(name)s</strong>?"
+
+#: tournaments/templates/tournaments/tournament_confirm_delete.html:10
+msgid ""
+"This deletes the tournament and <strong>all</strong> associated divisions "
+"and matches permanently."
+msgstr ""
+"S'eliminaran definitivament el torneig i <strong>totes</strong> les seves "
+"categories i partits."
+
+#: tournaments/templates/tournaments/tournament_confirm_delete.html:21
+#: tournaments/templates/tournaments/tournament_confirm_reset.html:21
+msgid "to confirm:"
+msgstr "per confirmar:"
+
+#: tournaments/templates/tournaments/tournament_confirm_reset.html:3
+#: tournaments/templates/tournaments/tournament_confirm_reset.html:28
+#: tournaments/templates/tournaments/tournament_detail.html:50
+msgid "Reset match programme"
+msgstr "Reinicia el programa de partits"
+
+#: tournaments/templates/tournaments/tournament_confirm_reset.html:7
+msgid "Confirm reset"
+msgstr "Confirma el reinici"
+
+#: tournaments/templates/tournaments/tournament_confirm_reset.html:8
+#, python-format
+msgid ""
+"Are you sure you want to reset the match programme for "
+"<strong>%(name)s</strong>?"
+msgstr ""
+"Segur que vols reiniciar el programa de partits de "
+"<strong>%(name)s</strong>?"
+
+#: tournaments/templates/tournaments/tournament_confirm_reset.html:10
+msgid ""
+"This deletes <strong>all matches</strong> in all divisions and resets the "
+"match number counter to 0."
+msgstr ""
+"S'eliminaran <strong>tots els partits</strong> de totes les categories i el "
+"comptador de partits tornarà a 0."
+
+#: tournaments/templates/tournaments/tournament_confirm_reset.html:11
+msgid ""
+"Players, pairs and divisions are preserved. This action cannot be undone."
+msgstr ""
+"Es mantenen els jugadors, les parelles i les categories. Aquesta acció no es"
+" pot desfer."
+
+#: tournaments/templates/tournaments/tournament_court_signs_print.html:5
+#: tournaments/templates/tournaments/tournament_court_signs_print.html:168
+#: tournaments/templates/tournaments/tournament_detail.html:47
+msgid "Court signs"
+msgstr "Rètols de pista"
+
+#: tournaments/templates/tournaments/tournament_detail.html:32
+msgid "General"
+msgstr "General"
+
+#: tournaments/templates/tournaments/tournament_detail.html:34
+msgid "Maintenance"
+msgstr "Manteniment"
+
+#: tournaments/templates/tournaments/tournament_detail.html:37
+#: tournaments/templates/tournaments/tournament_run.html:3
+#: tournaments/templates/tournaments/tournament_run.html:272
+msgid "Tournament run"
+msgstr "Dia de torneig"
+
+#: tournaments/templates/tournaments/tournament_detail.html:38
+msgid "Edit setup"
+msgstr "Edita la configuració"
+
+#: tournaments/templates/tournaments/tournament_detail.html:40
+msgid "Export backup"
+msgstr "Exporta una còpia"
+
+#: tournaments/templates/tournaments/tournament_detail.html:43
+msgid "Print programme"
+msgstr "Imprimeix el programa"
+
+#: tournaments/templates/tournaments/tournament_detail.html:46
+#: tournaments/templates/tournaments/tournament_run.html:693
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:6
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:225
+msgid "Result chart"
+msgstr "Full de resultats"
+
+#: tournaments/templates/tournaments/tournament_detail.html:54
+msgid ""
+"Rebuild playoff labels? Use this if labels are broken (showing W-match #?)."
+msgstr ""
+"Vols refer les etiquetes de la fase final? Fes-ho si es veuen malament (p. "
+"ex. «Guanyador de #?»)."
+
+#: tournaments/templates/tournaments/tournament_detail.html:55
+msgid "Rebuild playoff labels"
+msgstr "Refés les etiquetes de la fase final"
+
+#: tournaments/templates/tournaments/tournament_detail.html:61
+msgid ""
+"Renumber matches by schedule order? Matches without a time are placed last."
+msgstr ""
+"Vols renumerar els partits segons l'horari? Els partits sense hora queden al"
+" final."
+
+#: tournaments/templates/tournaments/tournament_detail.html:62
+msgid "Renumber by schedule"
+msgstr "Renumera segons l'horari"
+
+#: tournaments/templates/tournaments/tournament_detail.html:86
+#: tournaments/templates/tournaments/tournament_detail.html:90
+msgid "Days"
+msgstr "Jornades"
+
+#: tournaments/templates/tournaments/tournament_detail.html:87
+msgid "courts"
+msgstr "pistes"
+
+#: tournaments/templates/tournaments/tournament_detail.html:90
+msgid "No days configured."
+msgstr "No hi ha cap jornada."
+
+#: tournaments/templates/tournaments/tournament_detail.html:95
+msgid "completed"
+msgstr "acabats"
+
+#: tournaments/templates/tournaments/tournament_detail.html:97
+msgid "missing"
+msgstr "falten"
+
+#: tournaments/templates/tournaments/tournament_detail.html:99
+msgid "all done"
+msgstr "tot fet"
+
+#: tournaments/templates/tournaments/tournament_detail.html:112
+msgid "Create new division"
+msgstr "Crea una categoria nova"
+
+#: tournaments/templates/tournaments/tournament_detail.html:144
+msgid "earliest done"
+msgstr "primer"
+
+#: tournaments/templates/tournaments/tournament_detail.html:159
+msgid "Create division"
+msgstr "Crea la categoria"
+
+#: tournaments/templates/tournaments/tournament_detail.html:190
+msgid "Jump to match #…"
+msgstr "Ves al partit núm.…"
+
+#: tournaments/templates/tournaments/tournament_detail.html:195
+msgid "Go to match"
+msgstr "Ves al partit"
+
+#: tournaments/templates/tournaments/tournament_detail.html:220
+msgid "not found."
+msgstr "no trobat."
+
+#: tournaments/templates/tournaments/tournament_detail.html:248
+msgid "participant(s)"
+msgstr "participant(s)"
+
+#: tournaments/templates/tournaments/tournament_detail.html:249
+msgid "matches pending"
+msgstr "partits pendents"
+
+#: tournaments/templates/tournaments/tournament_detail.html:253
+msgid "Priority"
+msgstr "Prioritat"
+
+#: tournaments/templates/tournaments/tournament_detail.html:268
+msgid "Day assignment"
+msgstr "Assignació de jornades"
+
+#: tournaments/templates/tournaments/tournament_detail.html:270
+#: tournaments/templates/tournaments/tournament_detail.html:281
+msgid "Group phase"
+msgstr "Fase de grups"
+
+#: tournaments/templates/tournaments/tournament_detail.html:271
+#: tournaments/templates/tournaments/tournament_detail.html:294
+msgid "Playoff phase"
+msgstr "Fase final"
+
+#: tournaments/templates/tournaments/tournament_detail.html:272
+#: tournaments/templates/tournaments/tournament_detail.html:283
+#: tournaments/templates/tournaments/tournament_detail.html:296
+msgid "Not assigned"
+msgstr "Sense assignar"
+
+#: tournaments/templates/tournaments/tournament_detail.html:316
+msgid "Register players"
+msgstr "Inscriu jugadors"
+
+#: tournaments/templates/tournaments/tournament_detail.html:316
+msgid "Register teams"
+msgstr "Inscriu parelles"
+
+#: tournaments/templates/tournaments/tournament_detail.html:316
+msgid "registered"
+msgstr "inscrits"
+
+#: tournaments/templates/tournaments/tournament_detail.html:362
+#: tournaments/templates/tournaments/tournament_detail.html:385
+msgid "Missing someone?"
+msgstr "Falta algú?"
+
+#: tournaments/templates/tournaments/tournament_detail.html:362
+msgid "Add player here"
+msgstr "Afegeix el jugador aquí"
+
+#: tournaments/templates/tournaments/tournament_detail.html:365
+msgid "No players available."
+msgstr "No hi ha jugadors disponibles."
+
+#: tournaments/templates/tournaments/tournament_detail.html:365
+#: tournaments/templates/tournaments/tournament_detail.html:388
+msgid "and come back."
+msgstr "i torna aquí."
+
+#: tournaments/templates/tournaments/tournament_detail.html:385
+msgid "Add team here"
+msgstr "Afegeix la parella aquí"
+
+#: tournaments/templates/tournaments/tournament_detail.html:388
+msgid "No teams available."
+msgstr "No hi ha parelles disponibles."
+
+#: tournaments/templates/tournaments/tournament_detail.html:391
+msgid "Save registration"
+msgstr "Desa la inscripció"
+
+#: tournaments/templates/tournaments/tournament_detail.html:405
+#, python-format
+msgid ""
+"Enter seeding numbers for the best %(entity)ss. Seed 1 is best, seed 2 next "
+"best etc."
+msgstr ""
+"Indica els caps de sèrie (%(entity)s). El 1 és el millor, el 2 el següent, "
+"etc."
+
+#: tournaments/templates/tournaments/tournament_detail.html:406
+msgid "Seeded players do not meet in the first round."
+msgstr "Els caps de sèrie no es troben a la primera ronda."
+
+#: tournaments/templates/tournaments/tournament_detail.html:406
+msgid "Seeded players are distributed in separate groups (snake draw)."
+msgstr ""
+"Els caps de sèrie es reparteixen en grups diferents (sorteig en serp)."
+
+#: tournaments/templates/tournaments/tournament_detail.html:407
+msgid "Unseeded players are distributed randomly."
+msgstr "La resta es reparteix a l'atzar."
+
+#: tournaments/templates/tournaments/tournament_detail.html:415
+msgid "Seed #"
+msgstr "Cap de sèrie núm."
+
+#: tournaments/templates/tournaments/tournament_detail.html:432
+msgid "Save seeding"
+msgstr "Desa els caps de sèrie"
+
+#: tournaments/templates/tournaments/tournament_detail.html:443
+#: tournaments/templates/tournaments/tournament_detail.html:477
+#: tournaments/templates/tournaments/tournament_run.html:505
+msgid "Matches played"
+msgstr "Partits jugats"
+
+#: tournaments/templates/tournaments/tournament_detail.html:443
+#: tournaments/templates/tournaments/tournament_detail.html:477
+msgid "Matches won"
+msgstr "Partits guanyats"
+
+#: tournaments/templates/tournaments/tournament_detail.html:443
+#: tournaments/templates/tournaments/tournament_detail.html:477
+msgid "Matches lost"
+msgstr "Partits perduts"
+
+#: tournaments/templates/tournaments/tournament_detail.html:443
+#: tournaments/templates/tournaments/tournament_detail.html:477
+msgid "Competition points"
+msgstr "Punts de classificació"
+
+#: tournaments/templates/tournaments/tournament_detail.html:443
+#: tournaments/templates/tournaments/tournament_detail.html:477
+msgid "Sets won/lost"
+msgstr "Sets guanyats/perduts"
+
+#: tournaments/templates/tournaments/tournament_detail.html:443
+#: tournaments/templates/tournaments/tournament_detail.html:477
+#: tournaments/templates/tournaments/tournament_run.html:506
+#: tournaments/templates/tournaments/tournament_run.html:532
+msgid "Sets"
+msgstr "Sets"
+
+#: tournaments/templates/tournaments/tournament_detail.html:443
+#: tournaments/templates/tournaments/tournament_detail.html:477
+msgid "Points for/against"
+msgstr "Punts a favor/en contra"
+
+#: tournaments/templates/tournaments/tournament_detail.html:474
+#: tournaments/templates/tournaments/tournament_detail.html:585
+#: tournaments/templates/tournaments/tournament_detail.html:622
+#: tournaments/templates/tournaments/tournament_program_print.html:353
+#: tournaments/templates/tournaments/tournament_run.html:528
+msgid "Group"
+msgstr "Grup"
+
+#: tournaments/templates/tournaments/tournament_detail.html:503
+#: tournaments/templates/tournaments/tournament_program_print.html:473
+#: tournaments/templates/tournaments/tournament_run.html:399
+msgid "Bracket"
+msgstr "Quadre"
+
+#: tournaments/templates/tournaments/tournament_detail.html:533
+#: tournaments/templates/tournaments/tournament_program_print.html:420
+#: tournaments/templates/tournaments/tournament_program_print.html:501
+#: tournaments/templates/tournaments/tournament_run.html:594
+msgid "Pending…"
+msgstr "Pendent…"
+
+#: tournaments/templates/tournaments/tournament_detail.html:544
+#, python-format
+msgid "Suggested format for %(n)s participant"
+msgid_plural "Suggested formats for %(n)s participants"
+msgstr[0] "Format suggerit per a %(n)s participant"
+msgstr[1] "Formats suggerits per a %(n)s participants"
+
+#: tournaments/templates/tournaments/tournament_detail.html:552
+#, python-format
+msgid "%(m)s matches (~%(mins)s court-minutes), at least %(k)s per player"
+msgstr ""
+"%(m)s partits (~%(mins)s minuts de pista), com a mínim %(k)s per jugador"
+
+#: tournaments/templates/tournaments/tournament_detail.html:553
+msgid "Selected"
+msgstr "Triat"
+
+#: tournaments/templates/tournaments/tournament_detail.html:554
+msgid "Use this format"
+msgstr "Fes servir aquest format"
+
+#: tournaments/templates/tournaments/tournament_detail.html:564
+msgid "Generate match programme"
+msgstr "Genera el programa de partits"
+
+#: tournaments/templates/tournaments/tournament_detail.html:568
+msgid "Score sheets (PDF)"
+msgstr "Actes (PDF)"
+
+#: tournaments/templates/tournaments/tournament_detail.html:575
+msgid "Adjust group allocation manually"
+msgstr "Ajusta els grups a mà"
+
+#: tournaments/templates/tournaments/tournament_detail.html:579
+msgid "Drag players/teams between groups to adjust the balance of strength."
+msgstr ""
+"Arrossega jugadors o parelles d'un grup a un altre per equilibrar el nivell."
+
+#: tournaments/templates/tournaments/tournament_detail.html:580
+#| msgid "Save draw and regenerate match programme"
+msgid "Click 'Save draw' to regenerate the match programme with the new draw."
+msgstr ""
+"Prem «Desa el sorteig» per tornar a generar el programa amb els grups nous."
+
+#: tournaments/templates/tournaments/tournament_detail.html:604
+msgid "Save draw and regenerate match programme"
+msgstr "Desa el sorteig i torna a generar el programa"
+
+#: tournaments/templates/tournaments/tournament_detail.html:615
+msgid "Group matches"
+msgstr "Partits de grup"
+
+#: tournaments/templates/tournaments/tournament_detail.html:655
+#: tournaments/templates/tournaments/tournament_detail.html:708
+msgid "Edit result"
+msgstr "Edita el resultat"
+
+#: tournaments/templates/tournaments/tournament_detail.html:658
+msgid "Awaiting players"
+msgstr "Pendent de participants"
+
+#: tournaments/templates/tournaments/tournament_detail.html:672
+#: tournaments/templates/tournaments/tournament_program_print.html:435
+msgid "Playoff matches"
+msgstr "Partits de la fase final"
+
+#: tournaments/templates/tournaments/tournament_detail.html:711
+msgid "Awaiting group stage"
+msgstr "Pendent de la fase de grups"
+
+#: tournaments/templates/tournaments/tournament_detail.html:725
+msgid "No matches scheduled yet."
+msgstr "Encara no hi ha partits programats."
+
+#: tournaments/templates/tournaments/tournament_detail.html:734
+msgid "No divisions created yet. Use the form above to create the first."
+msgstr "Encara no hi ha categories. Crea la primera amb el formulari de dalt."
+
+#: tournaments/templates/tournaments/tournament_form.html:3
+msgid "Edit tournament"
+msgstr "Edita el torneig"
+
+#: tournaments/templates/tournaments/tournament_form.html:3
+#: tournaments/templates/tournaments/tournament_form.html:45
+#: tournaments/templates/tournaments/tournament_form.html:193
+#: tournaments/templates/tournaments/tournament_list.html:8
+msgid "Create tournament"
+msgstr "Crea un torneig"
+
+#: tournaments/templates/tournaments/tournament_form.html:45
+#, python-format
+msgid "Edit: %(name)s"
+msgstr "Edita: %(name)s"
+
+#: tournaments/templates/tournaments/tournament_form.html:52
+msgid "Basic information"
+msgstr "Informació bàsica"
+
+#: tournaments/templates/tournaments/tournament_form.html:76
+msgid "optional – PNG, JPG or SVG"
+msgstr "opcional – PNG, JPG o SVG"
+
+#: tournaments/templates/tournaments/tournament_form.html:79
+msgid "Current logo"
+msgstr "Logotip actual"
+
+#: tournaments/templates/tournaments/tournament_form.html:80
+msgid "Current logo – upload a new one to replace it"
+msgstr "Logotip actual – puja'n un de nou per canviar-lo"
+
+#: tournaments/templates/tournaments/tournament_form.html:98
+msgid "Day #"
+msgstr "Jornada núm."
+
+#: tournaments/templates/tournaments/tournament_form.html:100
+#: tournaments/templates/tournaments/tournament_list.html:19
+msgid "Start"
+msgstr "Inici"
+
+#: tournaments/templates/tournaments/tournament_form.html:101
+msgid "End"
+msgstr "Final"
+
+#: tournaments/templates/tournaments/tournament_form.html:104
+msgid "Buffer (min)"
+msgstr "Marge (min)"
+
+#: tournaments/templates/tournaments/tournament_form.html:105
+msgid ""
+"The last match must finish at least this many minutes before the end time. "
+"Example: end time 17:00, buffer 15 min → last match must end by 16:45."
+msgstr ""
+"L'últim partit ha d'acabar com a mínim aquests minuts abans de l'hora de "
+"final. Exemple: final a les 14:00 i 15 min de marge → l'últim partit ha "
+"d'acabar a les 13:45."
+
+#: tournaments/templates/tournaments/tournament_form.html:122
+#: tournaments/templates/tournaments/tournament_form.html:145
+msgid "Delete day"
+msgstr "Elimina la jornada"
+
+#: tournaments/templates/tournaments/tournament_form.html:130
+msgid "Add day"
+msgstr "Afegeix una jornada"
+
+#: tournaments/templates/tournaments/tournament_form.html:171
+msgid "Match duration & breaks"
+msgstr "Durada dels partits i descansos"
+
+#: tournaments/templates/tournaments/tournament_form.html:174
+msgid "Singles (min)"
+msgstr "Individual (min)"
+
+#: tournaments/templates/tournaments/tournament_form.html:179
+msgid "Doubles/Mix (min)"
+msgstr "Dobles/mixtos (min)"
+
+#: tournaments/templates/tournaments/tournament_form.html:184
+msgid "Min. break (min)"
+msgstr "Descans mínim (min)"
+
+#: tournaments/templates/tournaments/tournament_form.html:193
+msgid "Save changes"
+msgstr "Desa els canvis"
+
+#: tournaments/templates/tournaments/tournament_import.html:3
+msgid "Import tournament"
+msgstr "Importa un torneig"
+
+#: tournaments/templates/tournaments/tournament_import.html:6
+msgid "Import tournament from backup"
+msgstr "Importa un torneig des d'una còpia"
+
+#: tournaments/templates/tournaments/tournament_import.html:9
+msgid ""
+"Upload a JSON backup file from a previously exported tournament. All "
+"divisions, matches and players are recreated. Players that already exist in "
+"your system (same name, gender and division) are reused automatically."
+msgstr ""
+"Puja un fitxer JSON d'un torneig exportat. Es tornen a crear totes les "
+"categories, partits i jugadors. Els jugadors que ja existeixen (mateix nom, "
+"gènere i categoria) es reaprofiten."
+
+#: tournaments/templates/tournaments/tournament_import.html:14
+msgid "Backup file (.json)"
+msgstr "Fitxer de còpia (.json)"
+
+#: tournaments/templates/tournaments/tournament_import.html:19
+msgid "Import"
+msgstr "Importa"
+
+#: tournaments/templates/tournaments/tournament_list.html:9
+msgid "Import backup"
+msgstr "Importa una còpia"
+
+#: tournaments/templates/tournaments/tournament_list.html:20
+msgid "Divisions"
+msgstr "Categories"
+
+#: tournaments/templates/tournaments/tournament_list.html:34
+msgid "Open"
+msgstr "Obre"
+
+#: tournaments/templates/tournaments/tournament_list.html:45
+msgid "No tournaments yet."
+msgstr "Encara no hi ha tornejos."
+
+#: tournaments/templates/tournaments/tournament_list.html:46
+msgid "Create the first tournament"
+msgstr "Crea el primer torneig"
+
+#: tournaments/templates/tournaments/tournament_program_print.html:301
+#: tournaments/templates/tournaments/tournament_program_print.html:617
+#: tournaments/templates/tournaments/tournament_schedule_print.html:183
+#: tournaments/templates/tournaments/tournament_schedule_print.html:270
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:227
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:419
+msgid "Hide times"
+msgstr "Amaga les hores"
+
+#: tournaments/templates/tournaments/tournament_program_print.html:342
+msgid "No participants registered yet."
+msgstr "Encara no hi ha cap participant inscrit."
+
+#: tournaments/templates/tournaments/tournament_program_print.html:384
+msgid "No matches for this group yet."
+msgstr "Aquest grup encara no té partits."
+
+#: tournaments/templates/tournaments/tournament_program_print.html:429
+msgid "The playoff bracket is generated automatically after the group stage."
+msgstr ""
+"El quadre de la fase final es genera automàticament en acabar la fase de "
+"grups."
+
+#: tournaments/templates/tournaments/tournament_program_print.html:455
+#: tournaments/templates/tournaments/tournament_program_print.html:535
+#: tournaments/templates/tournaments/tournament_program_print.html:582
+msgid "Winner match"
+msgstr "Partit del guanyador"
+
+#: tournaments/templates/tournaments/tournament_program_print.html:455
+#: tournaments/templates/tournaments/tournament_program_print.html:535
+#: tournaments/templates/tournaments/tournament_program_print.html:582
+msgid "winner match"
+msgstr "partit del guanyador"
+
+#: tournaments/templates/tournaments/tournament_program_print.html:547
+#: tournaments/templates/tournaments/tournament_program_print.html:594
+msgid "No matches generated yet for this division."
+msgstr "Aquesta categoria encara no té partits."
+
+#: tournaments/templates/tournaments/tournament_program_print.html:607
+#: tournaments/templates/tournaments/tournament_run.html:610
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:411
+msgid "No divisions found in this tournament."
+msgstr "Aquest torneig no té categories."
+
+#: tournaments/templates/tournaments/tournament_program_print.html:617
+#: tournaments/templates/tournaments/tournament_schedule_print.html:270
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:419
+msgid "Show times"
+msgstr "Mostra les hores"
+
+#: tournaments/templates/tournaments/tournament_run.html:277
+msgid "Planning"
+msgstr "Planificació"
+
+#: tournaments/templates/tournaments/tournament_run.html:283
+msgid "courts occupied"
+msgstr "pistes ocupades"
+
+#: tournaments/templates/tournaments/tournament_run.html:289
+msgid "Match duration"
+msgstr "Durada del partit"
+
+#: tournaments/templates/tournaments/tournament_run.html:294
+#: tournaments/templates/tournaments/tournament_run.html:441
+#: tournaments/templates/tournaments/tournament_run.html:636
+msgid "Result"
+msgstr "Resultat"
+
+#: tournaments/templates/tournaments/tournament_run.html:300
+msgid "matches completed"
+msgstr "partits acabats"
+
+#: tournaments/templates/tournaments/tournament_run.html:301
+msgid "All matches completed"
+msgstr "Tots els partits acabats"
+
+#: tournaments/templates/tournaments/tournament_run.html:355
+msgid "Search match number or player name…"
+msgstr "Cerca per número de partit o nom…"
+
+#: tournaments/templates/tournaments/tournament_run.html:356
+msgid "Clear search"
+msgstr "Esborra la cerca"
+
+#: tournaments/templates/tournaments/tournament_run.html:369
+msgid "Today"
+msgstr "Avui"
+
+#: tournaments/templates/tournaments/tournament_run.html:380
+msgid "in progress"
+msgstr "en joc"
+
+#: tournaments/templates/tournaments/tournament_run.html:381
+msgid "pending"
+msgstr "pendents"
+
+#: tournaments/templates/tournaments/tournament_run.html:382
+msgid "done"
+msgstr "fets"
+
+#: tournaments/templates/tournaments/tournament_run.html:383
+msgid "Done"
+msgstr "Fet"
+
+#: tournaments/templates/tournaments/tournament_run.html:386
+#, python-format
+msgid "Medals for %(name)s"
+msgstr "Medalles de %(name)s"
+
+#: tournaments/templates/tournaments/tournament_run.html:431
+msgid "A player is busy or resting"
+msgstr "Algun jugador està ocupat o descansant"
+
+#: tournaments/templates/tournaments/tournament_run.html:431
+msgid "Busy"
+msgstr "Ocupat"
+
+#: tournaments/templates/tournaments/tournament_run.html:446
+#: tournaments/templates/tournaments/tournament_run.html:641
+msgid "Postpone"
+msgstr "Ajorna"
+
+#: tournaments/templates/tournaments/tournament_run.html:460
+msgid "Completed matches"
+msgstr "Partits acabats"
+
+#: tournaments/templates/tournaments/tournament_run.html:494
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:399
+msgid "No matches generated yet."
+msgstr "Encara no s'han generat partits."
+
+#: tournaments/templates/tournaments/tournament_run.html:589
+msgid "Change team manually"
+msgstr "Canvia el participant a mà"
+
+#: tournaments/templates/tournaments/tournament_run.html:589
+msgid "Change"
+msgstr "Canvia"
+
+#: tournaments/templates/tournaments/tournament_run.html:678
+msgid "All matches completed!"
+msgstr "Tots els partits acabats!"
+
+#: tournaments/templates/tournaments/tournament_run.html:680
+msgid "No upcoming matches with a time."
+msgstr "No hi ha propers partits amb hora."
+
+#: tournaments/templates/tournaments/tournament_run.html:681
+msgid "Generate time schedule to see times."
+msgstr "Genera l'horari per veure les hores."
+
+#: tournaments/templates/tournaments/tournament_run.html:689
+msgid "Quick links"
+msgstr "Enllaços ràpids"
+
+#: tournaments/templates/tournaments/tournament_run.html:708
+msgid "Choose court"
+msgstr "Tria la pista"
+
+#: tournaments/templates/tournaments/tournament_run.html:712
+msgid "Court occupied"
+msgstr "Pista ocupada"
+
+#: tournaments/templates/tournaments/tournament_schedule_print.html:228
+#, python-format
+msgid "%(counter)s match"
+msgid_plural "%(counter)s matches"
+msgstr[0] "%(counter)s partit"
+msgstr[1] "%(counter)s partits"
+
+#: tournaments/templates/tournaments/tournament_schedule_print.html:240
+#, python-format
+msgid "Winner of match %(f1)s vs winner of match %(f2)s"
+msgstr "Guanyador del partit %(f1)s contra guanyador del partit %(f2)s"
+
+#: tournaments/templates/tournaments/tournament_schedule_print.html:259
+msgid "No scheduled matches yet."
+msgstr "Encara no hi ha partits programats."
+
+#: tournaments/templates/tournaments/tournament_schedule_print.html:260
+msgid "Generate the match programme and time schedule under"
+msgstr "Genera el programa de partits i l'horari a"
+
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:322
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:328
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:372
+#: tournaments/templates/tournaments/tournament_wallchart_print.html:378
+msgid "W-match"
+msgstr "Guanyador"
+
+#: tournaments/templatetags/tournament_extras.py:65
+#, python-format
+msgid "%(ordinal)s of group %(group)s"
+msgstr "%(ordinal)s del grup %(group)s"
+
+#: tournaments/templatetags/tournament_extras.py:68
+msgid "(bye)"
+msgstr "(exempt)"
+
+#: tournaments/templatetags/tournament_extras.py:69
+#, python-format
+msgid "Winner of #%(n)s"
+msgstr "Guanyador del #%(n)s"
+
+#: tournaments/views.py:93
+#, python-format
+msgid "Tournament \"%(name)s\" has been created."
+msgstr "S'ha creat el torneig «%(name)s»."
+
+#: tournaments/views.py:123
+#, python-format
+msgid "Tournament \"%(name)s\" has been updated."
+msgstr "S'ha actualitzat el torneig «%(name)s»."
+
+#: tournaments/views.py:145
+msgid "You must type DELETE TOURNAMENT to confirm."
+msgstr "Per confirmar has d'escriure DELETE TOURNAMENT."
+
+#: tournaments/views.py:149
+#, python-format
+msgid "Tournament \"%(name)s\" has been deleted."
+msgstr "S'ha eliminat el torneig «%(name)s»."
+
+#: tournaments/views.py:300
+#, python-format
+msgid "The backup file is too large (max %(mb)d MB)."
+msgstr "La còpia és massa gran (màxim %(mb)d MB)."
+
+#: tournaments/views.py:309
+msgid "The file could not be read as JSON."
+msgstr "No s'ha pogut llegir el fitxer com a JSON."
+
+#: tournaments/views.py:313 tournaments/views.py:317
+msgid "Unknown backup format (version missing or incorrect)."
+msgstr "Format de còpia desconegut (falta la versió o és incorrecta)."
+
+#: tournaments/views.py:328
+#, python-format
+msgid "Import failed and was rolled back: %(err)s"
+msgstr "La importació ha fallat i s'ha desfet: %(err)s"
+
+#: tournaments/views.py:461
+#, python-format
+msgid ""
+"Tournament \"%(name)s\" restored with %(divs)s divisions and %(matches)s "
+"matches."
+msgstr ""
+"S'ha recuperat el torneig «%(name)s» amb %(divs)s categories i %(matches)s "
+"partits."
+
+#: tournaments/views.py:610
+#, python-format
+msgid "Division \"%(name)s\" has been created."
+msgstr "S'ha creat la categoria «%(name)s»."
+
+#: tournaments/views.py:638
+#, python-format
+msgid "Players in \"%(name)s\" have been updated."
+msgstr "S'han actualitzat els jugadors de «%(name)s»."
+
+#: tournaments/views.py:641
+#, python-format
+msgid "Teams in \"%(name)s\" have been updated."
+msgstr "S'han actualitzat les parelles de «%(name)s»."
+
+#: tournaments/views.py:670
+#, python-format
+msgid "Seeding for \"%(name)s\" has been saved."
+msgstr "S'han desat els caps de sèrie de «%(name)s»."
+
+#: tournaments/views.py:697
+msgid "Day assignment saved."
+msgstr "S'ha desat l'assignació de jornades."
+
+#: tournaments/views.py:715
+msgid "Group reassignment is only possible for divisions with several groups."
+msgstr "Només es poden reassignar grups en categories amb diversos grups."
+
+#: tournaments/views.py:719 tournaments/views.py:838 tournaments/views.py:1733
+msgid "The schedule is locked and cannot be changed."
+msgstr "L'horari està bloquejat i no es pot modificar."
+
+#: tournaments/views.py:723
+msgid "Cannot reassign groups – results have already been recorded."
+msgstr "No es poden reassignar els grups: ja hi ha resultats entrats."
+
+#: tournaments/views.py:731 tournaments/views.py:2013
+#: tournaments/views.py:2041
+msgid "Invalid data."
+msgstr "Dades incorrectes."
+
+#: tournaments/views.py:738
+msgid "Groups do not contain exactly the right teams."
+msgstr "Els grups no contenen exactament els participants correctes."
+
+#: tournaments/views.py:758
+#, python-format
+msgid "Group assignment in \"%(name)s\" saved and match schedule regenerated."
+msgstr ""
+"S'han desat els grups de «%(name)s» i s'ha tornat a generar el programa."
+
+#: tournaments/views.py:760
+msgid "No matches generated."
+msgstr "No s'ha generat cap partit."
+
+#: tournaments/views.py:781
+#, python-format
+msgid "Division \"%(name)s\" has been deleted."
+msgstr "S'ha eliminat la categoria «%(name)s»."
+
+#: tournaments/views.py:785
+msgid "division"
+msgstr "la categoria"
+
+#: tournaments/views.py:809
+msgid ""
+"The format can only be changed before the match programme is generated."
+msgstr ""
+"El format només es pot canviar abans de generar el programa de partits."
+
+#: tournaments/views.py:820
+#, python-format
+msgid "Format of \"%(name)s\" updated. You can now generate the match programme."
+msgstr ""
+"S'ha canviat el format de «%(name)s». Ara ja pots generar el programa de "
+"partits."
+
+#: tournaments/views.py:879
+#, python-format
+msgid "Schedule generated: %(group)s group matches in %(gc)s groups."
+msgstr "Programa generat: %(group)s partits de grup en %(gc)s grups."
+
+#: tournaments/views.py:884
+#, python-format
+msgid ""
+"Schedule generated: %(group)s group matches in %(gc)s groups + %(playoff)s "
+"playoff matches (scheduled after group stage)."
+msgstr ""
+"Programa generat: %(group)s partits de grup en %(gc)s grups + %(playoff)s "
+"partits de fase final (després de la fase de grups)."
+
+#: tournaments/views.py:889
+#, python-format
+msgid ""
+"Schedule generated with %(n)s matches (+ %(p)s bracket final matches "
+"reserved)."
+msgstr ""
+"Programa generat amb %(n)s partits (+ %(p)s partits del quadre reservats)."
+
+#: tournaments/views.py:892
+#, python-format
+msgid "Schedule generated with %(n)s matches."
+msgstr "Programa generat amb %(n)s partits."
+
+#: tournaments/views.py:922
+msgid "Result saved."
+msgstr "S'ha desat el resultat."
+
+#: tournaments/views.py:969
+msgid "Cannot start match: "
+msgstr "No es pot començar el partit: "
+
+#: tournaments/views.py:973
+msgid "Please choose a court before starting the match."
+msgstr "Tria una pista abans de començar el partit."
+
+#: tournaments/views.py:977
+#, python-format
+msgid "Court %(court)s is already in use."
+msgstr "La pista %(court)s ja està ocupada."
+
+#: tournaments/views.py:983
+#, python-format
+msgid "Match #%(n)s is now in progress."
+msgstr "El partit #%(n)s ja està en joc."
+
+#: tournaments/views.py:1005
+#, python-format
+msgid "Match #%(n)s has been reset to pending."
+msgstr "El partit #%(n)s torna a estar pendent."
+
+#: tournaments/views.py:1036
+#, python-format
+msgid "Walk-over recorded – %(winner)s wins."
+msgstr "S'ha registrat el WO: guanya %(winner)s."
+
+#: tournaments/views.py:1072
+#, python-format
+msgid "Bracket match updated: %(t1)s vs %(t2)s."
+msgstr "S'ha actualitzat el partit del quadre: %(t1)s contra %(t2)s."
+
+#: tournaments/views.py:1735
+msgid ""
+"Configure at least one tournament day before generating the time schedule."
+msgstr "Configura almenys una jornada abans de generar l'horari."
+
+#: tournaments/views.py:1744
+msgid "Warning: schedule may be incomplete despite forced run."
+msgstr "Atenció: l'horari pot quedar incomplet."
+
+#: tournaments/views.py:1748
+#, python-format
+msgid "Time schedule generated for %(n)s matches."
+msgstr "S'ha generat l'horari per a %(n)s partits."
+
+#: tournaments/views.py:1750
+msgid "No matches to schedule. Generate match programmes for divisions first."
+msgstr ""
+"No hi ha partits per programar. Primer genera el programa de partits de les "
+"categories."
+
+#: tournaments/views.py:1770
+msgid "The schedule is now locked."
+msgstr "L'horari ja està bloquejat."
+
+#: tournaments/views.py:1772
+msgid "The schedule is now unlocked."
+msgstr "L'horari ja està desbloquejat."
+
+#: tournaments/views.py:1782
+msgid "You must type RESET SCHEDULE to confirm."
+msgstr "Per confirmar has d'escriure RESET SCHEDULE."
+
+#: tournaments/views.py:1788
+msgid "All matches deleted and match number counter reset."
+msgstr "S'han eliminat tots els partits i s'ha reiniciat el comptador."
+
+#: tournaments/views.py:1862
+#, python-format
+msgid "Day %(n)s"
+msgstr "Jornada %(n)s"
+
+#: tournaments/views.py:2003 tournaments/views.py:2035
+#: tournaments/views.py:2057
+msgid "The schedule is locked."
+msgstr "L'horari està bloquejat."
+
+#: tournaments/views.py:2096
+#, python-format
+msgid "Match numbers recalculated – %(n)s matches numbered from 1."
+msgstr "S'han renumerat els partits: %(n)s partits numerats des de l'1."
+
+#: tournaments/views.py:2186
+#, python-format
+msgid "Bracket labels rebuilt (%(n)s matches updated)."
+msgstr "S'han refet les etiquetes del quadre (%(n)s partits actualitzats)."
+
+#: tournaments/views.py:2263
+#, python-format
+msgid ""
+"Match numbers sorted by schedule – %(n)s matches numbered from 1 (%(u)s "
+"without time placed last)."
+msgstr ""
+"Partits renumerats segons l'horari: %(n)s partits des de l'1 (%(u)s sense "
+"hora al final)."
+
+#: tournaments/views.py:2265
+#, python-format
+msgid "Match numbers sorted by schedule – %(n)s matches numbered from 1."
+msgstr "Partits renumerats segons l'horari: %(n)s partits des de l'1."

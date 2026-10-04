@@ -168,9 +168,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en'
+# Default language for visitors without a language cookie (e.g. the public pages).
+LANGUAGE_CODE = os.environ.get('LANGUAGE_CODE', 'en')
 
 LANGUAGES = [
+    ('ca', 'Català'),
     ('en', 'English'),
     ('da', 'Dansk'),
 ]
@@ -179,7 +181,7 @@ LOCALE_PATHS = [
     BASE_DIR / 'locale',
 ]
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = os.environ.get('TIME_ZONE', 'UTC')
 
 USE_I18N = True
 

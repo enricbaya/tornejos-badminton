@@ -279,7 +279,7 @@
     <div class="match-teams">
       <div class="team">
         {% if match.team1 %}{{ match.team1.name }}{% if match.t1_seed %}<span class="team-seed">{{ match.t1_seed }}</span>{% endif %}{% if match.t1_status == 'playing' %} <span title="{% trans "Match in progress" %}" style="margin-left:0.25rem;">🏸</span>{% elif match.t1_status == 'resting' %} <span style="font-size:0.85rem; color:#F5C400; white-space:nowrap; margin-left:0.25rem;">⏱ <span class="rest-timer" data-until="{{ match.t1_rest_until|unix_ts }}"></span></span>{% endif %}
-        {% else %}<span style="color:var(--muted); font-style:italic;">{{ match.bracket_label }}</span>{% endif %}
+        {% else %}<span style="color:var(--muted); font-style:italic;">{{ match.bracket_label|bracket_label_i18n }}</span>{% endif %}
       </div>
       <div class="vs">vs</div>
       <div class="team">

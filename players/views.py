@@ -335,7 +335,7 @@ def player_delete(request, pk):
         _delete_player(player)
         messages.success(request, _("Player \"%(name)s\" has been deleted.") % {'name': name})
         return redirect('player_list')
-    return render(request, 'players/player_confirm_delete.html', {'object': player, 'type': 'spiller'})
+    return render(request, 'players/player_confirm_delete.html', {'object': player, 'type': _('player')})
 
 @login_required
 def player_bulk_delete(request):
@@ -552,7 +552,7 @@ def team_delete(request, pk):
         team.delete()
         messages.success(request, _("Team \"%(name)s\" has been deleted.") % {'name': name})
         return redirect('team_list')
-    return render(request, 'players/player_confirm_delete.html', {'object': team, 'type': 'par'})
+    return render(request, 'players/player_confirm_delete.html', {'object': team, 'type': _('pair')})
 
 
 @login_required

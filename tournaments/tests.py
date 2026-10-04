@@ -197,7 +197,7 @@ class TournamentDayStrTest(TestCase):
     def test_str_with_end_time(self):
         day = make_day(make_tournament())
         s = str(day)
-        self.assertIn("Dag 1", s)
+        self.assertIn("Day 1", s)
         self.assertIn("09:00", s)
         self.assertIn("22:00", s)
         self.assertIn("buffer", s)
@@ -205,8 +205,8 @@ class TournamentDayStrTest(TestCase):
     def test_str_without_end_time(self):
         day = make_day(make_tournament(), end=None)
         s = str(day)
-        self.assertIn("Dag 1", s)
-        self.assertIn("løber over", s)
+        self.assertIn("Day 1", s)
+        self.assertIn("open end", s)
 
 
 class TournamentSyncDateTest(TestCase):
@@ -1851,7 +1851,7 @@ class MatchStartTest(TestCase):
         # Should stay pending because player is already playing
         self.assertEqual(self.match.status, 'pending')
         messages_list = list(response.wsgi_request._messages)
-        self.assertTrue(any('spiller allerede' in str(m) for m in messages_list))
+        self.assertTrue(any('already playing' in str(m) for m in messages_list))
 
     def test_match_start_404_for_nonexistent(self):
         response = self.client.post(reverse('match_start', args=[9999]))
@@ -1865,7 +1865,7 @@ class MatchStartTest(TestCase):
         self.match.refresh_from_db()
         self.assertEqual(self.match.status, 'pending')
         messages_list = list(response.wsgi_request._messages)
-        self.assertTrue(any('ikke ankommet' in str(m) for m in messages_list))
+        self.assertTrue(any('has not arrived' in str(m) for m in messages_list))
 
 
 # ---------------------------------------------------------------------------
@@ -2021,7 +2021,7 @@ class PlayerStatusFunctionTest(TestCase):
             division=self.division, team1=self.t1, team2=self.t2,
         )
         errors = check_match_startable(match)
-        self.assertTrue(any('hviler' in e for e in errors))
+        self.assertTrue(any('still resting' in e for e in errors))
 
     def test_check_match_startable_playing_player_blocked(self):
         from tournaments.player_status import check_match_startable
@@ -2034,7 +2034,7 @@ class PlayerStatusFunctionTest(TestCase):
             division=self.division, team1=self.t1, team2=self.t2,
         )
         errors = check_match_startable(match2)
-        self.assertTrue(any('spiller allerede' in e for e in errors))
+        self.assertTrue(any('already playing' in e for e in errors))
 
     def test_check_match_startable_blocked_when_player_not_arrived(self):
         from tournaments.player_status import check_match_startable
@@ -2044,7 +2044,7 @@ class PlayerStatusFunctionTest(TestCase):
             division=self.division, team1=self.t1, team2=self.t2,
         )
         errors = check_match_startable(match)
-        self.assertTrue(any('ikke ankommet' in e for e in errors))
+        self.assertTrue(any('has not arrived' in e for e in errors))
 
     def test_check_match_startable_doubles_blocked_until_all_four_arrived(self):
         from tournaments.player_status import check_match_startable
@@ -2055,7 +2055,7 @@ class PlayerStatusFunctionTest(TestCase):
             division=self.division, team1=self.t1, team2=self.t2,
         )
         errors = check_match_startable(match)
-        self.assertTrue(any('ikke ankommet' in e for e in errors))
+        self.assertTrue(any('has not arrived' in e for e in errors))
         # Once everyone has arrived, no more errors
         self.t2.player2.has_arrived = True
         self.t2.player2.save()
@@ -3438,7 +3438,7 @@ class DivisionReassignGroupsTest(TestCase):
 class LoginSignalLanguageTest(TestCase):
     def setUp(self):
         # make_user() triggers the post_save signal that auto-creates a
-        # UserProfile (language defaults to 'da'), so no explicit create here.
+        # UserProfile (language defaults to 'ca'), so no explicit create here.
         self.user = make_user(username='signaluserclub')
 
     def test_login_activates_club_language_without_cookie(self):
@@ -3450,7 +3450,7 @@ class LoginSignalLanguageTest(TestCase):
         request.COOKIES = {}  # No language cookie
         set_language_on_login(sender=None, request=request, user=self.user)
         # Language cookie should be scheduled to be set
-        self.assertEqual(getattr(request, '_set_language_cookie', None), 'da')
+        self.assertEqual(getattr(request, '_set_language_cookie', None), 'ca')
 
     def test_login_does_not_override_existing_cookie(self):
         from django.test import RequestFactory

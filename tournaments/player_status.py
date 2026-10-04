@@ -7,6 +7,7 @@ Status values:
   None       – player is free
 """
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 
 # ---------------------------------------------------------------------------
@@ -139,10 +140,10 @@ def check_match_startable(match):
             if not player:
                 continue
             if player.pk in playing_pks:
-                errors.append(f'{player.name} spiller allerede en kamp')
+                errors.append(_('%(name)s is already playing a match') % {'name': player.name})
             elif player.pk in resting and resting[player.pk] > now:
                 remaining = int((resting[player.pk] - now).total_seconds() // 60) + 1
-                errors.append(f'{player.name} hviler endnu (ca. {remaining} min)')
+                errors.append(_('%(name)s is still resting (approx. %(min)s min)') % {'name': player.name, 'min': remaining})
             elif not player.has_arrived:
-                errors.append(f'{player.name} er ikke ankommet endnu')
+                errors.append(_('%(name)s has not arrived yet') % {'name': player.name})
     return errors

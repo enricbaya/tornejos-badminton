@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load i18n %}{% load tournament_extras %}
 {% block title %}{% trans "Change bracket team" %}{% endblock %}
 {% block content %}
 <div class="content-col-sm">
@@ -7,7 +7,7 @@
     <h1 style="margin-top:0;">{% trans "Change team in bracket" %}</h1>
 
     <div style="background:#fff8e1; border-left:4px solid #f59e0b; padding:0.75rem 1rem; border-radius:4px; margin-bottom:1.5rem;">
-      <strong>{{ match.division.name }}</strong> – {{ match.bracket_label|default:"Playoff match" }}<br>
+      <strong>{{ match.division.name }}</strong> – {{ match.bracket_label|bracket_label_i18n|default:"Playoff match" }}<br>
       <span style="color:#888; font-size:0.9rem;">
         {% trans "Round" %} {{ match.match_round }}
         {% if match.match_number %} · {% trans "Match" %} #{{ match.match_number }}{% endif %}

@@ -78,7 +78,7 @@
                 {{ match.division.name }}{% if match.phase == 'playoff' %} · {% trans "Playoff" %}{% endif %}
               </span>
               <div style="font-size:.85rem; font-weight:500; line-height:1.4;">
-                {{ match.team1.name|default:match.bracket_label|default:"TBD" }}
+                {{ match.team1.name|default:match.bracket_label|bracket_label_i18n|default:"TBD" }}
                 <span style="color:#94a3b8; font-weight:400;"> {% trans "vs" %} </span>
                 {{ match.team2.name|default:"TBD" }}
               </div>
