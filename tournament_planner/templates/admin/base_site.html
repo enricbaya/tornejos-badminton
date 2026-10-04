@@ -1,0 +1,58 @@
+{% extends "admin/base.html" %}
+{% load static i18n %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="icon" type="image/png" href="{% static 'club/favicon-64.png' %}">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  /* Club Bàdminton Igualada: negre, blanc i fúcsia */
+  :root, html[data-theme="light"] {
+    --primary: #141414;
+    --secondary: #141414;
+    --accent: #EB1C60;
+    --primary-fg: #fff;
+    --header-color: #fff;
+    --header-branding-color: #fff;
+    --header-bg: #111;
+    --header-link-color: #fff;
+    --breadcrumbs-fg: #f4f4f5;
+    --breadcrumbs-link-fg: #fff;
+    --breadcrumbs-bg: #2a2a2a;
+    --link-fg: #c8174f;
+    --link-hover-color: #EB1C60;
+    --link-selected-fg: #EB1C60;
+    --button-bg: #141414;
+    --button-hover-bg: #EB1C60;
+    --default-button-bg: #EB1C60;
+    --default-button-hover-bg: #c4124c;
+    --selected-row: #fdf0f4;
+    --font-family-primary: 'Inter', system-ui, sans-serif;
+  }
+  #header { border-bottom: 3px solid #EB1C60; }
+  #branding h1, #branding h1 a:link, #branding h1 a:visited {
+    font-family: 'Barlow', 'Inter', sans-serif; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.04em; display: flex; align-items: center; gap: 0.6rem; color: #fff;
+  }
+  #branding img { height: 30px; }
+  #branding small { color: #EB1C60; font-size: 0.7em; letter-spacing: 0.25em; font-weight: 700; }
+  .module h2, .module caption, .inline-group h2 { background: #141414; }
+  #user-tools a { border-bottom-color: rgba(255,255,255,0.4); }
+</style>
+{% endblock %}
+
+{% block branding %}
+<div id="site-name"><a href="{% url 'admin:index' %}" style="display:flex; align-items:center; gap:0.6rem; text-decoration:none;">
+  <img src="{% static 'club/volant_rosa.png' %}" alt="" style="height:30px;">
+  <span style="font-family:'Barlow','Inter',sans-serif; font-weight:800; text-transform:uppercase; letter-spacing:0.04em; color:#fff;">Club Bàdminton Igualada <small style="color:#EB1C60; letter-spacing:0.25em; font-size:0.7em;">{% trans "Administration" %}</small></span>
+</a></div>
+{% if user.is_anonymous %}{% include "admin/color_theme_toggle.html" %}{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

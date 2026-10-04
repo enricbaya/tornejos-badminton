@@ -6,8 +6,7 @@
 {% block extra_head %}
 <style>
 body {
-    background: radial-gradient(circle at 85% 15%, rgba(235,28,96,0.35), transparent 45%),
-                linear-gradient(160deg, #1a1a1a 0%, #000 70%);
+    background: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.70)), url('{% static 'club/portada.jpg' %}') center / cover no-repeat, #000;
     background-attachment: fixed;
 }
 body > .container { background: transparent; }

@@ -117,6 +117,11 @@ class Tournament(models.Model):
         verbose_name=_("Club user"),
     )
 
+
+    class Meta:
+        verbose_name = _("Tournament")
+        verbose_name_plural = _("Tournaments")
+
     def sync_date(self):
         """Synkroniser tournament.date til første dags dato."""
         first = self.days.order_by('date').first()
@@ -129,7 +134,7 @@ class Tournament(models.Model):
         Returns:
             str: Tournament name and scoring model.
         """
-        return f"{self.name} ({self.scoring_model})"
+        return self.name
 
 
 class TournamentDay(models.Model):
@@ -282,6 +287,10 @@ class Division(models.Model):
     )
     teams = models.ManyToManyField('players.Team', related_name='divisions', blank=True, verbose_name=_("Participants"))
 
+    class Meta:
+        verbose_name = _("Tournament division")
+        verbose_name_plural = _("Tournament divisions")
+
     @property
     def has_groups(self):
         """True for formats with several round-robin groups (with or without playoff)."""
@@ -362,6 +371,11 @@ class Match(models.Model):
         verbose_name=_("Phase"),
     )
 
+
+    class Meta:
+        verbose_name = _("Match")
+        verbose_name_plural = _("Matches")
+
     def __str__(self):
         """Return a readable match label.
 
@@ -381,6 +395,8 @@ class DivisionSeed(models.Model):
 
     class Meta:
         unique_together = [('division', 'team'), ('division', 'seed_number')]
+        verbose_name = _("Seed")
+        verbose_name_plural = _("Seeds")
         ordering = ['seed_number']
 
     def __str__(self):
@@ -406,6 +422,8 @@ class MedalOverride(models.Model):
 
     class Meta:
         unique_together = [('division', 'medal', 'order')]
+        verbose_name = _("Medal override")
+        verbose_name_plural = _("Medal overrides")
         ordering = ['medal', 'order']
 
     def __str__(self):

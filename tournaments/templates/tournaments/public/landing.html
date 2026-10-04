@@ -1,12 +1,12 @@
 {% extends 'base_viewer.html' %}
-{% load i18n %}
+{% load i18n %}{% load static %}
 {% block title %}{% trans "Select tournament" %}{% endblock %}
 
 {% block extra_head %}
 {{ block.super }}
 <style>
 body {
-    background-image: linear-gradient(rgba(13,79,34,0.55), rgba(13,79,34,0.65)), url('/media/img/background.jpg');
+    background-image: linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.70)), url('{% static 'club/portada.jpg' %}');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -22,6 +22,7 @@ body > .container {
     padding: 2.5rem 1rem 2rem;
     text-align: center;
 }
+.landing-hero h1::after { margin-left: auto; margin-right: auto; }
 .landing-hero h1 {
     font-size: 2.2rem;
     color: white;
@@ -38,7 +39,8 @@ body > .container {
 
 {% block content %}
 <div class="landing-hero">
-    <h1>🏸 {% trans "Tournament overview" %}</h1>
+    <img src="{% static 'club/logo_blanc.png' %}" alt="Club Bàdminton Igualada" style="height:120px; margin-bottom:0.75rem;">
+    <h1>{% trans "Tournament overview" %}</h1>
     <p>{% trans "Select a club and tournament to view the match overview and time schedule." %}</p>
 </div>
 
@@ -56,7 +58,7 @@ body > .container {
             <select id="club-select" style="width:100%; padding:0.55rem 0.75rem; border:1px solid #cbd5e1; border-radius:7px; font-size:0.95rem; font-family:inherit; background:#fff;">
                 <option value="">– {% trans "Select club" %} –</option>
                 {% for club in clubs %}
-                <option value="{{ club.pk }}">{{ club.username }}</option>
+                <option value="{{ club.pk }}">{{ club.first_name|default:club.username }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -87,7 +89,7 @@ body > .container {
         <li style="display:flex; justify-content:space-between; align-items:center; padding:0.5rem 0; border-bottom:1px solid #f1f5f9;">
             <div>
                 <div style="font-weight:600; font-size:0.9rem;">{{ t.name }}</div>
-                <div style="font-size:0.8rem; color:#64748b;">{{ t.owner.username }} · {{ t.date }}</div>
+                <div style="font-size:0.8rem; color:#64748b;">{{ t.owner.first_name|default:t.owner.username }} · {{ t.date }}</div>
             </div>
             <a href="{% url 'public_tournament' t.pk %}" class="btn btn-secondary" style="font-size:0.78rem; padding:0.25rem 0.65rem;">{% trans "View" %}</a>
         </li>
@@ -104,7 +106,7 @@ body > .container {
         <li style="display:flex; justify-content:space-between; align-items:center; padding:0.5rem 0; border-bottom:1px solid #f1f5f9; opacity:0.75;">
             <div>
                 <div style="font-weight:600; font-size:0.9rem;">{{ t.name }}</div>
-                <div style="font-size:0.8rem; color:#64748b;">{{ t.owner.username }} · {{ t.date }}</div>
+                <div style="font-size:0.8rem; color:#64748b;">{{ t.owner.first_name|default:t.owner.username }} · {{ t.date }}</div>
             </div>
             <a href="{% url 'public_tournament' t.pk %}" class="btn btn-secondary" style="font-size:0.78rem; padding:0.25rem 0.65rem;">{% trans "View" %}</a>
         </li>

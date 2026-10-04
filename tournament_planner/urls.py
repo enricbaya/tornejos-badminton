@@ -24,6 +24,13 @@ from django.contrib.auth.decorators import login_required
 from django.template.response import TemplateResponse
 from tournaments.models import Tournament
 from tournaments.public_views import public_landing, public_tournament, public_schedule
+
+# Admin titles in the club's language (Django's default is "Django administration").
+from django.utils.translation import gettext_lazy as _
+admin.site.site_header = _("Club administration")
+admin.site.site_title = _("Club Bàdminton Igualada")
+admin.site.index_title = _("Advanced administration")
+
 import datetime
 import os
 

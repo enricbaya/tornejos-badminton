@@ -21,6 +21,8 @@ class DivisionCategory(models.Model):
 
     class Meta:
         ordering = ['sort_order', 'name']
+        verbose_name = _("Category")
+        verbose_name_plural = _("Categories")
         constraints = [
             models.UniqueConstraint(fields=['owner', 'name'], name='unique_owner_category'),
         ]
@@ -63,6 +65,11 @@ class Player(models.Model):
         verbose_name=_("Club user"),
     )
 
+
+    class Meta:
+        verbose_name = _("Player")
+        verbose_name_plural = _("Players")
+
     def __str__(self):
         """Return a readable player representation.
 
@@ -90,6 +97,10 @@ class Team(models.Model):
         verbose_name=_("Division"),
     )
     name = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        verbose_name = _("Team")
+        verbose_name_plural = _("Teams")
 
     @property
     def is_single(self):

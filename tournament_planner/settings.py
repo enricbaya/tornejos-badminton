@@ -65,7 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'axes',
+    'tournaments.apps.AxesConfig',  # django-axes (brute-force protection)
     'csp',
     'players',
     'tournaments',
