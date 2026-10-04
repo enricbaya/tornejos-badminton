@@ -533,12 +533,12 @@
             </tr></thead>
             <tbody>
               {% for row in g_rows %}
-              <tr {% if forloop.counter == division.advance_count %}class="advance-row"{% endif %}>
+              <tr {% if forloop.counter == division.advancing_count %}class="advance-row"{% endif %}>
                 <td class="rank">{{ forloop.counter }}</td>
                 <td>
                   {% if row.status == 'playing' %}<span class="status-dot dot-playing"></span>{% elif row.status == 'resting' %}<span class="status-dot dot-resting"></span>{% endif %}
                   <strong>{{ row.team.name }}</strong>{{ dd.seeds_dict|dict_get:row.team.pk }}
-                  {% if forloop.counter <= division.advance_count %}<span style="font-size:0.65rem; color:#16a34a; margin-left:0.2rem;">↑</span>{% endif %}
+                  {% if forloop.counter <= division.advancing_count %}<span style="font-size:0.65rem; color:#16a34a; margin-left:0.2rem;">↑</span>{% endif %}
                 </td>
                 <td>{{ row.played }}</td><td>{{ row.won }}</td><td>{{ row.lost }}</td>
                 <td class="pts">{{ row.points }}</td>

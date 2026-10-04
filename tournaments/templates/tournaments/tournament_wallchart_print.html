@@ -260,7 +260,7 @@
   </div>
 
   {# Matches #}
-  {% if dd.division.tournament_type == 'playoff' and dd.groups %}
+  {% if dd.division.has_groups and dd.groups %}
 
     {# ── Gruppespil ─── #}
     <div class="phase-heading">Gruppespil</div>

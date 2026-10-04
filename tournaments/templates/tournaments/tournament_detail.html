@@ -133,7 +133,7 @@
                 <label style="white-space:nowrap; font-size:0.85rem; font-weight:600;">{% trans "Number of groups" %}:</label>
                 {{ division_form.group_count }}
             </div>
-            <div style="display:flex; gap:0.5rem; align-items:center;">
+            <div id="advance-setting" style="display:flex; gap:0.5rem; align-items:center;">
                 <label style="white-space:nowrap; font-size:0.85rem; font-weight:600;">{% trans "Players advancing per group" %}:</label>
                 {{ division_form.advance_count }}
             </div>
@@ -162,7 +162,8 @@
     (function() {
         var sel = document.querySelector('[name=tournament_type]');
         var box = document.getElementById('playoff-settings');
-        function update() { box.style.display = sel.value === 'playoff' ? 'flex' : 'none'; }
+        var adv = document.getElementById('advance-setting');
+        function update() { box.style.display = (sel.value === 'playoff' || sel.value === 'groups') ? 'flex' : 'none'; if (adv) adv.style.display = sel.value === 'playoff' ? 'flex' : 'none'; }
         sel.addEventListener('change', update);
         update();
     })();
@@ -275,7 +276,7 @@ var MATCH_LOOKUP = {
         <form method="post" action="{% url 'division_update_days' division.pk %}">
             {% csrf_token %}
             <div style="display:flex; gap:1rem; flex-wrap:wrap; align-items:flex-end;">
-            {% if division.tournament_type == 'group' or division.tournament_type == 'playoff' %}
+            {% if division.tournament_type == 'group' or division.has_groups %}
             <div class="form-group" style="margin:0; min-width:180px;">
                 <label style="font-size:0.82rem; font-weight:600;">{% trans "Group phase" %}</label>
                 <select name="group_day" style="width:100%;">
@@ -477,10 +478,10 @@ var MATCH_LOOKUP = {
         </thead>
         <tbody>
             {% for row in g_rows %}
-            <tr {% if forloop.counter <= division.advance_count %}style="background:#f0fdf4;"{% endif %}>
+            <tr {% if forloop.counter <= division.advancing_count %}style="background:#f0fdf4;"{% endif %}>
                 <td>
                     {{ forloop.counter }}
-                    {% if forloop.counter <= division.advance_count %}<span style="font-size:0.7rem; color:#16a34a; margin-left:0.3rem;">↑ {% trans "advances" %}</span>{% endif %}
+                    {% if forloop.counter <= division.advancing_count %}<span style="font-size:0.7rem; color:#16a34a; margin-left:0.3rem;">↑ {% trans "advances" %}</span>{% endif %}
                 </td>
                 <td><strong>{{ row.team.name }}</strong>{{ seeds_dict|dict_get:row.team.pk }}{% if row.status == 'playing' %} <span title="Spiller i gang">🏸</span>{% elif row.status == 'resting' %} <span class="status-badge-rest" style="font-size:0.72rem; color:#d97706; white-space:nowrap;">⏱ <span class="rest-timer" data-until="{{ row.rest_until|unix_ts }}"></span></span>{% endif %}</td>
                 <td>{{ row.played }}</td>
@@ -538,6 +539,24 @@ var MATCH_LOOKUP = {
 </div>
 {% endif %}
 
+{% if dd.format_options and not tournament.schedule_locked %}
+<div class="card format-suggestions" style="margin-bottom:1rem; padding:0.75rem 1rem; background:#f8fafc; border:1px solid #e2e8f0;">
+    <div style="font-weight:700; font-size:0.9rem; margin-bottom:0.5rem;">💡 {% blocktrans count n=division.teams.count %}Suggested format for {{ n }} participant{% plural %}Suggested formats for {{ n }} participants{% endblocktrans %}</div>
+    {% for opt in dd.format_options %}
+    <form method="post" action="{% url 'division_apply_format' division.pk %}" style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; padding:0.35rem 0; {% if not forloop.last %}border-bottom:1px dashed #e2e8f0;{% endif %}">
+        {% csrf_token %}
+        <input type="hidden" name="tournament_type" value="{{ opt.tournament_type }}">
+        <input type="hidden" name="group_count" value="{{ opt.group_count }}">
+        <input type="hidden" name="advance_count" value="{{ opt.advance_count|default:1 }}">
+        <span style="flex:1; min-width:220px; font-size:0.88rem;">{% if forloop.first %}<strong>{{ opt.label }}</strong>{% else %}{{ opt.label }}{% endif %}
+            <span style="color:#64748b; font-size:0.8rem;"> · {% blocktrans with m=opt.matches mins=opt.court_minutes k=opt.min_matches_per_team %}{{ m }} matches (~{{ mins }} court-minutes), at least {{ k }} per player{% endblocktrans %}</span></span>
+        {% if opt.is_current %}<span class="badge badge-completed">{% trans "Selected" %}</span>
+        {% else %}<button type="submit" class="btn btn-secondary btn-sm">{% trans "Use this format" %}</button>{% endif %}
+    </form>
+    {% endfor %}
+</div>
+{% endif %}
+
 <div class="btn-group" style="margin-bottom:1rem;">
     {% if not tournament.schedule_locked %}
     <form method="post" action="{% url 'division_generate_schedule' division.pk %}">
@@ -550,7 +569,7 @@ var MATCH_LOOKUP = {
     {% endif %}
 </div>
 
-{% if division.tournament_type == 'playoff' and dd.match_count and not dd.completed_count and not tournament.schedule_locked and dd.group_teams %}
+{% if division.has_groups and dd.match_count and not dd.completed_count and not tournament.schedule_locked and dd.group_teams %}
 <details style="margin-bottom:1rem;">
     <summary style="cursor:pointer; font-weight:600; color:#16692c; padding:0.4rem 0;">
         🔀 Juster gruppefordeling manuelt
@@ -592,7 +611,7 @@ var MATCH_LOOKUP = {
 {% if division.matches.all %}
 {% if division.tournament_type == 'tree' %}
 <h3>{% trans "Matches" %}</h3>
-{% elif division.tournament_type == 'playoff' %}
+{% elif division.has_groups %}
 <h3>{% trans "Group matches" %}</h3>
 {% else %}
 <h3>{% trans "Match programme" %}</h3>
@@ -600,7 +619,7 @@ var MATCH_LOOKUP = {
 <table>
     <thead>
         <tr>
-            {% if division.tournament_type == 'playoff' %}<th>{% trans "Group" %}</th>{% endif %}
+            {% if division.has_groups %}<th>{% trans "Group" %}</th>{% endif %}
             <th>{% trans "Round" %}</th><th>#</th><th>{% trans "Team 1" %}</th><th>{% trans "Team 2" %}</th><th>{% trans "Score" %}</th><th>{% trans "Winner" %}</th><th>{% trans "Status" %}</th><th></th>
         </tr>
     </thead>
@@ -609,7 +628,7 @@ var MATCH_LOOKUP = {
         {% if match.phase != 'playoff' %}
         {% if match.team2 or match.bracket_label %}
         <tr>
-            {% if division.tournament_type == 'playoff' %}<td style="font-size:0.82rem; color:#16692c; font-weight:600;">G{{ match.group_number }}</td>{% endif %}
+            {% if division.has_groups %}<td style="font-size:0.82rem; color:#16692c; font-weight:600;">G{{ match.group_number }}</td>{% endif %}
             <td>{{ match.match_round }}</td>
             <td style="color:#888; font-size:0.85rem;">{% if match.match_number %}#{{ match.match_number }}{% else %}–{% endif %}</td>
             {% if match.bracket_label %}

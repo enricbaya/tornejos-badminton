@@ -81,7 +81,7 @@ def public_tournament(request, pk):
     division_data = []
     for d in divisions:
         standings = compute_standings(d) if d.tournament_type == 'group' else []
-        group_standings = compute_group_standings(d) if d.tournament_type == 'playoff' else []
+        group_standings = compute_group_standings(d) if d.has_groups else []
         bracket_data = get_bracket_data(d) if d.tournament_type in ('tree', 'playoff') else None
 
         # Annotate matches with seed labels + player status

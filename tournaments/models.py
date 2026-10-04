@@ -228,6 +228,7 @@ class Division(models.Model):
     ]
     TOURNAMENT_TYPE_CHOICES = [
         ('group', _("Group (round-robin)")),
+        ('groups', _("Several groups (round-robin, no playoff)")),
         ('playoff', _("Group + playoff bracket")),
         ('tree', _("Single elimination")),
     ]
@@ -243,7 +244,7 @@ class Division(models.Model):
     )
     group_count = models.IntegerField(
         default=2, verbose_name=_("Number of groups"),
-        help_text=_("Number of groups in the group stage (only for 'Group + playoff bracket')."),
+        help_text=_("Number of groups in the group stage (only for formats with several groups)."),
     )
     advance_count = models.IntegerField(
         default=2, verbose_name=_("Players advancing per group"),
@@ -279,6 +280,16 @@ class Division(models.Model):
         help_text=_("0, 1 or 2. Use 2 for bracket tournaments where both semi-final losers receive bronze."),
     )
     teams = models.ManyToManyField('players.Team', related_name='divisions', blank=True, verbose_name=_("Participants"))
+
+    @property
+    def has_groups(self):
+        """True for formats with several round-robin groups (with or without playoff)."""
+        return self.tournament_type in ('groups', 'playoff')
+
+    @property
+    def advancing_count(self):
+        """Number of teams per group that advance to a playoff (0 when there is no playoff)."""
+        return self.advance_count if self.tournament_type == 'playoff' else 0
 
     def clean(self):
         super().clean()

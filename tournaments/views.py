@@ -16,6 +16,7 @@ from .standings import compute_standings, compute_group_standings
 from players.models import Team
 from .scheduler import generate_schedule, advance_bracket, fill_playoff_bracket_from_group, get_bracket_data, regenerate_playoff_with_groups, _seeding_order, _bracket_placeholder_label
 from .schedule_planner import generate_time_schedule
+from .format_suggestion import suggest_formats
 from .player_status import (
     get_busy_info, apply_status_to_matches, set_player_rest,
     check_match_startable, player_status as _player_status, team_status as _team_status,
@@ -483,7 +484,7 @@ def tournament_detail(request, pk):
 
     def _group_teams(d):
         """Return {group_number: [team, ...]} from existing group-stage matches."""
-        if d.tournament_type != 'playoff':
+        if not d.has_groups:
             return {}
         result = {}
         seen = {}  # group_num -> set of team pks already added
@@ -513,11 +514,26 @@ def tournament_detail(request, pk):
         )
         return [{'player': p, 'checked': p.pk in checked_pks} for p in qs]
 
+    def _format_options(d):
+        """Format suggestions for divisions whose match programme is not generated yet."""
+        if d.matches.exists():
+            return []
+        minutes = tournament.single_match_duration if d.discipline == 'single' else tournament.double_match_duration
+        options = suggest_formats(d.teams.count())
+        for opt in options:
+            opt['court_minutes'] = opt['matches'] * minutes
+            opt['is_current'] = (
+                opt['tournament_type'] == d.tournament_type
+                and (d.tournament_type in ('group', 'tree') or opt['group_count'] == d.group_count)
+                and (d.tournament_type != 'playoff' or opt['advance_count'] == d.advance_count)
+            )
+        return options
+
     division_data = [
         {
             'division': d,
             'standings': compute_standings(d) if d.tournament_type == 'group' else [],
-            'group_standings': compute_group_standings(d) if d.tournament_type == 'playoff' else [],
+            'group_standings': compute_group_standings(d) if d.has_groups else [],
             'participants_form': get_participants_form(d, owner=request.user),
             'player_items': _player_items(d),
             'match_count': d.matches.count(),
@@ -527,6 +543,7 @@ def tournament_detail(request, pk):
             'seed_list': _seed_list(d),
             'seeds_dict': _seeds_dict_for_division(d, seed_lookup),
             'group_teams': _group_teams(d),
+            'format_options': _format_options(d),
         }
         for d in divisions
     ]
@@ -694,8 +711,8 @@ def division_reassign_groups(request, pk):
     if request.method != 'POST':
         return redirect('tournament_detail', pk=division.tournament.pk)
 
-    if division.tournament_type != 'playoff':
-        messages.error(request, _("Group reassignment is only possible for divisions with group stage and playoff bracket."))
+    if not division.has_groups:
+        messages.error(request, _("Group reassignment is only possible for divisions with several groups."))
         return redirect('tournament_detail', pk=division.tournament.pk)
 
     if division.tournament.schedule_locked:
@@ -784,6 +801,27 @@ def division_set_priority(request, pk):
 
 
 @login_required
+def division_apply_format(request, pk):
+    """POST: apply a suggested competition format to a division without matches."""
+    division = get_object_or_404(Division, pk=pk, tournament__owner=request.user)
+    if request.method == 'POST' and not division.tournament.schedule_locked:
+        if division.matches.exists():
+            messages.error(request, _("The format can only be changed before the match programme is generated."))
+        else:
+            ttype = request.POST.get('tournament_type')
+            if ttype in dict(Division.TOURNAMENT_TYPE_CHOICES):
+                try:
+                    division.group_count = max(1, min(16, int(request.POST.get('group_count', division.group_count))))
+                    division.advance_count = max(1, min(8, int(request.POST.get('advance_count', division.advance_count) or 1)))
+                except (TypeError, ValueError):
+                    pass
+                division.tournament_type = ttype
+                division.save(update_fields=['tournament_type', 'group_count', 'advance_count'])
+                messages.success(request, _("Format of \"%(name)s\" updated. You can now generate the match programme.") % {'name': division.name})
+    return redirect('tournament_detail', pk=division.tournament.pk)
+
+
+@login_required
 def division_generate_schedule(request, pk):
     """Generate match schedules for one division.
 
@@ -835,7 +873,12 @@ def division_generate_schedule(request, pk):
         group_count = sum(1 for m in matches if getattr(m, 'phase', 'group') == 'group')
         playoff_count = sum(1 for m in matches if getattr(m, 'phase', 'group') == 'playoff' and not (m.team1 is None and m.team2 is None and m.score == 'Bye'))
         placeholder_count = sum(1 for m in matches if m.team1 is None and m.phase != 'playoff')
-        if division.tournament_type == 'playoff':
+        if division.tournament_type == 'groups':
+            messages.success(
+                request,
+                _("Schedule generated: %(group)s group matches in %(gc)s groups.") % {'group': group_count, 'gc': division.group_count}
+            )
+        elif division.tournament_type == 'playoff':
             messages.success(
                 request,
                 _("Schedule generated: %(group)s group matches in %(gc)s groups + %(playoff)s playoff matches (scheduled after group stage).") % {'group': group_count, 'gc': division.group_count, 'playoff': playoff_count}
@@ -1100,7 +1143,7 @@ def tournament_wallchart(request, pk):
 
         # Build groups for playoff type
         groups = []
-        if div.tournament_type == 'playoff':
+        if div.has_groups:
             group_teams_dict = {}
             seen = {}
             for m in div.matches.filter(phase='group').select_related('team1', 'team2').order_by('group_number', 'match_round'):
@@ -1247,7 +1290,7 @@ def tournament_program_print(request, pk):
 
         # Build groups for playoff type (teams + matches per group)
         groups = []
-        if division.tournament_type == 'playoff':
+        if division.has_groups:
             group_teams_dict = {}
             seen = {}
             for m in division.matches.filter(phase='group').select_related('team1', 'team2').order_by('group_number', 'match_round'):
@@ -1342,6 +1385,16 @@ def _compute_medals(division):
         for _ in range(division.bronze_count):
             if pos < len(teams):
                 bronze.append(teams[pos]); pos += 1
+    elif division.tournament_type == 'groups':
+        # Several round-robin groups without playoff: one podium per group.
+        from .standings import compute_group_standings
+        for _g_num, rows in compute_group_standings(division):
+            teams = [r['team'] for r in rows]
+            pos = 0
+            for bucket, count in ((gold, division.gold_count), (silver, division.silver_count), (bronze, division.bronze_count)):
+                for _ in range(count):
+                    if pos < len(teams):
+                        bucket.append(teams[pos]); pos += 1
     else:
         phase_filter = {'phase': 'playoff'} if division.tournament_type == 'playoff' else {}
         bracket_matches = list(
@@ -1489,7 +1542,7 @@ def tournament_run(request, pk):
         if division.tournament_type == 'group':
             standings = compute_standings(division)
             group_standings = []
-        elif division.tournament_type == 'playoff':
+        elif division.has_groups:
             standings = []
             group_standings = compute_group_standings(division)
         else:

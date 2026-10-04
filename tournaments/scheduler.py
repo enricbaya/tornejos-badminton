@@ -394,7 +394,7 @@ def get_bracket_data(division):
 # Playoff (group stage + bracket)
 # ---------------------------------------------------------------------------
 
-def generate_playoff(division):
+def generate_playoff(division, with_bracket=True):
     """
     Generate a playoff schedule:
     1. Divide teams into groups and generate round-robin within each group.
@@ -444,6 +444,9 @@ def generate_playoff(division):
                     status='pending',
                 )
                 created.append(match)
+
+    if not with_bracket:
+        return created
 
     # ── Playoff bracket ───────────────────────────────────────────────
     total_advancing = group_count * advance_count
@@ -545,6 +548,8 @@ def generate_schedule(division):
         return generate_bracket(division)
     if division.tournament_type == 'playoff':
         return generate_playoff(division)
+    if division.tournament_type == 'groups':
+        return generate_playoff(division, with_bracket=False)
     return generate_round_robin(division)
 
 
@@ -588,6 +593,9 @@ def regenerate_playoff_with_groups(division, groups):
                     status='pending',
                 )
                 created.append(match)
+
+    if division.tournament_type != 'playoff':
+        return created  # 'groups': several round-robins, no playoff bracket
 
     # ── Re-use the playoff bracket generation from generate_playoff ──────
     #    Re-call it but skip the group stage since we already created it.

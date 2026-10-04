@@ -78,13 +78,13 @@
         </thead>
         <tbody>
             {% for row in g_rows %}
-            <tr {% if forloop.counter <= division.advance_count %}style="background:#f0fdf4;"{% endif %}>
+            <tr {% if forloop.counter <= division.advancing_count %}style="background:#f0fdf4;"{% endif %}>
                 <td>
                     {% if forloop.counter == 1 %}<span class="rank-1">🥇</span>
                     {% elif forloop.counter == 2 %}<span class="rank-2">🥈</span>
                     {% elif forloop.counter == 3 %}<span class="rank-3">🥉</span>
                     {% else %}{{ forloop.counter }}{% endif %}
-                    {% if forloop.counter <= division.advance_count %}<span style="font-size:0.7rem; color:#16a34a; margin-left:0.3rem;">↑ {% trans "advances" %}</span>{% endif %}
+                    {% if forloop.counter <= division.advancing_count %}<span style="font-size:0.7rem; color:#16a34a; margin-left:0.3rem;">↑ {% trans "advances" %}</span>{% endif %}
                 </td>
                 <td>
                     <strong>{{ row.team.name }}</strong>{{ seeds_dict|dict_get:row.team.pk }}
@@ -151,7 +151,7 @@
 <table>
     <thead>
         <tr>
-            {% if division.tournament_type == 'playoff' %}<th>{% trans "Phase" %}</th>{% endif %}
+            {% if division.has_groups %}<th>{% trans "Phase" %}</th>{% endif %}
             <th>{% trans "Round" %}</th><th>#</th><th>{% trans "Team 1" %}</th><th>{% trans "Team 2" %}</th><th>{% trans "Score" %}</th><th>{% trans "Winner" %}</th><th>{% trans "Status" %}</th>
         </tr>
     </thead>
@@ -159,7 +159,7 @@
         {% for match in dd.matches %}
         {% if match.team2 or match.bracket_label %}
         <tr>
-            {% if division.tournament_type == 'playoff' %}
+            {% if division.has_groups %}
             <td style="font-size:0.8rem; color:{% if match.phase == 'playoff' %}#7c3aed{% else %}#16692c{% endif %}; font-weight:600;">
                 {% if match.phase == 'playoff' %}{% trans "Playoff" %}{% else %}{% blocktrans with n=match.group_number %}G{{ n }}{% endblocktrans %}{% endif %}
             </td>

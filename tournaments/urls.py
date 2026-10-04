@@ -16,6 +16,7 @@ urlpatterns = [
     path('division/<int:pk>/delete/', views.division_delete, name='division_delete'),
     path('division/<int:pk>/priority/', views.division_set_priority, name='division_set_priority'),
     path('division/<int:pk>/generate/', views.division_generate_schedule, name='division_generate_schedule'),
+    path('division/<int:pk>/format/', views.division_apply_format, name='division_apply_format'),
     path('division/<int:pk>/reassign-groups/', views.division_reassign_groups, name='division_reassign_groups'),
     path('match/<int:pk>/result/', views.match_record_result, name='match_record_result'),
     path('match/<int:pk>/start/', views.match_start, name='match_start'),
