@@ -1194,12 +1194,16 @@ def tournament_wallchart(request, pk):
 def tournament_court_signs(request, pk):
     """Printable A3 court-number signs — one page per court."""
     tournament = get_object_or_404(Tournament, pk=pk, owner=request.user)
-    first_day = tournament.days.order_by('date', 'start_time').first()
-    court_count = first_day.court_count if first_day else 4
-    courts = list(range(1, court_count + 1))
+    from .court_access import court_count as _court_count, court_url, qr_svg
+    courts = list(range(1, _court_count(tournament) + 1))
+    # With court referees enabled, each sign carries the QR code of its court page.
+    court_qrs = {}
+    if tournament.court_access_enabled:
+        court_qrs = {c: qr_svg(court_url(request, tournament, c)) for c in courts}
     return render(request, 'tournaments/tournament_court_signs_print.html', {
         'tournament': tournament,
         'courts': courts,
+        'court_qrs': court_qrs,
     })
 
 

@@ -183,6 +183,9 @@ LOCALE_PATHS = [
 
 TIME_ZONE = os.environ.get('TIME_ZONE', 'UTC')
 
+# Public address of the site (used in QR codes for the court referees), e.g. https://tornejos.example.org
+PUBLIC_BASE_URL = os.environ.get('PUBLIC_BASE_URL', '')
+
 USE_I18N = True
 
 USE_TZ = True

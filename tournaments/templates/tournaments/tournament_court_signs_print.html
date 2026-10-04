@@ -1,4 +1,4 @@
-{% load i18n %}{% load static %}<!DOCTYPE html>
+{% load i18n %}{% load static %}{% load tournament_extras %}<!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
 <meta charset="UTF-8">
@@ -159,6 +159,17 @@
       height: 3pt;
     }
   }
+  /* QR code for the court referee: bottom-right corner, so the big number keeps its size */
+  .court-sign { position: relative; }
+  .sign-qr { position: absolute; right: 18px; bottom: 18px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .sign-qr-code { width: 130px; }
+  .sign-qr-text { max-width: 150px; text-align: center; font-size: 0.75rem; font-weight: 600; color: #333; line-height: 1.25; }
+  @media print {
+    .sign-qr { right: 12mm; bottom: 10mm; }
+    .sign-qr-code { width: 50mm; }
+    .sign-qr-text { max-width: 60mm; font-size: 11pt; }
+    .court-sign.has-qr .sign-number { font-size: 300pt; }
+  }
 </style>
 </head>
 <body>
@@ -172,7 +183,7 @@
 
 <div class="signs-container">
   {% for court in courts %}
-  <div class="court-sign">
+  <div class="court-sign{% if court_qrs %} has-qr{% endif %}">
     {% if tournament.logo %}
     <img src="{{ tournament.logo.url }}" alt="{{ tournament.name }} logo" class="sign-logo">
     {% else %}
@@ -189,6 +200,12 @@
     <div class="sign-divider"></div>
     <div class="sign-label">{% trans "Court" %}</div>
     <div class="sign-number">{{ court }}</div>
+    {% with qr=court_qrs|dict_get:court %}{% if qr %}
+    <div class="sign-qr">
+      <div class="sign-qr-code">{{ qr|safe }}</div>
+      <div class="sign-qr-text">{% trans "Referee: scan to start the match and enter the result" %}</div>
+    </div>
+    {% endif %}{% endwith %}
   </div>
   {% endfor %}
 </div>

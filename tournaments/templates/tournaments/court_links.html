@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Court referees" %} – {{ tournament.name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.ref-status { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; padding: 1rem 1.25rem; border-radius: 12px; margin: 1rem 0; }
+.ref-status.on  { background: var(--brand-soft); border: 1.5px solid var(--brand-soft-border); }
+.ref-status.off { background: #f4f4f5; border: 1.5px solid #e4e4e7; }
+.ref-dot { width: 14px; height: 14px; border-radius: 50%; flex: none; }
+.ref-status.on .ref-dot { background: var(--accent); box-shadow: 0 0 0 4px rgba(235,28,96,0.18); }
+.ref-status.off .ref-dot { background: #a1a1aa; }
+.ref-status b { font-size: 1.05rem; }
+.ref-steps { margin: 0.4rem 0 0; padding-left: 1.2rem; color: #52525b; font-size: 0.9rem; }
+.court-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.court-card { background: #fff; border-radius: 14px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05); text-align: center; }
+.court-card h3 { margin: 0 0 0.5rem; font-family: var(--heading-font); font-size: 1.6rem; color: #111; text-transform: none; letter-spacing: 0; }
+.court-card .qr { width: 180px; margin: 0 auto 0.6rem; }
+.court-card .qr.disabled { opacity: 0.25; filter: grayscale(1); }
+.court-card .now { font-size: 0.8rem; color: #64748b; min-height: 2.2em; }
+.court-card .now b { color: var(--accent-text); }
+.court-card input { width: 100%; font-size: 0.72rem; padding: 0.35rem; border: 1px solid #e4e4e7; border-radius: 6px; color: #52525b; }
+@media print {
+  header, footer, .no-print, .messages { display: none !important; }
+  body { background: #fff; }
+  .court-grid { grid-template-columns: repeat(2, 1fr); }
+  .court-card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="no-print" style="display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:space-between; align-items:flex-start;">
+  <div>
+    <h1>📱 {% trans "Court referees" %}</h1>
+    <div style="color:#64748b;">{{ tournament.name }}</div>
+  </div>
+  <div class="btn-group">
+    <a href="{% url 'tournament_run' tournament.pk %}" class="btn btn-secondary">← {% trans "Tournament run" %}</a>
+    <a href="{% url 'tournament_court_signs' tournament.pk %}" class="btn btn-secondary" target="_blank">🖨 {% trans "Court signs with QR" %}</a>
+  </div>
+</div>
+
+<div class="ref-status {% if tournament.court_access_enabled %}on{% else %}off{% endif %} no-print">
+  <span class="ref-dot"></span>
+  <div style="flex:1; min-width:240px;">
+    {% if tournament.court_access_enabled %}
+      <b>{% trans "Court referees are enabled" %}</b>
+      <div style="font-size:0.88rem; color:#52525b;">{% trans "Each court's QR code opens a page where the referee starts the match and enters the final score. The court is freed and the standings update immediately." %}</div>
+    {% else %}
+      <b>{% trans "Court referees are disabled" %}</b>
+      <div style="font-size:0.88rem; color:#52525b;">{% trans "The court links do not work. Enable them on tournament day." %}</div>
+    {% endif %}
+    {% if entered_by_courts %}<div style="font-size:0.85rem; margin-top:0.3rem;">{% blocktrans count n=entered_by_courts %}{{ n }} result entered from the courts so far.{% plural %}{{ n }} results entered from the courts so far.{% endblocktrans %}</div>{% endif %}
+  </div>
+  <form method="post" action="{% url 'court_access_toggle' tournament.pk %}">
+    {% csrf_token %}
+    {% if tournament.court_access_enabled %}
+      <button type="submit" class="btn btn-secondary">⏸ {% trans "Disable" %}</button>
+    {% else %}
+      <button type="submit" class="btn btn-primary">▶ {% trans "Enable court referees" %}</button>
+    {% endif %}
+  </form>
+</div>
+
+<div class="card no-print" style="margin-bottom:1rem;">
+  <b>{% trans "How it works" %}</b>
+  <ol class="ref-steps">
+    <li>{% trans "Print the court signs (they include the QR code) and put one on each court." %}</li>
+    <li>{% trans "The referee scans the QR code with their phone: no user or password needed." %}</li>
+    <li>{% trans "They start the suggested match and, at the end, enter the score of each set." %}</li>
+    <li>{% trans "The judge table still sees everything and can correct any result from the tournament run page." %}</li>
+  </ol>
+  <details style="margin-top:0.75rem;">
+    <summary style="cursor:pointer; color:#64748b; font-size:0.88rem;">🔑 {% trans "A link or QR code has been lost or shared too widely?" %}</summary>
+    <form method="post" action="{% url 'court_access_regenerate' tournament.pk %}" style="margin-top:0.6rem;">
+      {% csrf_token %}
+      <p style="font-size:0.88rem; color:#52525b; margin:0 0 0.5rem;">{% trans "Creating new links makes every printed QR code stop working. You will have to print the court signs again." %}</p>
+      <button type="submit" class="btn btn-danger btn-sm">{% trans "Create new links" %}</button>
+    </form>
+  </details>
+</div>
+
+<div class="court-grid">
+  {% for c in courts %}
+  <div class="court-card">
+    <h3>{% trans "Court" %} {{ c.number }}</h3>
+    <div class="qr{% if not tournament.court_access_enabled %} disabled{% endif %}">{{ c.qr|safe }}</div>
+    <div class="now">
+      {% if c.active %}<b>{% trans "Now" %}:</b> {{ c.active.team1.name }} – {{ c.active.team2.name }}{% else %}{% trans "Free" %}{% endif %}
+    </div>
+    <div class="no-print" style="display:flex; gap:0.35rem; margin-top:0.4rem;">
+      <input type="text" value="{{ c.url }}" readonly onclick="this.select()">
+      <a href="{{ c.url }}" target="_blank" class="btn btn-secondary btn-sm">{% trans "Open" %}</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

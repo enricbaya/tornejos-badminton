@@ -1,0 +1,186 @@
+{% extends 'base_public.html' %}
+{% load i18n %}{% load tournament_extras %}
+{% block title %}{% blocktrans %}Court {{ court }}{% endblocktrans %} · {{ tournament.name }}{% endblock %}
+
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow">
+{% if not active %}<meta http-equiv="refresh" content="20">{% endif %}
+<style>
+.court-wrap { max-width: 560px; margin: 0 auto; }
+.court-head { display: flex; align-items: center; gap: 1rem; margin: 0.25rem 0 1rem; }
+.court-badge {
+    background: #111; color: #fff; border-radius: 14px; min-width: 84px; padding: 0.4rem 0.8rem;
+    text-align: center; border-bottom: 4px solid var(--accent);
+}
+.court-badge small { display: block; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+.court-badge b { display: block; font-family: var(--heading-font); font-size: 2.6rem; line-height: 1; }
+.court-head .t-name { font-weight: 700; font-size: 1.05rem; line-height: 1.25; }
+.court-head .t-role { color: #64748b; font-size: 0.85rem; }
+.c-card { background: #fff; border-radius: 14px; padding: 1rem 1.1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05); margin-bottom: 0.9rem; border: 2px solid transparent; }
+.c-card.suggested { border-color: var(--accent); }
+.c-meta { font-size: 0.8rem; color: #64748b; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.c-tag { background: var(--accent); color: #fff; border-radius: 99px; padding: 0.05rem 0.55rem; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.c-players { font-size: 1.2rem; font-weight: 700; margin: 0.45rem 0 0.6rem; line-height: 1.3; }
+.c-players .vs { color: #94a3b8; font-weight: 500; font-size: 0.9rem; margin: 0 0.3rem; }
+.c-block { font-size: 0.85rem; color: #b45309; background: #fffbeb; border-radius: 8px; padding: 0.45rem 0.65rem; margin-bottom: 0.6rem; }
+.big-btn { width: 100%; min-height: 54px; font-size: 1.05rem !important; font-weight: 700 !important; border-radius: 12px !important; }
+.c-empty { text-align: center; padding: 2rem 1rem; color: #64748b; }
+.score-grid { display: grid; grid-template-columns: 1fr repeat(3, 64px); gap: 0.45rem 0.5rem; align-items: center; margin: 0.8rem 0; }
+.score-grid .h { font-size: 0.7rem; color: #64748b; text-align: center; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+.score-grid .pname { font-weight: 700; font-size: 0.95rem; line-height: 1.2; overflow-wrap: anywhere; }
+.score-grid input {
+    width: 100%; height: 56px; font-size: 1.5rem; font-weight: 700; text-align: center;
+    border: 2px solid #d4d4d8; border-radius: 10px; padding: 0; font-family: inherit; background: #fff;
+}
+.score-grid input.won { border-color: var(--accent); background: var(--brand-soft); }
+.score-grid input.dim { opacity: 0.35; }
+.score-help { font-size: 0.78rem; color: #64748b; margin-bottom: 0.8rem; }
+.winner-line { min-height: 1.6rem; font-weight: 700; color: var(--accent-text); margin-bottom: 0.6rem; }
+.c-msgs { list-style: none; padding: 0; margin: 0 0 0.8rem; }
+.c-msgs li { padding: 0.65rem 0.85rem; border-radius: 10px; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.92rem; }
+.c-msgs .success { background: #f0fdf4; color: #166534; border-left: 4px solid #16a34a; }
+.c-msgs .error { background: #fef2f2; color: #991b1b; border-left: 4px solid #dc2626; }
+.undo summary { cursor: pointer; color: #64748b; font-size: 0.85rem; text-align: center; margin-top: 0.8rem; }
+.timer { font-variant-numeric: tabular-nums; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="court-wrap">
+  <div class="court-head">
+    <div class="court-badge"><small>{% trans "Court" %}</small><b>{{ court }}</b></div>
+    <div>
+      <div class="t-name">{{ tournament.name }}</div>
+      <div class="t-role">{% trans "Court referee" %}</div>
+    </div>
+  </div>
+
+  {% if messages %}
+  <ul class="c-msgs">{% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}</ul>
+  {% endif %}
+
+  {% if active %}
+  {# ── Match being played on this court: enter the final score ── #}
+  <div class="c-card suggested">
+    <div class="c-meta">
+      <span class="c-tag">{% trans "In progress" %}</span>
+      {% if active.match_number %}<span>#{{ active.match_number }}</span>{% endif %}
+      <span>{{ active.division.name }}</span>
+      {% if active.started_at %}<span>· <span class="timer" data-start="{{ active.started_at|date:'U' }}"></span></span>{% endif %}
+    </div>
+    <div class="c-players">{{ active.team1.name }} <span class="vs">vs</span> {{ active.team2.name }}</div>
+
+    <form method="post" action="{% url 'court_result' tournament.pk court sig active.pk %}" id="score-form">
+      {% csrf_token %}
+      <div class="score-grid">
+        <div></div><div class="h">{% trans "Set 1" %}</div><div class="h">{% trans "Set 2" %}</div><div class="h">{% trans "Set 3" %}</div>
+        <div class="pname">{{ active.team1.name }}</div>
+        <input name="s1a" inputmode="numeric" pattern="[0-9]*" min="0" max="{{ max_points }}" value="{{ draft.s1a }}" data-set="1" data-side="a" autocomplete="off">
+        <input name="s2a" inputmode="numeric" pattern="[0-9]*" min="0" max="{{ max_points }}" value="{{ draft.s2a }}" data-set="2" data-side="a" autocomplete="off">
+        <input name="s3a" inputmode="numeric" pattern="[0-9]*" min="0" max="{{ max_points }}" value="{{ draft.s3a }}" data-set="3" data-side="a" autocomplete="off">
+        <div class="pname">{{ active.team2.name }}</div>
+        <input name="s1b" inputmode="numeric" pattern="[0-9]*" min="0" max="{{ max_points }}" value="{{ draft.s1b }}" data-set="1" data-side="b" autocomplete="off">
+        <input name="s2b" inputmode="numeric" pattern="[0-9]*" min="0" max="{{ max_points }}" value="{{ draft.s2b }}" data-set="2" data-side="b" autocomplete="off">
+        <input name="s3b" inputmode="numeric" pattern="[0-9]*" min="0" max="{{ max_points }}" value="{{ draft.s3b }}" data-set="3" data-side="b" autocomplete="off">
+      </div>
+      <div class="score-help">
+        {% if points_to_win == 15 %}{% trans "Sets to 15 · from 14-14 a 2-point lead is needed · maximum 21-20" %}{% else %}{% trans "Sets to 21 · from 20-20 a 2-point lead is needed · maximum 30-29" %}{% endif %}
+      </div>
+      <div class="winner-line" id="winner-line"></div>
+      <button type="submit" class="btn btn-primary big-btn">✔ {% trans "Save result and free the court" %}</button>
+    </form>
+
+    <details class="undo">
+      <summary>{% trans "Wrong match started?" %}</summary>
+      <form method="post" action="{% url 'court_cancel' tournament.pk court sig active.pk %}" style="margin-top:0.6rem;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary big-btn">↩ {% trans "Put this match back in the queue" %}</button>
+      </form>
+    </details>
+  </div>
+
+  {% else %}
+  {# ── Court is free: choose the next match ── #}
+  <div class="c-card" style="background:#111; color:#fff;">
+    <div style="font-family:var(--heading-font); font-size:1.4rem; font-weight:800;">✅ {% trans "The court is free" %}</div>
+    <div style="font-size:0.88rem; opacity:0.75;">{% trans "Start the suggested match, or another one from the list. The page refreshes by itself." %}</div>
+  </div>
+
+  {% for m in choices %}
+  <div class="c-card{% if m.is_suggested %} suggested{% endif %}">
+    <div class="c-meta">
+      {% if m.is_suggested %}<span class="c-tag">{% trans "Suggested" %}</span>{% endif %}
+      {% if m.match_number %}<span>#{{ m.match_number }}</span>{% endif %}
+      <span>{{ m.division.name }}</span>
+      {% if m.scheduled_time %}<span>· {{ m.scheduled_time|time:"H:i" }}</span>{% endif %}
+      {% if m.court %}<span>· {% trans "Court" %} {{ m.court }}</span>{% endif %}
+    </div>
+    <div class="c-players">{{ m.team1.name }} <span class="vs">vs</span> {{ m.team2.name }}</div>
+    {% if m.blockers %}
+      <div class="c-block">⏳ {{ m.blockers|join:" · " }}</div>
+      {% if m.only_arrival %}
+      <form method="post" action="{% url 'court_start' tournament.pk court sig m.pk %}">
+        {% csrf_token %}<input type="hidden" name="mark_arrived" value="1">
+        <button type="submit" class="btn btn-secondary big-btn">👋 {% trans "They are on court: check them in and start" %}</button>
+      </form>
+      {% endif %}
+    {% else %}
+      <form method="post" action="{% url 'court_start' tournament.pk court sig m.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary big-btn">▶ {% trans "Start on this court" %}</button>
+      </form>
+    {% endif %}
+  </div>
+  {% empty %}
+  <div class="c-card c-empty">{% trans "There are no matches waiting right now." %}</div>
+  {% endfor %}
+  {% endif %}
+</div>
+
+<script>
+(function () {
+  // Elapsed time of the match in progress
+  document.querySelectorAll('.timer[data-start]').forEach(function (el) {
+    var start = Number(el.dataset.start) * 1000;
+    function tick() {
+      var s = Math.max(0, Math.floor((Date.now() - start) / 1000));
+      el.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    }
+    tick(); setInterval(tick, 1000);
+  });
+  // Live feedback while typing the score
+  var form = document.getElementById('score-form');
+  if (!form) return;
+  var P = {{ points_to_win }}, MAX = {{ max_points }};
+  function val(n) { var v = form.querySelector('[name=' + n + ']').value; return v === '' ? null : Number(v); }
+  function setOk(a, b) {
+    if (a === null || b === null || a === b) return false;
+    var w = Math.max(a, b), l = Math.min(a, b);
+    if (w < P || w > MAX) return false;
+    if (w === P) return l <= P - 2;
+    return w - l === 2 || (w === MAX && l === MAX - 1);
+  }
+  function update() {
+    var wins = [0, 0];
+    [1, 2, 3].forEach(function (i) {
+      var a = val('s' + i + 'a'), b = val('s' + i + 'b');
+      var ia = form.querySelector('[name=s' + i + 'a]'), ib = form.querySelector('[name=s' + i + 'b]');
+      ia.classList.remove('won'); ib.classList.remove('won');
+      if (setOk(a, b)) {
+        if (a > b) { wins[0]++; ia.classList.add('won'); } else { wins[1]++; ib.classList.add('won'); }
+      }
+    });
+    var split = (val('s1a') !== null && val('s2a') !== null &&
+                 setOk(val('s1a'), val('s1b')) && setOk(val('s2a'), val('s2b')) &&
+                 ((val('s1a') > val('s1b')) !== (val('s2a') > val('s2b'))));
+    form.querySelectorAll('[data-set="3"]').forEach(function (el) { el.classList.toggle('dim', !split && el.value === ''); });
+    var line = document.getElementById('winner-line');
+    if (wins[0] === 2) line.textContent = '🏆 {{ active.team1.name|escapejs }}';
+    else if (wins[1] === 2) line.textContent = '🏆 {{ active.team2.name|escapejs }}';
+    else line.textContent = '';
+  }
+  form.addEventListener('input', update);
+  update();
+})();
+</script>
+{% endblock %}

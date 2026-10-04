@@ -274,6 +274,7 @@
   </div>
   <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
     <a href="{% url 'tournament_bigscreen' tournament.pk %}" class="btn btn-secondary" target="_blank">📺 {% trans "Big screen" %}</a>
+    <a href="{% url 'tournament_court_links' tournament.pk %}" class="btn btn-secondary">📱 {% trans "Court referees" %}{% if tournament.court_access_enabled %} <span style="color:var(--accent,#EB1C60);">●</span>{% endif %}</a>
     <a href="{% url 'tournament_detail' tournament.pk %}" class="btn btn-secondary">⚙ {% trans "Planning" %}</a>
   </div>
 </div>
@@ -692,6 +693,7 @@
         <a href="{% url 'tournament_program_print' tournament.pk %}" class="btn btn-secondary btn-sm" target="_blank">📋 {% trans "Match programme" %}</a>
         <a href="{% url 'tournament_wallchart' tournament.pk %}" class="btn btn-secondary btn-sm" target="_blank">📋 {% trans "Result chart" %}</a>
         <a href="{% url 'tournament_scoresheet' tournament.pk %}" class="btn btn-secondary btn-sm" target="_blank">🖨 {% trans "Score sheets" %}</a>
+        <a href="{% url 'tournament_court_links' tournament.pk %}" class="btn btn-secondary btn-sm">📱 {% trans "Court referees" %}{% if tournament.court_access_enabled %} ●{% endif %}</a>
       </div>
     </div>
 

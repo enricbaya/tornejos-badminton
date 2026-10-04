@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import court_views
 
 urlpatterns = [
     path('', views.tournament_list, name='tournament_list'),
@@ -26,6 +27,9 @@ urlpatterns = [
     path('<int:pk>/scoresheet/', views.tournament_scoresheet, name='tournament_scoresheet'),
     path('<int:pk>/wallchart/', views.tournament_wallchart, name='tournament_wallchart'),
     path('<int:pk>/court-signs/', views.tournament_court_signs, name='tournament_court_signs'),
+    path('<int:pk>/courts/referees/', court_views.tournament_court_links, name='tournament_court_links'),
+    path('<int:pk>/courts/referees/toggle/', court_views.court_access_toggle, name='court_access_toggle'),
+    path('<int:pk>/courts/referees/regenerate/', court_views.court_access_regenerate, name='court_access_regenerate'),
     path('<int:pk>/program/print/', views.tournament_program_print, name='tournament_program_print'),
     path('division/<int:pk>/scoresheet/', views.division_scoresheet, name='division_scoresheet'),
     path('division/<int:pk>/medals/', views.division_medals, name='division_medals'),

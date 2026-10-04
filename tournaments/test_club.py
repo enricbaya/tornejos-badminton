@@ -217,3 +217,120 @@ class PublicCacheTest(TestCase):
         r = c_en.get(self.url)
         self.assertEqual(r['X-Cache'], 'MISS')
         self.assertContains(r, 'Time schedule')
+
+
+# ---------------------------------------------------------------------------
+# Court referee mode
+# ---------------------------------------------------------------------------
+
+from .court_access import court_path, court_signature, ensure_key  # noqa: E402
+from .models import TournamentDay  # noqa: E402
+
+
+class CourtRefereeTest(TestCase):
+    def setUp(self):
+        self.user = make_user(username='clubcourt')
+        self.t = Tournament.objects.create(name="Pistes", date=datetime.date.today(), division_model='youth',
+                                           scoring_model='best_of_5_15', owner=self.user, court_access_enabled=True)
+        TournamentDay.objects.create(tournament=self.t, day_number=1, date=self.t.date,
+                                     start_time=datetime.time(9, 0), court_count=4, buffer_minutes=0)
+        self.d = Division.objects.create(tournament=self.t, name="Aleví", discipline='single', tournament_type='group')
+        self.d.teams.set(_singles(4, self.user))
+        generate_schedule(self.d)
+        from .schedule_planner import generate_time_schedule
+        generate_time_schedule(self.t)
+        ensure_key(self.t)
+        self.url = court_path(self.t, 2)
+        self.sig = court_signature(self.t, 2)
+        self.c = Client()
+
+    def _first(self):
+        return Match.objects.filter(division=self.d).order_by('scheduled_time', 'pk').first()
+
+    def test_panel_proposes_a_match(self):
+        r = self.c.get(self.url)
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, self._first().team1.name)
+
+    def test_bad_signature_or_disabled_is_404(self):
+        self.assertEqual(self.c.get(reverse('court_panel', args=[self.t.pk, 2, 'x' * 20])).status_code, 404)
+        # a valid link for court 2 cannot be reused for court 3
+        self.assertEqual(self.c.get(reverse('court_panel', args=[self.t.pk, 3, self.sig])).status_code, 404)
+        self.assertEqual(self.c.get(reverse('court_panel', args=[self.t.pk, 9, court_signature(self.t, 9)])).status_code, 404)
+        self.t.court_access_enabled = False
+        self.t.save()
+        self.assertEqual(self.c.get(self.url).status_code, 404)
+
+    def test_start_and_enter_result_frees_court(self):
+        m = self._first()
+        self.c.post(reverse('court_start', args=[self.t.pk, 2, self.sig, m.pk]))
+        m.refresh_from_db()
+        self.assertEqual((m.status, m.court), ('in_progress', '2'))
+        self.assertContains(self.c.get(self.url), 'name="s1a"')
+        r = self.c.post(reverse('court_result', args=[self.t.pk, 2, self.sig, m.pk]),
+                        {'s1a': '15', 's1b': '9', 's2a': '13', 's2b': '15', 's3a': '21', 's3b': '20'}, follow=True)
+        m.refresh_from_db()
+        self.assertEqual(m.status, 'completed')
+        self.assertEqual(m.score, '15-9, 13-15, 21-20')
+        self.assertEqual(m.winner_id, m.team1_id)
+        self.assertEqual(m.entered_by_court, '2')
+        self.assertContains(r, 'name="s1a"', count=0)  # court is free again
+
+    def test_invalid_score_is_rejected_and_kept(self):
+        m = self._first()
+        self.c.post(reverse('court_start', args=[self.t.pk, 2, self.sig, m.pk]))
+        self.c.post(reverse('court_result', args=[self.t.pk, 2, self.sig, m.pk]), {'s1a': '22', 's1b': '20', 's2a': '15', 's2b': '3'})
+        m.refresh_from_db()
+        self.assertEqual(m.status, 'in_progress')
+        r = self.c.get(self.url)
+        self.assertContains(r, 'value="22"')
+
+    def test_cannot_touch_match_of_other_court(self):
+        m = self._first()
+        sig3 = court_signature(self.t, 3)
+        self.c.post(reverse('court_start', args=[self.t.pk, 2, self.sig, m.pk]))
+        r = self.c.post(reverse('court_result', args=[self.t.pk, 3, sig3, m.pk]), {'s1a': '15', 's1b': '0', 's2a': '15', 's2b': '0'})
+        self.assertEqual(r.status_code, 404)
+
+    def test_check_in_from_court(self):
+        m = self._first()
+        Player.objects.filter(pk=m.team1.player1_id).update(has_arrived=False)
+        self.c.post(reverse('court_start', args=[self.t.pk, 2, self.sig, m.pk]))
+        m.refresh_from_db()
+        self.assertEqual(m.status, 'pending')
+        self.c.post(reverse('court_start', args=[self.t.pk, 2, self.sig, m.pk]), {'mark_arrived': '1'})
+        m.refresh_from_db()
+        self.assertEqual(m.status, 'in_progress')
+
+    def test_cancel_puts_match_back(self):
+        m = self._first()
+        self.c.post(reverse('court_start', args=[self.t.pk, 2, self.sig, m.pk]))
+        self.c.post(reverse('court_cancel', args=[self.t.pk, 2, self.sig, m.pk]))
+        m.refresh_from_db()
+        self.assertEqual(m.status, 'pending')
+
+    def test_table_page_toggle_and_regenerate(self):
+        c = Client(); c.force_login(self.user)
+        r = c.get(reverse('tournament_court_links', args=[self.t.pk]))
+        self.assertContains(r, '<svg')
+        old_url = self.url
+        c.post(reverse('court_access_regenerate', args=[self.t.pk]))
+        self.assertEqual(self.c.get(old_url).status_code, 404)
+        c.post(reverse('court_access_toggle', args=[self.t.pk]))
+        self.t.refresh_from_db()
+        self.assertFalse(self.t.court_access_enabled)
+        # court signs print with QR codes only when enabled
+        c.post(reverse('court_access_toggle', args=[self.t.pk]))
+        self.assertContains(c.get(reverse('tournament_court_signs', args=[self.t.pk])), 'sign-qr-code')
+
+
+class CourtUrlTest(TestCase):
+    def test_public_base_url_is_used_for_qr_links(self):
+        from django.test import RequestFactory, override_settings as ovs
+        from .court_access import court_url
+        user = make_user(username='clubqr')
+        t = Tournament.objects.create(name="Q", date=datetime.date.today(), division_model='youth', owner=user)
+        req = RequestFactory().get('/', HTTP_HOST='localhost')
+        with ovs(PUBLIC_BASE_URL='https://tornejos.example.org/'):
+            self.assertTrue(court_url(req, t, 1).startswith('https://tornejos.example.org/pista/'))
+        self.assertTrue(court_url(req, t, 1).startswith('http://localhost/pista/'))

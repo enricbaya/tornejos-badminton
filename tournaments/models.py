@@ -116,6 +116,16 @@ class Tournament(models.Model):
         related_name='tournaments',
         verbose_name=_("Club user"),
     )
+    court_access_enabled = models.BooleanField(
+        default=False,
+        verbose_name=_("Court referees enabled"),
+        help_text=_("Allow court referees to start matches and enter results from their phone (QR code on the court sign)."),
+    )
+    court_access_key = models.CharField(
+        max_length=32, blank=True, default='',
+        verbose_name=_("Court access key"),
+        help_text=_("Secret used to sign the court links. Changing it invalidates every printed QR code."),
+    )
 
 
     class Meta:
@@ -364,6 +374,11 @@ class Match(models.Model):
     scheduled_time = models.DateTimeField(verbose_name=_("Scheduled Time"), null=True, blank=True)
     court = models.CharField(max_length=50, blank=True, null=True, verbose_name=_("Court"))
     started_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Started at"))
+    entered_by_court = models.CharField(
+        max_length=10, blank=True, default='',
+        verbose_name=_("Result entered from court"),
+        help_text=_("Court number when the result was entered by the court referee."),
+    )
     group_number = models.IntegerField(null=True, blank=True, verbose_name=_("Group number"))
     phase = models.CharField(
         max_length=10, default='group',

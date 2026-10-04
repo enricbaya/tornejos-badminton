@@ -45,6 +45,7 @@
         <a href="{% url 'tournament_scoresheet' tournament.pk %}" class="btn btn-secondary" target="_blank">🖨 {% trans "Score sheets" %}</a>
         <a href="{% url 'tournament_wallchart' tournament.pk %}" class="btn btn-secondary" target="_blank">📋 {% trans "Result chart" %}</a>
         <a href="{% url 'tournament_court_signs' tournament.pk %}" class="btn btn-secondary" target="_blank">🏸 {% trans "Court signs" %}</a>
+        <a href="{% url 'tournament_court_links' tournament.pk %}" class="btn btn-secondary">📱 {% trans "Court referees" %}</a>
     </div>
     <div class="detail-panel" id="panel-admin" style="display:none;">
         <a href="{% url 'tournament_reset_schedule' tournament.pk %}" class="btn btn-danger">🔄 {% trans "Reset match programme" %}</a>
@@ -637,7 +638,7 @@ var MATCH_LOOKUP = {
             <td>{{ match.team1.name }}{{ match.t1_seed }}{% if match.t1_status == 'playing' %} 🏸{% elif match.t1_status == 'resting' %} <span class="status-badge-rest" style="font-size:0.72rem; color:#d97706; white-space:nowrap;">⏱ <span class="rest-timer" data-until="{{ match.t1_rest_until|unix_ts }}"></span></span>{% endif %}</td>
             <td>{{ match.team2.name }}{{ match.t2_seed }}{% if match.t2_status == 'playing' %} 🏸{% elif match.t2_status == 'resting' %} <span class="status-badge-rest" style="font-size:0.72rem; color:#d97706; white-space:nowrap;">⏱ <span class="rest-timer" data-until="{{ match.t2_rest_until|unix_ts }}"></span></span>{% endif %}</td>
             {% endif %}
-            <td>{{ match.score|default:"–" }}</td>
+            <td>{{ match.score|default:"–" }}{% if match.entered_by_court %} <span title="{% trans 'Entered by the court referee' %}" style="font-size:0.72rem; color:var(--accent-text,#c8174f); white-space:nowrap;">📱{% trans "Court" %} {{ match.entered_by_court }}</span>{% endif %}</td>
             <td>{{ match.winner.name|default:"–" }}</td>
             <td>
                 {% if match.status == 'completed' %}
@@ -690,7 +691,7 @@ var MATCH_LOOKUP = {
                     <span style="color:#888; font-style:italic;">{{ match.bracket_label|bracket_label_i18n }}</span>
                 {% else %}–{% endif %}
             </td>
-            <td>{{ match.score|default:"–" }}</td>
+            <td>{{ match.score|default:"–" }}{% if match.entered_by_court %} <span title="{% trans 'Entered by the court referee' %}" style="font-size:0.72rem; color:var(--accent-text,#c8174f); white-space:nowrap;">📱{% trans "Court" %} {{ match.entered_by_court }}</span>{% endif %}</td>
             <td>{{ match.winner.name|default:"–" }}</td>
             <td>
                 {% if match.status == 'completed' %}
