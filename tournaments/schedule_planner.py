@@ -122,7 +122,7 @@ def generate_time_schedule(tournament):
         return 0
 
     days = list(tournament.days.order_by('date', 'start_time'))
-    return _schedule_greedy(tournament, matches, days)
+    return _schedule_interleaved(tournament, matches, days)
 
 
 # ---------------------------------------------------------------------------
@@ -336,7 +336,7 @@ def replan_pending(tournament, now=None):
     if not pending:
         return 0
     busy = {'courts': courts, 'players': players, 'bracket_slots': bracket_slots, 'group_ends': group_ends}
-    return _schedule_greedy(tournament, pending, days, start_at=start_at, busy=busy)
+    return _schedule_interleaved(tournament, pending, days, start_at=start_at, busy=busy)
 
 
 # ---------------------------------------------------------------------------
@@ -418,3 +418,181 @@ def check_schedule_feasibility(tournament):
             )
 
     return errors
+
+
+# ---------------------------------------------------------------------------
+# Interleaved scheduler (default since October 2026)
+# ---------------------------------------------------------------------------
+#
+# The original greedy scheduler placed whole divisions one after the other in
+# priority order. With school tournaments this left courts idle: while the
+# youngest players rest between rounds, nobody else may use the courts, and the
+# last divisions (and their finals) no longer fit in the day.
+#
+# This one walks through the day in 5-minute steps and, every time a court is
+# free, starts the best match that can be played at that moment:
+#   1. lowest schedule priority number first (younger divisions keep priority),
+#   2. group stage before final phase, earlier rounds first, lower match number.
+# A match can be played when its players have finished their previous match
+# plus the break, and when what it depends on (whole group stage for the final
+# phase, both feeder matches for a knockout round, the previous round of a
+# final round-robin) has finished plus the break.
+
+def _schedule_interleaved(tournament, matches, days, start_at=None, busy=None):
+    from .models import Match
+
+    day_windows = _build_day_windows(days)
+    if start_at is not None:
+        day_windows = [w for w in day_windows if w['end'] > start_at]
+        for w in day_windows:
+            w['start'] = max(w['start'], start_at)
+    if not day_windows or not matches:
+        return 0
+    busy = busy or {}
+    break_td = timedelta(minutes=tournament.player_break_time)
+    step = timedelta(minutes=_SLOT_MINUTES)
+
+    def duration(m):
+        return tournament.single_match_duration if m.division.discipline == 'single' else tournament.double_match_duration
+
+    def players(m):
+        out = []
+        for t in (m.team1, m.team2):
+            if t is not None:
+                out += [pk for pk in (t.player1_id, t.player2_id) if pk]
+        return out
+
+    pending = list(matches)
+    pending_ids = {m.pk for m in pending}
+    player_free = dict(busy.get('players', {}))          # pk → end of last match (break added on use)
+    slot_end = {}                                          # (div, sec, round, slot) → end
+    for (div, sec, r, s), end in busy.get('bracket_slots', {}).items():
+        slot_end[(div, sec, r, s)] = end
+    league_round_end = {}                                  # (div, sec, round) → end
+    group_end = {}                                         # div → end of its group stage so far
+    for (div, _day), end in busy.get('group_ends', {}).items():
+        group_end[div] = max(group_end.get(div, end), end)
+
+    # Which group matches / knockout matches exist but are not scheduled yet (dependencies)
+    div_ids = {m.division_id for m in pending}
+    group_left = {}
+    for m in pending:
+        if m.phase == 'group' and m.division.tournament_type in ('playoff',):
+            group_left[m.division_id] = group_left.get(m.division_id, 0) + 1
+    ko_index = {}
+    for m in Match.objects.filter(division_id__in=div_ids, bracket_slot__isnull=False, is_third_place=False):
+        ko_index[(m.division_id, m.final_section, m.match_round, m.bracket_slot)] = m
+    # Finals (and 3rd-place matches) of a division split per gender wait until every other
+    # final-phase match of that division has a time, so all the finals are played at the end.
+    final_round = {}
+    for (div, sec, r, _s) in ko_index:
+        final_round[(div, sec)] = max(final_round.get((div, sec), 0), r)
+
+    def is_final(m):
+        return m.phase == 'playoff' and m.bracket_slot is not None and (
+            m.is_third_place or m.match_round == final_round.get((m.division_id, m.final_section)))
+    semis_left, semis_end = {}, {}
+    for m in pending:
+        if m.division.final_split and m.phase == 'playoff' and not is_final(m):
+            semis_left[m.division_id] = semis_left.get(m.division_id, 0) + 1
+    league_left = {}
+    for m in pending:
+        if m.bracket_slot is None and m.phase == 'playoff':
+            key = (m.division_id, m.final_section, m.match_round)
+            league_left[key] = league_left.get(key, 0) + 1
+
+    def ready_at(m):
+        """Earliest start allowed by players and dependencies, or None if not ready yet."""
+        earliest = day_windows[0]['start']
+        for pk in players(m):
+            if pk in player_free:
+                earliest = max(earliest, player_free[pk] + break_td)
+        if m.phase == 'playoff' and m.division.tournament_type == 'playoff':
+            if group_left.get(m.division_id):
+                return None
+            if m.division.final_split and is_final(m):
+                if semis_left.get(m.division_id):
+                    return None
+                if m.division_id in semis_end:
+                    earliest = max(earliest, semis_end[m.division_id])
+            if m.division_id in group_end:
+                earliest = max(earliest, group_end[m.division_id] + break_td)
+        if m.team1_id is None or m.team2_id is None:
+            if m.bracket_slot is None:
+                if m.phase == 'playoff':
+                    prev = (m.division_id, m.final_section, m.match_round - 1)
+                    if league_left.get(prev):
+                        return None
+                    if prev in league_round_end:
+                        earliest = max(earliest, league_round_end[prev] + break_td)
+            else:
+                s = 1 if m.is_third_place else m.bracket_slot
+                ends = []
+                for fs in (2 * s - 1, 2 * s):
+                    key = (m.division_id, m.final_section, m.match_round - 1, fs)
+                    if key in slot_end:
+                        ends.append(slot_end[key])
+                        continue
+                    feeder = ko_index.get(key)
+                    if feeder is not None and feeder.pk in pending_ids:
+                        return None   # the feeder match has no time yet
+                    # bye, finished before this run or no such slot: only the group stage matters
+                if ends:
+                    earliest = max(earliest, max(ends) + break_td)
+        return earliest
+
+    def sort_key(m):
+        return (m.division.schedule_priority, 0 if m.phase == 'group' else 1,
+                m.match_round, 1 if m.is_third_place else 0, m.match_number or 0, m.pk)
+
+    pending.sort(key=sort_key)
+    updated = []
+    for w in day_windows:
+        court_free = {c: w['start'] for c in range(1, w['court_count'] + 1)}
+        for c, end in busy.get('courts', {}).items():
+            if c in court_free:
+                court_free[c] = max(court_free[c], end)
+        limit = w['end'] - w['buffer']
+        t = w['start']
+        while t < limit and pending:
+            free_courts = [c for c, f in sorted(court_free.items()) if f <= t]
+            if free_courts:
+                for c in free_courts:
+                    chosen = None
+                    for m in pending:
+                        if w not in _get_allowed_windows(m, day_windows):
+                            continue
+                        if t + timedelta(minutes=duration(m)) > limit:
+                            continue
+                        ra = ready_at(m)
+                        if ra is not None and ra <= t:
+                            chosen = m
+                            break
+                    if chosen is None:
+                        break
+                    end = t + timedelta(minutes=duration(chosen))
+                    chosen.scheduled_time = t
+                    chosen.court = str(c)
+                    updated.append(chosen)
+                    pending.remove(chosen)
+                    pending_ids.discard(chosen.pk)
+                    court_free[c] = end
+                    for pk in players(chosen):
+                        player_free[pk] = end
+                    if chosen.phase == 'group':
+                        group_end[chosen.division_id] = max(group_end.get(chosen.division_id, end), end)
+                        if chosen.division_id in group_left:
+                            group_left[chosen.division_id] -= 1
+                    if chosen.division.final_split and chosen.phase == 'playoff' and not is_final(chosen):
+                        semis_left[chosen.division_id] -= 1
+                        semis_end[chosen.division_id] = max(semis_end.get(chosen.division_id, end), end)
+                    if chosen.bracket_slot is not None and not chosen.is_third_place:
+                        slot_end[(chosen.division_id, chosen.final_section, chosen.match_round, chosen.bracket_slot)] = end
+                    if chosen.bracket_slot is None and chosen.phase == 'playoff':
+                        key = (chosen.division_id, chosen.final_section, chosen.match_round)
+                        league_round_end[key] = max(league_round_end.get(key, end), end)
+                        league_left[key] -= 1
+            t += step
+
+    Match.objects.bulk_update(updated, ['scheduled_time', 'court'])
+    return len(updated)

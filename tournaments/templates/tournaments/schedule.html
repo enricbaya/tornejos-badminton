@@ -40,7 +40,9 @@
 
 {% if has_unscheduled %}
 <div class="flash flash-warning">
-    {% trans "Some matches are missing a time slot. Click 'Generate new time schedule' to schedule all matches." %}
+    <b>{% blocktrans count n=unscheduled_count %}{{ n }} match has no time: it does not fit in the tournament day.{% plural %}{{ n }} matches have no time: they do not fit in the tournament day.{% endblocktrans %}</b>
+    {% for d in days %}<br>{% blocktrans with start=d.start_time|time:"H:i" end=d.end_time|time:"H:i" buf=d.buffer_minutes courts=d.court_count %}Day: {{ start }}–{{ end }}, {{ courts }} courts, the last {{ buf }} min kept free.{% endblocktrans %}{% endfor %}
+    <br>{% trans "To make room: set a later end time or fewer free minutes at the end (Edit setup → days), add courts, shorten the match time or the rest between matches, or choose a format with fewer matches. Then click 'Generate new time schedule' again." %}
 </div>
 {% endif %}
 

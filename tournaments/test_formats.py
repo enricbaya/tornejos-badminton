@@ -205,3 +205,51 @@ class ConfiguratorTest(BaseFormat):
         c.post(reverse('division_apply_format', args=[d.pk]), {'group_count': 3, 'final_format': 'none'})
         d.refresh_from_db()
         self.assertEqual((d.tournament_type, d.matches.count()), ('groups', 0))
+
+
+class InterleavedScheduleTest(TestCase):
+    """The trial tournament of December 2026: 65 matches, 6 courts, 9:00–14:00. Everything must fit and
+    the senior finals (boys and girls) come last."""
+
+    def test_trial_tournament_fits(self):
+        user = make_user(username='clubsched')
+        t = Tournament.objects.create(name="Nadal", date=datetime.date(2026, 12, 21), division_model='youth',
+                                      scoring_model='best_of_5_15', owner=user, single_match_duration=20,
+                                      player_break_time=15)
+        TournamentDay.objects.create(tournament=t, day_number=1, date=t.date, start_time=datetime.time(9, 0),
+                                     end_time=datetime.time(14, 0), court_count=6, buffer_minutes=15)
+        a = Division.objects.create(tournament=t, name='Alevins', discipline='single', tournament_type='playoff',
+                                    group_count=3, advance_count=1, final_format='league', schedule_priority=1)
+        a.teams.set(_teams(user, [(f'A{i:02d}', 'M') for i in range(12)]))
+        c = Division.objects.create(tournament=t, name='Cadet', discipline='single', tournament_type='playoff',
+                                    group_count=2, advance_count=4, third_place_match=True, schedule_priority=2)
+        c.teams.set(_teams(user, [(f'C{i}', 'M') for i in range(8)]))
+        s = Division.objects.create(tournament=t, name='Sènior', discipline='single', tournament_type='playoff',
+                                    group_count=6, final_split='gender', third_place_match=True,
+                                    section_qualifiers={'M': 4, 'K': 2}, schedule_priority=3)
+        s.teams.set(_teams(user, [(f'M{i:02d}', 'M') for i in range(11)] + [(f'F{i}', 'K') for i in range(7)]))
+        for d in (a, c, s):
+            generate_schedule(d)
+        for i, m in enumerate(Match.objects.filter(division__tournament=t).order_by('pk'), start=1):
+            m.match_number = i
+            m.save(update_fields=['match_number'])
+        from .schedule_planner import generate_time_schedule
+        generate_time_schedule(t)
+        qs = Match.objects.filter(division__tournament=t).exclude(walkover=True)
+        self.assertFalse(qs.filter(scheduled_time__isnull=True).exists())
+        last = qs.order_by('-scheduled_time').first().scheduled_time
+        finals = s.matches.filter(phase='playoff').filter(is_third_place=False, match_round=5, final_section='M')
+        self.assertEqual(finals.first().scheduled_time, last)
+        girls_final = s.matches.get(final_section='K', is_third_place=False)
+        boys_semis_end = max(m.scheduled_time for m in s.matches.filter(final_section='M', match_round=4, is_third_place=False))
+        self.assertGreater(girls_final.scheduled_time, boys_semis_end)
+        # no player plays two matches at once or without the break
+        from collections import defaultdict
+        slots = defaultdict(list)
+        for m in qs.exclude(team1__isnull=True).exclude(team2__isnull=True):
+            for team in (m.team1, m.team2):
+                slots[team.player1_id].append(m.scheduled_time)
+        for times in slots.values():
+            times.sort()
+            for x, y in zip(times, times[1:]):
+                self.assertGreaterEqual((y - x).total_seconds(), (20 + 15) * 60)

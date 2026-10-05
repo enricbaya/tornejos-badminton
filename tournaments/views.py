@@ -260,6 +260,12 @@ def tournament_export_data(tournament):
                 "silver_count": d.silver_count,
                 "bronze_count": d.bronze_count,
                 "medals_by_age_group": d.medals_by_age_group,
+                "final_format": d.final_format,
+                "qualify_mode": d.qualify_mode,
+                "final_qualifiers": d.final_qualifiers,
+                "third_place_match": d.third_place_match,
+                "final_split": d.final_split,
+                "section_qualifiers": d.section_qualifiers,
                 "team_ids": list(d.teams.values_list('pk', flat=True)),
                 "medal_overrides": [
                     {"medal": o.medal, "team_id": o.team_id, "order": o.order, "subgroup": o.subgroup}
@@ -288,6 +294,8 @@ def tournament_export_data(tournament):
                 "started_at": m.started_at.isoformat() if m.started_at else None,
                 "finished_at": m.finished_at.isoformat() if m.finished_at else None,
                 "entered_by_court": m.entered_by_court,
+                "final_section": m.final_section,
+                "is_third_place": m.is_third_place,
             }
             for m in matches
         ],
@@ -453,6 +461,12 @@ def _do_tournament_import(request, data):
             silver_count=dd.get('silver_count', 1),
             bronze_count=dd.get('bronze_count', 0),
             medals_by_age_group=dd.get('medals_by_age_group', False),
+            final_format=dd.get('final_format', 'knockout'),
+            qualify_mode=dd.get('qualify_mode', 'per_group'),
+            final_qualifiers=dd.get('final_qualifiers', 4),
+            third_place_match=dd.get('third_place_match', False),
+            final_split=dd.get('final_split', ''),
+            section_qualifiers=dd.get('section_qualifiers') or {},
         )
         teams_for_div = [team_map[tid] for tid in dd.get('team_ids', []) if tid in team_map]
         division.teams.set(teams_for_div)
@@ -489,6 +503,8 @@ def _do_tournament_import(request, data):
             started_at=parse_datetime(md['started_at']) if md.get('started_at') else None,
             finished_at=parse_datetime(md['finished_at']) if md.get('finished_at') else None,
             entered_by_court=md.get('entered_by_court', '') or '',
+            final_section=md.get('final_section', '') or '',
+            is_third_place=md.get('is_third_place', False),
         )
 
     # Seeds
@@ -1929,12 +1945,14 @@ def tournament_schedule(request, pk):
     _apply_seed_labels(matches, seed_lookup)
     playing_pks, resting = get_busy_info()
     apply_status_to_matches(matches, playing_pks, resting)
-    has_unscheduled = (
+    unscheduled_count = (
         Match.objects
         .filter(division__tournament=tournament, scheduled_time__isnull=True)
         .exclude(match_number=None)
-        .exists()
+        .exclude(walkover=True)
+        .count()
     )
+    has_unscheduled = unscheduled_count > 0
     now = timezone.now()
     from .live_info import compute_delay
     return render(request, 'tournaments/schedule.html', {
@@ -1942,6 +1960,8 @@ def tournament_schedule(request, pk):
         'matches': matches,
         'now': now,
         'has_unscheduled': has_unscheduled,
+        'unscheduled_count': unscheduled_count,
+        'days': list(tournament.days.order_by('date', 'start_time')),
         'delay': compute_delay(tournament, now),
     })
 
@@ -1975,7 +1995,11 @@ def tournament_generate_time_schedule(request, pk):
                     messages.warning(request, _("Warning: schedule may be incomplete despite forced run."))
                 with transaction.atomic():
                     count = generate_time_schedule(tournament)
-                if count:
+                left = (Match.objects.filter(division__tournament=tournament, scheduled_time__isnull=True)
+                        .exclude(match_number=None).exclude(walkover=True).count())
+                if count and left:
+                    messages.warning(request, _("Time schedule generated for %(n)s matches, but %(left)s do not fit in the tournament day.") % {'n': count, 'left': left})
+                elif count:
                     messages.success(request, _("Time schedule generated for %(n)s matches.") % {'n': count})
                 else:
                     messages.warning(request, _("No matches to schedule. Generate match programmes for divisions first."))
