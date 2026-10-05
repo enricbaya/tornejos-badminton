@@ -330,6 +330,11 @@ class Division(models.Model):
     section_qualifiers = models.JSONField(
         default=dict, blank=True, verbose_name=_("Players in each final"),
         help_text=_("Per gender / age group: how many go through to that final phase."))
+    target_min_matches = models.PositiveSmallIntegerField(
+        default=3, verbose_name=_("Minimum matches per player"),
+        help_text=_("Wished range of matches per player in this category, used to suggest formats."))
+    target_max_matches = models.PositiveSmallIntegerField(
+        default=5, verbose_name=_("Maximum matches per player"))
     medals_by_age_group = models.BooleanField(
         default=False, verbose_name=_("Medals per age group and gender"),
         help_text=_("Award gold, silver and bronze to the best three of each age group and gender in this category "

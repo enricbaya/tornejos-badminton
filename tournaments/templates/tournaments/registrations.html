@@ -52,7 +52,7 @@
 <h2 style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
   <span>{% trans "Waiting" %} ({{ pending|length }})</span>
   {% if pending %}
-  <form method="post" action="{% url 'registration_accept_all' tournament.pk %}" onsubmit="return confirm('{% trans "Accept all waiting registrations?" %}');">
+  <form method="post" action="{% url 'registration_accept_all' tournament.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Accept all waiting registrations?" %}{% endfilter %}');">
     {% csrf_token %}<button class="btn btn-primary btn-sm">✔ {% trans "Accept all" %}</button>
   </form>
   {% endif %}
@@ -78,7 +78,7 @@
           {% endif %}
           <button class="btn btn-primary btn-sm">✔</button>
         </form>
-        <form method="post" action="{% url 'registration_reject' tournament.pk r.pk %}" onsubmit="return confirm('{% trans "Reject this registration?" %}');">
+        <form method="post" action="{% url 'registration_reject' tournament.pk r.pk %}" onsubmit="return confirm('{% filter escapejs %}{% trans "Reject this registration?" %}{% endfilter %}');">
           {% csrf_token %}<button class="btn btn-secondary btn-sm" title="{% trans 'Reject' %}">✕</button>
         </form>
       </td>

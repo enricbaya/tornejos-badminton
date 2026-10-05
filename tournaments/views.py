@@ -266,6 +266,8 @@ def tournament_export_data(tournament):
                 "third_place_match": d.third_place_match,
                 "final_split": d.final_split,
                 "section_qualifiers": d.section_qualifiers,
+                "target_min_matches": d.target_min_matches,
+                "target_max_matches": d.target_max_matches,
                 "team_ids": list(d.teams.values_list('pk', flat=True)),
                 "medal_overrides": [
                     {"medal": o.medal, "team_id": o.team_id, "order": o.order, "subgroup": o.subgroup}
@@ -467,6 +469,8 @@ def _do_tournament_import(request, data):
             third_place_match=dd.get('third_place_match', False),
             final_split=dd.get('final_split', ''),
             section_qualifiers=dd.get('section_qualifiers') or {},
+            target_min_matches=dd.get('target_min_matches', 3),
+            target_max_matches=dd.get('target_max_matches', 5),
         )
         teams_for_div = [team_map[tid] for tid in dd.get('team_ids', []) if tid in team_map]
         division.teams.set(teams_for_div)
@@ -579,7 +583,8 @@ def tournament_detail(request, pk):
             return []
         from .format_suggestion import suggest_flexible
         minutes = tournament.single_match_duration if d.discipline == 'single' else tournament.double_match_duration
-        options = suggest_flexible(d.teams.count(), match_minutes=minutes)
+        options = suggest_flexible(d.teams.count(), match_minutes=minutes,
+                                   target=(d.target_min_matches, d.target_max_matches))
         current = _division_format_key(d)
         for opt in options:
             opt['is_current'] = _division_format_key(opt['config'], opt['tournament_type']) == current
@@ -890,7 +895,8 @@ def _current_format_summary(division):
     }
     if division.tournament_type == 'tree':
         return None
-    return evaluate_format(cfg, n, _section_counts(division, division.final_split), minutes)
+    return evaluate_format(cfg, n, _section_counts(division, division.final_split), minutes,
+                           (division.target_min_matches, division.target_max_matches))
 
 
 def _division_has_results(division):
@@ -946,6 +952,16 @@ def _format_config_from_request(data, division):
     return cfg
 
 
+def _target_from_request(data, division):
+    """Wished matches per player (min, max) from the configurator, falling back to the division."""
+    try:
+        lo = max(1, min(20, int(data.get('target_min') or division.target_min_matches)))
+        hi = max(1, min(20, int(data.get('target_max') or division.target_max_matches)))
+    except (TypeError, ValueError):
+        lo, hi = division.target_min_matches, division.target_max_matches
+    return (min(lo, hi), max(lo, hi))
+
+
 def _section_counts(division, split):
     from .final_phase import division_sections
     old = division.final_split
@@ -964,7 +980,8 @@ def division_format_preview(request, pk):
     cfg = _format_config_from_request(request.GET, division)
     t = division.tournament
     minutes = t.single_match_duration if division.discipline == 'single' else t.double_match_duration
-    res = evaluate_format(cfg, division.teams.count(), _section_counts(division, cfg['final_split']), minutes)
+    lo, hi = _target_from_request(request.GET, division)
+    res = evaluate_format(cfg, division.teams.count(), _section_counts(division, cfg['final_split']), minutes, (lo, hi))
     return JsonResponse({k: res[k] for k in ('label', 'matches', 'court_minutes', 'min_matches_per_team',
                                              'max_matches_per_team', 'ok', 'sizes')})
 
@@ -989,6 +1006,7 @@ def division_apply_format(request, pk):
             division.third_place_match = cfg['third_place_match']
             division.final_split = cfg['final_split']
             division.section_qualifiers = cfg['section_qualifiers']
+            division.target_min_matches, division.target_max_matches = _target_from_request(request.POST, division)
             if division.third_place_match and division.bronze_count > 1:
                 division.bronze_count = 1
             division.save()
@@ -1139,6 +1157,13 @@ def match_start(request, pk):
     match = get_object_or_404(Match, pk=pk, division__tournament__owner=request.user)
     next_url = request.POST.get('next') or ''
     if request.method == 'POST' and match.status == 'pending':
+        if request.POST.get('mark_arrived') == '1':
+            # Started from the loudspeaker panel after calling the players: they are here.
+            for team in (match.team1, match.team2):
+                for p in (team.players if team else []):
+                    if not p.has_arrived:
+                        p.has_arrived = True
+                        p.save(update_fields=['has_arrived'])
         errors = check_match_startable(match)
         if errors:
             messages.error(request, _("Cannot start match: ") + ' · '.join(errors))
@@ -1903,20 +1928,16 @@ def tournament_run(request, pk):
     ]
     occupied_court_count = sum(1 for court in court_indicators if court['active_match'])
 
+    from .day_views import live_context
+    live = live_context(tournament)
     return render(request, 'tournaments/tournament_run.html', {
+        **live,
         'tournament': tournament,
         'division_data': division_data,
         'next_matches': next_matches,
-        'active_matches': active_matches,
-        'total_matches': total_matches,
-        'completed_matches': completed_matches,
         'in_progress_matches': in_progress_matches,
         'today_date': today_date,
         'day_anchor_pks': day_anchor_pks,
-        'court_choices': court_choices,
-        'court_indicators': court_indicators,
-        'occupied_court_count': occupied_court_count,
-        'occupied_courts': occupied_courts,
         'playing_pks': playing_pks,
         'resting': resting,
     })

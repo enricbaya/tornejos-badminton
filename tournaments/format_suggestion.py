@@ -136,7 +136,7 @@ def normalise_config(cfg, n):
     return c
 
 
-def evaluate_format(cfg, n, section_counts=None, match_minutes=None):
+def evaluate_format(cfg, n, section_counts=None, match_minutes=None, target=None):
     """Matches in total and per player (min/max) for a configuration with n participants.
 
     section_counts: {code: players} for a final phase split per gender / age group.
@@ -196,7 +196,7 @@ def evaluate_format(cfg, n, section_counts=None, match_minutes=None):
         'max_matches_per_team': max_pp,
         'sizes': sizes,
         'label': describe_format(c, sizes),
-        'ok': TARGET_MIN <= min_pp and max_pp <= TARGET_MAX,
+        'ok': (target or (TARGET_MIN, TARGET_MAX))[0] <= min_pp and max_pp <= (target or (TARGET_MIN, TARGET_MAX))[1],
     }
     if match_minutes:
         res['court_minutes'] = total * match_minutes
@@ -236,19 +236,20 @@ def describe_format(c, sizes):
     return txt
 
 
-def _score(opt, n):
-    """Lower is better: inside 3–5 matches per player, close to 4 on average, short day."""
+def _score(opt, n, target=None):
+    """Lower is better: inside the wished range of matches per player, close to its middle, short day."""
+    lo, hi = target or (TARGET_MIN, TARGET_MAX)
     avg = opt['matches'] * 2 / n
-    penalty = 100 * max(0, TARGET_MIN - opt['min_matches_per_team'])
-    penalty += 100 * max(0, opt['max_matches_per_team'] - TARGET_MAX)
-    penalty += abs(avg - 3.75) * 8
+    penalty = 100 * max(0, lo - opt['min_matches_per_team'])
+    penalty += 100 * max(0, opt['max_matches_per_team'] - hi)
+    penalty += abs(avg - (lo + hi) / 2 + 0.25) * 8
     penalty += opt['matches'] / 10
     if opt['final_format'] != 'none':
         penalty -= 3   # a final phase makes the medals clearer
     return penalty
 
 
-def suggest_flexible(n, section_counts=None, match_minutes=None, limit=4):
+def suggest_flexible(n, section_counts=None, match_minutes=None, limit=4, target=None):
     """Several good formats for n participants, best first (all fields needed to apply them)."""
     if n < 2:
         return []
@@ -275,11 +276,11 @@ def suggest_flexible(n, section_counts=None, match_minutes=None, limit=4):
                 configs.append({'group_count': g, 'final_format': 'league', 'qualify_mode': 'total', 'final_qualifiers': 3})
                 configs.append({'group_count': g, 'final_format': 'league', 'qualify_mode': 'total', 'final_qualifiers': 4})
         for cfg in configs:
-            opt = evaluate_format(cfg, n, section_counts, match_minutes)
+            opt = evaluate_format(cfg, n, section_counts, match_minutes, target)
             key = (opt['label'], opt['matches'])
             if key in seen:
                 continue
             seen.add(key)
             candidates.append(opt)
-    candidates.sort(key=lambda o: _score(o, n))
+    candidates.sort(key=lambda o: _score(o, n, target))
     return candidates[:limit]

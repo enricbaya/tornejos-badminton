@@ -214,7 +214,7 @@
     pendingSlot  = slot;
     pendingCourt = court;
     document.getElementById('panel-title').textContent    = `{% trans "Court" %} ${court} · ${slot.slice(-5)}`;
-    document.getElementById('panel-subtitle').textContent = '{% trans "Only matches without conflicts are shown" %}';
+    document.getElementById('panel-subtitle').textContent = '{% filter escapejs %}{% trans "Only matches without conflicts are shown" %}{% endfilter %}';
     document.getElementById('panel-loading').style.display = 'block';
     document.getElementById('panel-empty').style.display   = 'none';
     document.getElementById('suggestion-list').innerHTML   = '';
@@ -250,7 +250,7 @@
         });
       })
       .catch(() => {
-        document.getElementById('panel-loading').textContent = '{% trans "Error loading suggestions." %}';
+        document.getElementById('panel-loading').textContent = '{% filter escapejs %}{% trans "Error loading suggestions." %}{% endfilter %}';
       });
   }
 
@@ -281,13 +281,13 @@
         // Reload the page to refresh the grid
         window.location.reload();
       } else {
-        alert(data.error || '{% trans "Error assigning match." %}');
+        alert(data.error || '{% filter escapejs %}{% trans "Error assigning match." %}{% endfilter %}');
         listItem.style.opacity = '';
         listItem.style.pointerEvents = '';
       }
     })
     .catch(() => {
-      alert('{% trans "Network error – please try again." %}');
+      alert('{% filter escapejs %}{% trans "Network error – please try again." %}{% endfilter %}');
       listItem.style.opacity = '';
       listItem.style.pointerEvents = '';
     });
@@ -319,12 +319,12 @@
       if (data.ok) {
         window.location.reload();
       } else {
-        alert(data.error || '{% trans "Error freeing slot." %}');
+        alert(data.error || '{% filter escapejs %}{% trans "Error freeing slot." %}{% endfilter %}');
         document.getElementById('unassign-confirm').disabled = false;
       }
     })
     .catch(() => {
-      alert('{% trans "Network error – please try again." %}');
+      alert('{% filter escapejs %}{% trans "Network error – please try again." %}{% endfilter %}');
       document.getElementById('unassign-confirm').disabled = false;
     });
   });
@@ -354,12 +354,12 @@
       if (data.ok) {
         window.location.reload();
       } else {
-        alert(data.error || '{% trans "Error resetting schedule." %}');
+        alert(data.error || '{% filter escapejs %}{% trans "Error resetting schedule." %}{% endfilter %}');
         document.getElementById('clear-confirm').disabled = false;
       }
     })
     .catch(() => {
-      alert('{% trans "Network error – please try again." %}');
+      alert('{% filter escapejs %}{% trans "Network error – please try again." %}{% endfilter %}');
       document.getElementById('clear-confirm').disabled = false;
     });
   });

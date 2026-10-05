@@ -1,6 +1,6 @@
 // BTP Service Worker — caches the public viewer for offline/app use.
 // Bump the version string to force a cache refresh after deployments.
-const CACHE = 'btp-public-v2-cbi';
+const CACHE = 'btp-public-cbi-{{ STATIC_VERSION }}';
 
 const PRECACHE = [
   '/public/',

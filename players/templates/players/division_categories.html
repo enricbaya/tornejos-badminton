@@ -53,7 +53,7 @@
                 <td style="padding:0.5rem 0.7rem; text-align:right;">
                     <form method="post" action="{% url 'division_category_delete' cat.pk %}"
                           style="display:inline;"
-                          onsubmit="return confirm('{% blocktrans with name=cat.name %}Delete age group {{ name }}?{% endblocktrans %}');">
+                          onsubmit="return confirm('{% filter escapejs %}{% blocktrans with name=cat.name %}Delete age group {{ name }}?{% endblocktrans %}{% endfilter %}');">
                         {% csrf_token %}
                         <button type="submit"
                                 style="background:none; border:none; cursor:pointer; color:#ef4444; font-size:0.85rem; padding:0.2rem 0.5rem;">

@@ -48,7 +48,7 @@
             <div class="sched-card sched-upcoming" style="border-left-color:#aaa;"
                  data-search="{{ match.bracket_label|bracket_label_i18n|lower }}">
                 <span class="sched-dot dot-upcoming" style="background:#aaa;"></span>
-                <span class="sched-card-no">#{{ match.match_number }}</span>
+                <span class="sched-card-no">#{{ match.match_number }}</span>{% if match.court %}<span class="sched-card-court">{% trans "Court" %} {{ match.court }}</span>{% endif %}
                 <span class="sched-card-teams" style="color:#888; font-style:italic;">{{ match.bracket_label|bracket_label_i18n }}</span>
                 <span class="sched-card-div" style="margin-left:auto; font-size:0.8rem; color:#aaa;">{{ match.division.name }}</span>
             </div>
@@ -57,7 +57,7 @@
                      data-search="{{ match.team1.name|lower }} {{ match.team2.name|lower }}">
                 <summary class="sched-card-summary">
                     <span class="sched-dot dot-done"></span>
-                    <span class="sched-card-no">#{{ match.match_number }}</span>
+                    <span class="sched-card-no">#{{ match.match_number }}</span>{% if match.court %}<span class="sched-card-court">{% trans "Court" %} {{ match.court }}</span>{% endif %}
                     <span class="sched-card-teams">{{ match.team1|team_html:tournament.pk }}{{ match.t1_seed }}{% if match.t1_status == 'playing' %} <span title="{% trans 'Match in progress' %}">🏸</span>{% elif match.t1_status == 'resting' %} <span class="status-badge-rest" style="font-size:0.72rem; color:#d97706; white-space:nowrap;">⏱ <span class="rest-timer" data-until="{{ match.t1_rest_until|unix_ts }}"></span></span>{% endif %} <span class="vs">vs</span> {{ match.team2|team_html:tournament.pk }}{{ match.t2_seed }}{% if match.t2_status == 'playing' %} <span title="{% trans 'Match in progress' %}">🏸</span>{% elif match.t2_status == 'resting' %} <span class="status-badge-rest" style="font-size:0.72rem; color:#d97706; white-space:nowrap;">⏱ <span class="rest-timer" data-until="{{ match.t2_rest_until|unix_ts }}"></span></span>{% endif %}</span>
                     <span class="sched-card-result">{{ match.score|default:"" }}</span>
                     {% if match.walkover %}<span class="badge badge-walkover" style="margin-left:0.5rem;">WO</span>{% endif %}
@@ -75,7 +75,7 @@
             <div class="sched-card sched-active"
                  data-search="{{ match.team1.name|lower }} {{ match.team2.name|lower }}">
                 <span class="sched-dot dot-active"></span>
-                <span class="sched-card-no">#{{ match.match_number }}</span>
+                <span class="sched-card-no">#{{ match.match_number }}</span>{% if match.court %}<span class="sched-card-court">{% trans "Court" %} {{ match.court }}</span>{% endif %}
                 <span class="sched-card-teams">{{ match.team1|team_html:tournament.pk }}{{ match.t1_seed }} <span title="{% trans 'Match in progress' %}">🏸</span> <span class="vs">vs</span> {{ match.team2|team_html:tournament.pk }}{{ match.t2_seed }} <span title="{% trans 'Match in progress' %}">🏸</span></span>
                 <span class="sched-badge-active">{% trans "In progress" %}</span>
                 <span class="sched-card-div" style="margin-left:auto; font-size:0.8rem; color:#888;">{{ match.division.name }}</span>
@@ -84,7 +84,7 @@
             <div class="sched-card sched-upcoming"
                  data-search="{{ match.team1.name|lower }} {{ match.team2.name|lower }}">
                 <span class="sched-dot dot-upcoming"></span>
-                <span class="sched-card-no">#{{ match.match_number }}</span>
+                <span class="sched-card-no">#{{ match.match_number }}</span>{% if match.court %}<span class="sched-card-court">{% trans "Court" %} {{ match.court }}</span>{% endif %}
                 <span class="sched-card-teams">{{ match.team1|team_html:tournament.pk }}{{ match.t1_seed }}{% if match.t1_status == 'playing' %} <span title="{% trans 'Match in progress' %}">🏸</span>{% elif match.t1_status == 'resting' %} <span class="status-badge-rest" style="font-size:0.72rem; color:#d97706; white-space:nowrap;">⏱ <span class="rest-timer" data-until="{{ match.t1_rest_until|unix_ts }}"></span></span>{% endif %} <span class="vs">vs</span> {{ match.team2|team_html:tournament.pk }}{{ match.t2_seed }}{% if match.t2_status == 'playing' %} <span title="{% trans 'Match in progress' %}">🏸</span>{% elif match.t2_status == 'resting' %} <span class="status-badge-rest" style="font-size:0.72rem; color:#d97706; white-space:nowrap;">⏱ <span class="rest-timer" data-until="{{ match.t2_rest_until|unix_ts }}"></span></span>{% endif %}</span>
                 <span class="sched-card-div" style="margin-left:auto; font-size:0.8rem; color:#888;">{{ match.division.name }}</span>
             </div>
@@ -180,7 +180,7 @@
     background: white;
 }
 .sched-card-no  { font-weight: 700; min-width: 2.8rem; color: var(--accent-text,#c8174f); font-size: 0.82rem; }
-.sched-card-court { font-size: 0.75rem; color: #94a3b8; min-width: 4rem; background: #f1f5f9; padding: 0.15rem 0.5rem; border-radius: 4px; }
+.sched-card-court { font-size: 0.72rem; color: #111; font-weight: 800; text-transform: uppercase; white-space: nowrap; border: 1.5px solid #111; padding: 0.05rem 0.45rem; border-radius: 6px; margin-right: 0.4rem; }
 .sched-card-teams { flex: 1; color: #1e293b; }
 .sched-card-result { font-size: 0.8rem; color: #475569; }
 .sched-card-winner { font-size: 0.8rem; color: #166534; font-weight: 700; }
@@ -198,7 +198,7 @@
 @media (max-width: 600px) {
     .sched-timeslot { flex-direction: column; gap: 0.15rem; }
     .sched-time-label { padding-top: 0; font-size: 1rem; }
-    .sched-card-court { display: none; }
+    .sched-card-court { font-size: 0.65rem; padding: 0 0.3rem; }
     .sched-card-div { display: none; }
     .sched-card { padding: 0.45rem 0.65rem; gap: 0.4rem; }
     .sched-card-no { min-width: 2rem; }

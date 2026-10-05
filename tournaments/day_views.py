@@ -115,15 +115,9 @@ def tournament_replan(request, pk):
 
 @login_required
 def tournament_calls(request, pk):
-    """HTML fragment with the players to call over the loudspeaker (polled by the run page)."""
-    from .live_info import compute_calls, compute_delay
+    """HTML fragment with the players to call over the loudspeaker."""
     tournament = get_object_or_404(Tournament, pk=pk, owner=request.user)
-    calls = compute_calls(tournament)
-    return render(request, 'tournaments/partials/_calls.html', {
-        'tournament': tournament,
-        'calls': calls,
-        'delay': compute_delay(tournament),
-    })
+    return render(request, 'tournaments/partials/_calls.html', live_context(tournament))
 
 
 @login_required
@@ -135,3 +129,50 @@ def match_mark_called(request, pk):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({'ok': True})
     return redirect('tournament_run', pk=match.division.tournament.pk)
+
+
+# ---------------------------------------------------------------------------
+# Live part of the tournament-run page (courts on top + right column)
+# ---------------------------------------------------------------------------
+
+def live_context(tournament):
+    """Everything the live parts of the run page need (also used for the first render)."""
+    from .live_info import compute_delay, court_plan
+    plan = court_plan(tournament)
+    active = [e['active'] for e in plan if e['active']]
+    known = {str(e['court']) for e in plan}
+    # matches in progress on a court number outside today's courts (should not happen, but show them)
+    extra = list(Match.objects.filter(division__tournament=tournament, status='in_progress')
+                 .exclude(court__in=known).select_related('division', 'team1', 'team2'))
+    matches = Match.objects.filter(division__tournament=tournament).exclude(match_number=None) \
+        .exclude(team2__isnull=True, score='Bye')
+    total = matches.count()
+    done = matches.filter(status='completed').count()
+    calls = [{'match': e['proposal']} for e in plan if not e['active'] and e['proposal']]
+    return {
+        'tournament': tournament,
+        'plan': plan,
+        'calls': calls,
+        'any_free': any(not e['active'] for e in plan),
+        'delay': compute_delay(tournament),
+        'active_matches': active + extra,
+        'court_indicators': [{'number': e['court'], 'active_match': e['active']} for e in plan],
+        'court_choices': [e['court'] for e in plan],
+        'occupied_court_count': sum(1 for e in plan if e['active']),
+        'occupied_courts': {str(e['court']) for e in plan if e['active']},
+        'total_matches': total,
+        'completed_matches': done,
+    }
+
+
+@login_required
+def tournament_live(request, pk):
+    """JSON with the refreshed HTML of the courts strip and the right column of the run page."""
+    from django.template.loader import render_to_string
+    tournament = get_object_or_404(Tournament, pk=pk, owner=request.user)
+    ctx = live_context(tournament)
+    return JsonResponse({
+        'courts': render_to_string('tournaments/partials/_run_courts.html', ctx, request=request),
+        'side': render_to_string('tournaments/partials/_run_side.html', ctx, request=request),
+        'occupied': sorted(ctx['occupied_courts']),
+    })

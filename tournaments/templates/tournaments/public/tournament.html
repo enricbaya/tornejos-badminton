@@ -157,7 +157,7 @@
             </td>
             {% endif %}
             <td>{{ match.match_round }}</td>
-            <td style="color:#888; font-size:0.85rem;">{% if match.match_number %}#{{ match.match_number }}{% else %}–{% endif %}</td>
+            <td style="color:#888; font-size:0.85rem;">{% if match.match_number %}#{{ match.match_number }}{% else %}–{% endif %}{% if match.status != 'completed' %} {{ match|court_tag }}{% endif %}</td>
             {% if match.bracket_label and not match.team1 %}
             <td colspan="2" style="color:#888; font-style:italic;">{{ match.bracket_label|bracket_label_i18n }}</td>
             {% else %}

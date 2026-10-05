@@ -1,0 +1,59 @@
+{% load i18n tournament_extras %}
+{# Right column of the tournament-run page: refreshed every few seconds by tournament_live #}
+<div class="calls-panel" id="calls-panel" data-ids="{% for c in calls %}{% if not c.match.called_at %}{{ c.match.pk }} {% endif %}{% endfor %}">
+  {% include 'tournaments/partials/_calls.html' %}
+</div>
+
+{% if active_matches %}
+<div class="next-panel live-panel">
+  <div class="next-panel-header" style="background:var(--accent,#EB1C60);"><span>⚡ {% trans "In progress" %} ({{ active_matches|length }})</span></div>
+  {% for match in active_matches %}
+  <div class="live-row playing">
+    <div class="court-tag big">{% trans "Court" %} {{ match.court }}</div>
+    <div class="live-body">
+      <div class="live-meta">#{{ match.match_number }} · {{ match.division.name }}{% if match.started_at %} · <span class="court-timer inline" data-started-at="{{ match.started_at|date:'U' }}">0:00</span>{% endif %}</div>
+      <div class="live-teams">{{ match.team1.name }} <span class="vs">vs</span> {{ match.team2.name }}</div>
+      <div class="live-actions">
+        <a href="{% url 'match_record_result' match.pk %}?next={% url 'tournament_run' tournament.pk %}" class="js-result-modal btn btn-primary btn-sm">{% trans "Result" %}</a>
+        <a href="{% url 'match_walkover' match.pk %}?next={% url 'tournament_run' tournament.pk %}" class="btn btn-secondary btn-sm" style="color:#d97706; border-color:#fde68a;">WO</a>
+        <form method="post" action="{% url 'match_postpone' match.pk %}" class="inline-form">
+          {% csrf_token %}<input type="hidden" name="next" value="{% url 'tournament_run' tournament.pk %}">
+          <button type="submit" class="btn btn-secondary btn-sm" style="color:#94a3b8;">{% trans "Postpone" %}</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="next-panel live-panel">
+  <div class="next-panel-header"><span>🏸 {% trans "Next match on each court" %}</span></div>
+  {% for e in plan %}
+  {% with m=e.next %}
+  <div class="live-row">
+    <div class="court-tag big{% if e.active %} busy{% endif %}">{% trans "Court" %} {{ e.court }}</div>
+    <div class="live-body">
+      {% if m %}
+      <div class="live-meta">
+        {% if e.active %}{% trans "after the current match" %}{% elif e.proposal %}<b class="now">{% trans "now" %}</b>{% endif %}
+        {% if e.proposal and e.advanced %}<span class="adv-badge small">⏩ {% trans "Advanced" %}</span>{% endif %}
+        · #{{ m.match_number }} · {{ m.division.name }}{% if m.scheduled_time %} · {{ m.scheduled_time|time:"H:i" }}{% endif %}
+      </div>
+      <div class="live-teams">{% if m.team1 and m.team2 %}{{ m.team1.name }} <span class="vs">vs</span> {{ m.team2.name }}{% else %}<i style="color:#888;">{{ m.bracket_label|bracket_label_i18n }}</i>{% endif %}</div>
+      {% if not e.proposal and e.next_blockers %}<div class="live-warn">⏳ {{ e.next_blockers|join:" · " }}</div>{% endif %}
+      {% if m.team1 and m.team2 and not e.active %}
+      <div class="live-actions">
+        <button type="button" class="btn btn-primary btn-sm start-match-btn"
+                data-url="{% url 'match_start' m.pk %}" data-next="{% url 'tournament_run' tournament.pk %}"
+                data-planned="{{ e.court }}" data-label="#{{ m.match_number }} {{ m.team1.name }} {% trans 'vs' %} {{ m.team2.name }}">▶ {% trans "Start match" %}</button>
+      </div>
+      {% endif %}
+      {% else %}
+      <div class="live-teams" style="color:#94a3b8; font-weight:500;">{% if e.active %}{% trans "No more matches planned after this one." %}{% else %}{% trans "No more matches planned on this court." %}{% endif %}</div>
+      {% endif %}
+    </div>
+  </div>
+  {% endwith %}
+  {% endfor %}
+</div>

@@ -1,25 +1,46 @@
-{% load i18n %}
+{% load i18n tournament_extras %}
 <div class="calls-head">
   <b>📢 {% trans "Loudspeaker" %}</b>
   {% if delay %}<span class="delay-pill late">⏱ +{{ delay }} min</span>{% else %}<span class="delay-pill">⏱ {% trans "On time" %}</span>{% endif %}
 </div>
-{% for c in calls %}
-{% with m=c.match %}
-<div class="call-item{% if m.called_at %} called{% endif %}" data-match="{{ m.pk }}"
-     data-say="{% if c.court %}{% blocktrans with court=c.court %}Court {{ court }}{% endblocktrans %}. {% endif %}{{ m.team1.name }} {% trans 'against' %} {{ m.team2.name }}. {{ m.division.name }}.">
-  <div class="call-court">{% if c.court %}<small>{% trans "Court" %}</small>{{ c.court }}{% else %}–{% endif %}</div>
+{% for e in plan %}{% if not e.active %}
+{% if e.proposal %}{% with m=e.proposal %}
+<div class="call-item{% if m.called_at %} called{% endif %}{% if e.advanced %} advanced{% endif %}" data-match="{{ m.pk }}"
+     data-say="{% blocktrans with court=e.court %}Court {{ court }}{% endblocktrans %}. {{ m.team1.name }} {% trans 'against' %} {{ m.team2.name }}. {{ m.division.name }}.">
+  <div class="call-court"><small>{% trans "Court" %}</small>{{ e.court }}</div>
   <div class="call-body">
-    <div class="call-names">{{ m.team1.name }} <span>vs</span> {{ m.team2.name }}</div>
-    <div class="call-sub">{{ m.division.name }}{% if m.match_number %} · #{{ m.match_number }}{% endif %} ·
-      {% if c.reason == 'court_free' %}{% trans "court free" %}{% else %}{% trans "planned" %} {{ m.scheduled_time|time:"H:i" }}{% endif %}
-      {% if m.called_at %} · <b>{% trans "called at" %} {{ m.called_at|time:"H:i" }}</b>{% endif %}</div>
-  </div>
-  <div class="call-actions">
-    <button type="button" class="btn btn-secondary btn-sm js-say" title="{% trans 'Read aloud' %}">🔊</button>
-    <button type="button" class="btn {% if m.called_at %}btn-secondary{% else %}btn-primary{% endif %} btn-sm js-called" data-url="{% url 'match_mark_called' m.pk %}">{% if m.called_at %}{% trans "Call again" %}{% else %}✔ {% trans "Called" %}{% endif %}</button>
+    {% if e.advanced %}
+      <div class="adv-badge">⏩ {% trans "Advanced match" %}</div>
+      {% if e.due %}<div class="adv-why">{% blocktrans with n=e.due.match_number t=e.due.scheduled_time|time:"H:i" %}Planned here: #{{ n }} ({{ t }}){% endblocktrans %} — {{ e.due_blockers|join:" · " }}</div>
+      {% else %}<div class="adv-why">{% trans "No more matches planned on this court." %}</div>{% endif %}
+    {% endif %}
+    <div class="call-names">{{ m.team1.name }}{{ m.team1|team_school }} <span>vs</span> {{ m.team2.name }}{{ m.team2|team_school }}</div>
+    <div class="call-sub">#{{ m.match_number }} · {{ m.division.name }}{% if m.scheduled_time %} · {% trans "planned" %} {{ m.scheduled_time|time:"H:i" }}{% endif %}{% if e.advanced and m.court %} {% blocktrans with c=m.court %}on court {{ c }}{% endblocktrans %}{% endif %}</div>
+    {% if e.not_arrived %}<div class="call-warn">⚠ {% trans "Not checked in" %}: {{ e.not_arrived|join:", " }}</div>{% endif %}
+    {% if m.called_at %}<div class="call-called">✔ {% trans "called at" %} {{ m.called_at|time:"H:i" }}</div>{% endif %}
+    <div class="call-actions">
+      <button type="button" class="btn btn-secondary btn-sm js-say" title="{% trans 'Read aloud' %}">🔊</button>
+      <button type="button" class="btn {% if m.called_at %}btn-secondary{% else %}btn-primary{% endif %} btn-sm js-called" data-url="{% url 'match_mark_called' m.pk %}">{% if m.called_at %}{% trans "Call again" %}{% else %}✔ {% trans "Called" %}{% endif %}</button>
+      {% if m.called_at %}
+      <form method="post" action="{% url 'match_start' m.pk %}" class="inline-form">
+        {% csrf_token %}
+        <input type="hidden" name="court" value="{{ e.court }}">
+        <input type="hidden" name="mark_arrived" value="1">
+        <input type="hidden" name="next" value="{% url 'tournament_run' tournament.pk %}">
+        <button type="submit" class="btn btn-primary btn-sm call-start">▶ {% blocktrans with c=e.court %}Start on court {{ c }}{% endblocktrans %}</button>
+      </form>
+      {% endif %}
+    </div>
   </div>
 </div>
-{% endwith %}
-{% empty %}
-<div class="call-empty">{% trans "Nobody to call right now." %}</div>
-{% endfor %}
+{% endwith %}{% else %}
+<div class="call-item idle">
+  <div class="call-court"><small>{% trans "Court" %}</small>{{ e.court }}</div>
+  <div class="call-body">
+    <div class="call-names" style="color:#64748b;">{% trans "Free — no match can start now" %}</div>
+    {% if e.due %}<div class="call-sub">{% blocktrans with n=e.due.match_number t=e.due.scheduled_time|time:"H:i" %}Planned here: #{{ n }} ({{ t }}){% endblocktrans %} — {{ e.due_blockers|join:" · " }}</div>{% endif %}
+  </div>
+</div>
+{% endif %}
+{% endif %}{% empty %}{% endfor %}
+{% if not any_free %}<div class="call-empty">{% trans "All courts are in use. Nobody to call right now." %}</div>{% endif %}

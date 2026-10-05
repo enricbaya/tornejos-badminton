@@ -60,68 +60,140 @@ def _court_count_today(tournament, now):
     return max((d.court_count for d in (today or days)), default=0)
 
 
-def compute_calls(tournament, now=None):
-    """Matches whose players should be called now.
+def _blockers(match, playing, resting, now, court_of_player):
+    """Why the match cannot start right now (list of short texts; empty = it can start).
 
-    * one per free court: the next match that can be played (planned for that court first);
-    * matches planned to start in the next few minutes.
+    Players who have not checked in at reception do NOT block a call: calling them is
+    precisely how the judge table finds them. They are reported separately.
+    """
+    from django.utils.translation import gettext as _
+    if match.team1 is None or match.team2 is None:
+        return [_("waiting for earlier results")]
+    out = []
+    for t in (match.team1, match.team2):
+        for p in t.players:
+            if p.withdrawn:
+                out.append(_("%(name)s has withdrawn") % {'name': p.name})
+            elif p.pk in playing:
+                c = court_of_player.get(p.pk)
+                out.append(_("%(name)s is playing on court %(court)s") % {'name': p.name, 'court': c}
+                           if c else _("%(name)s is playing") % {'name': p.name})
+            elif p.pk in resting and resting[p.pk] > now + timedelta(minutes=1):
+                mins = int((resting[p.pk] - now).total_seconds() // 60) + 1
+                out.append(_("%(name)s is resting (%(min)s min)") % {'name': p.name, 'min': mins})
+    return out
 
-    A call disappears by itself once its match is started. Each item:
-    dict(match, court, reason) with reason 'court_free' or 'soon'.
+
+def _not_arrived(match):
+    if match.team1 is None or match.team2 is None:
+        return []
+    return [p.name for t in (match.team1, match.team2) for p in t.players if not p.has_arrived]
+
+
+def court_plan(tournament, now=None):
+    """What happens on every court right now. One dict per court, in court order:
+
+    * ``active``   – match being played on the court (or None)
+    * ``due``      – next pending match planned for this court in the time schedule
+    * ``due_blockers`` – why ``due`` cannot start now ([] when it can)
+    * ``proposal`` – for a free court: the match to call now. It is ``due`` when it can be
+      played; otherwise the earliest pending match that can be played now (``advanced``).
+    * ``advanced`` – True when ``proposal`` is not the match planned for this court
+    * ``not_arrived`` – players of the proposal who did not check in at reception
+
+    The loudspeaker panel, the "next per court" list and the court referee page all use
+    this, so they always agree on which match is next.
     """
     from .player_status import get_busy_info
 
     now = now or timezone.now()
-    playing_pks, resting = get_busy_info()
-    in_progress = Match.objects.filter(division__tournament=tournament, status='in_progress')
-    busy_courts = {str(m.court) for m in in_progress}
-    courts = [str(c) for c in range(1, _court_count_today(tournament, now) + 1)]
-    free_courts = [c for c in courts if c not in busy_courts]
-
+    playing, resting = get_busy_info()
+    in_progress = list(Match.objects.filter(division__tournament=tournament, status='in_progress')
+                       .select_related('division', 'team1__player1', 'team1__player2',
+                                       'team2__player1', 'team2__player2'))
+    active_by_court = {str(m.court): m for m in in_progress if m.court}
+    court_of_player = {}
+    for m in in_progress:
+        for t in (m.team1, m.team2):
+            if t:
+                for p in t.players:
+                    court_of_player[p.pk] = m.court
+    n_courts = _court_count_today(tournament, now) or 4
+    for c in active_by_court:
+        if c.isdigit():
+            n_courts = max(n_courts, int(c))
     pending = list(
         Match.objects
-        .filter(division__tournament=tournament, status='pending', team1__isnull=False, team2__isnull=False)
+        .filter(division__tournament=tournament, status='pending')
         .select_related('division', 'team1__player1', 'team1__player2', 'team2__player1', 'team2__player2')
-        .order_by('scheduled_time', 'match_round', 'match_number', 'pk')[:40]
+        .order_by(models_F_asc('scheduled_time'), 'match_round', 'match_number', 'pk')
     )
-
-    def can_play_now(m):
-        for t in (m.team1, m.team2):
-            for p in t.players:
-                if p.withdrawn or p.pk in playing_pks:
-                    return False
-                if p.pk in resting and resting[p.pk] > now + timedelta(minutes=2):
-                    return False
-        return True
-
-    ready = [m for m in pending if can_play_now(m)]
-    calls, used, called_players = [], set(), set()
+    for m in pending:
+        m.blockers = _blockers(m, playing, resting, now, court_of_player)
+        m.not_arrived = _not_arrived(m)
 
     def players_of(m):
-        return {p.pk for t in (m.team1, m.team2) for p in t.players}
+        return {p.pk for t in (m.team1, m.team2) if t for p in t.players}
 
-    def available(m):
-        # A player can only be called for one match at a time.
-        return m.pk not in used and not (players_of(m) & called_players)
+    plan = []
+    for c in range(1, n_courts + 1):
+        key = str(c)
+        due = next((m for m in pending if str(m.court or '') == key), None)
+        plan.append({'court': c, 'active': active_by_court.get(key), 'due': due,
+                     'due_blockers': due.blockers if due else [],
+                     'proposal': None, 'advanced': False, 'not_arrived': []})
 
-    def take(m, court, reason):
+    used, called_players = set(), set()
+
+    def take(entry, m, advanced):
+        entry['proposal'] = m
+        entry['advanced'] = advanced
+        entry['not_arrived'] = m.not_arrived
         used.add(m.pk)
         called_players.update(players_of(m))
-        calls.append({'match': m, 'court': court, 'reason': reason})
 
-    for court in free_courts:
-        here = [m for m in ready if available(m) and str(m.court or '') == court]
-        others = [m for m in ready if available(m) and str(m.court or '') not in free_courts]
-        pick = (here or others or [None])[0]
-        if pick is not None:
-            take(pick, court, 'court_free')
-    # Matches due soon, taking the current delay into account (at most a few, in time order).
-    soon = now + timedelta(minutes=CALL_AHEAD_MINUTES - compute_delay(tournament, now))
-    extra = 0
-    for m in ready:
-        if extra >= MAX_SOON_CALLS:
+    free = [e for e in plan if e['active'] is None]
+    # 1) free courts whose planned match can be played now
+    for e in free:
+        d = e['due']
+        if d is not None and not d.blockers and not (players_of(d) & called_players):
+            take(e, d, False)
+    # 2) other free courts: the earliest pending match that can be played now ("advanced")
+    for e in free:
+        if e['proposal'] is not None:
+            continue
+        for m in pending:
+            if m.pk in used or m.blockers or (players_of(m) & called_players):
+                continue
+            # do not steal a match that is the planned one of another free court
+            planned_court = next((x for x in free if x is not e and x['due'] is m), None)
+            if planned_court is not None:
+                continue
+            take(e, m, True)
             break
-        if available(m) and m.scheduled_time and m.scheduled_time <= soon:
-            take(m, str(m.court or ''), 'soon')
-            extra += 1
+    # What to show as "next" on each court: the proposal on a free court; on a busy court the
+    # first match planned there that is not already proposed somewhere else.
+    for e in plan:
+        if e['proposal'] is not None:
+            e['next'] = e['proposal']
+        else:
+            key = str(e['court'])
+            e['next'] = next((m for m in pending if str(m.court or '') == key and m.pk not in used), None)
+            e['next_blockers'] = e['next'].blockers if e['next'] is not None else []
+    return plan
+
+
+def models_F_asc(field):
+    from django.db.models import F
+    return F(field).asc(nulls_last=True)
+
+
+def compute_calls(tournament, now=None):
+    """Loudspeaker calls: one per free court (see ``court_plan``)."""
+    calls = []
+    for e in court_plan(tournament, now):
+        if e['active'] is None and e['proposal'] is not None:
+            calls.append({'match': e['proposal'], 'court': str(e['court']), 'reason': 'court_free',
+                          'advanced': e['advanced'], 'due': e['due'], 'due_blockers': e['due_blockers'],
+                          'not_arrived': e['not_arrived']})
     return calls

@@ -288,6 +288,7 @@
     <div class="match-meta">
       <div class="match-time">{% if match.estimated_time %}~{{ match.estimated_time|time:"H:i" }}{% else %}{{ match.scheduled_time|time:"H:i" }}{% endif %}</div>
 
+      {% if match.court %}<div class="match-court">{% trans "Court" %} {{ match.court }}</div>{% endif %}
       {% if match.match_number %}<div class="match-no">#{{ match.match_number }}</div>{% endif %}
     </div>
 

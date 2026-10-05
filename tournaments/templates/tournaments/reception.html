@@ -68,7 +68,7 @@
       <form method="post" action="{% url 'tournament_player_reinstate' tournament.pk p.pk %}">{% csrf_token %}<button class="btn btn-secondary">↩ {% trans "Reinstate" %}</button></form>
       {% else %}
       <form method="post" action="{% url 'tournament_player_withdraw' tournament.pk p.pk %}"
-            onsubmit="return confirm('{% blocktrans with name=p.name|escapejs %}Withdraw {{ name }} from the tournament? All their pending matches will be lost by walk-over (15-0, 15-0).{% endblocktrans %}');">
+            onsubmit="return confirm('{% filter escapejs %}{% blocktrans with name=p.name|escapejs %}Withdraw {{ name }} from the tournament? All their pending matches will be lost by walk-over (15-0, 15-0).{% endblocktrans %}{% endfilter %}');">
         {% csrf_token %}<button class="btn btn-secondary" title="{% trans 'Withdraw from the tournament' %}">🚪 {% trans "Withdraw" %}</button>
       </form>
       {% endif %}

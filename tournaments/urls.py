@@ -61,6 +61,7 @@ urlpatterns = [
     path('<int:pk>/player/<int:player_pk>/reinstate/', day_views.tournament_player_reinstate, name='tournament_player_reinstate'),
     path('<int:pk>/replan/', day_views.tournament_replan, name='tournament_replan'),
     path('<int:pk>/calls/', day_views.tournament_calls, name='tournament_calls'),
+    path('<int:pk>/live/', day_views.tournament_live, name='tournament_live'),
     path('<int:pk>/medals/', final_views.tournament_medal_table, name='tournament_medal_table'),
     path('<int:pk>/registrations/', registration_views.tournament_registrations, name='tournament_registrations'),
     path('<int:pk>/registrations/toggle/', registration_views.registration_toggle, name='registration_toggle'),

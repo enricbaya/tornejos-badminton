@@ -7,14 +7,45 @@
 /* ── Run-page layout ─── */
 .run-layout {
   display: grid;
-  grid-template-columns: 1fr 260px;
+  grid-template-columns: minmax(0, 1fr) 430px;
   gap: 1.25rem;
   align-items: start;
+}
+@media (max-width: 1180px) {
+  .run-layout { grid-template-columns: minmax(0, 1fr) 380px; }
 }
 @media (max-width: 860px) {
   .run-layout { grid-template-columns: 1fr; }
   .run-sidebar { order: -1; }
 }
+
+/* ── Live right column ─── */
+.court-tag { display:inline-flex; align-items:center; gap:0.25rem; border:1.5px solid #111; color:#111; background:#fff; border-radius:7px; padding:0.05rem 0.45rem; font-size:0.72rem; font-weight:800; letter-spacing:0.02em; white-space:nowrap; text-transform:uppercase; }
+.court-tag.playing { background:var(--accent,#EB1C60); border-color:var(--accent,#EB1C60); color:#fff; }
+.court-tag.big { flex:none; justify-content:center; min-width:4.4rem; padding:0.35rem 0.4rem; font-size:0.85rem; text-align:center; }
+.court-tag.busy { background:#111; color:#fff; }
+.live-panel { margin-bottom:1rem; }
+.live-row { display:flex; gap:0.7rem; align-items:flex-start; padding:0.65rem 0.8rem; border-bottom:1px solid #f1f5f9; }
+.live-row:last-child { border-bottom:none; }
+.live-row.playing { background:var(--brand-soft,#fdf0f4); }
+.live-row.playing .court-tag.big { background:var(--accent,#EB1C60); border-color:var(--accent,#EB1C60); color:#fff; }
+.live-body { flex:1; min-width:0; }
+.live-meta { font-size:0.76rem; color:#64748b; }
+.live-meta .now { color:#16a34a; text-transform:uppercase; }
+.live-teams { font-weight:700; font-size:0.95rem; color:#111; line-height:1.3; margin:0.1rem 0; }
+.live-teams .vs { color:#94a3b8; font-weight:400; font-size:0.8rem; margin:0 0.2rem; }
+.live-warn { font-size:0.78rem; color:#b45309; }
+.live-actions { display:flex; gap:0.35rem; flex-wrap:wrap; margin-top:0.35rem; }
+.inline-form { display:inline; margin:0; }
+.court-timer.inline { position:static; transform:none; background:#111; color:#fff; border-radius:4px; padding:0 0.3rem; font-size:0.72rem; }
+.adv-badge { display:inline-block; background:#f59e0b; color:#111; font-weight:800; font-size:0.72rem; border-radius:99px; padding:0.1rem 0.55rem; margin-bottom:0.2rem; text-transform:uppercase; letter-spacing:0.04em; }
+.adv-badge.small { font-size:0.62rem; padding:0 0.4rem; margin:0; }
+.adv-why { font-size:0.78rem; color:#92400e; background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:0.25rem 0.45rem; margin-bottom:0.3rem; }
+.call-item.advanced { background:#fffbeb; box-shadow: inset 4px 0 0 #f59e0b; }
+.call-item.idle { opacity:0.75; }
+.call-warn { font-size:0.76rem; color:#b45309; margin-top:0.15rem; }
+.call-called { font-size:0.76rem; color:#16a34a; font-weight:700; margin-top:0.15rem; }
+.call-start { background:#16a34a !important; border-color:#16a34a !important; color:#fff !important; }
 
 /* ── Loudspeaker calls ─── */
 .calls-panel { background:#fff; border-radius:12px; border:2px solid #111; margin-bottom:1rem; overflow:hidden; }
@@ -23,16 +54,16 @@
 .calls-head { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; background:#111; color:#fff; padding:0.5rem 0.75rem; font-size:0.9rem; }
 .delay-pill { font-size:0.75rem; background:#27272a; border-radius:99px; padding:0.1rem 0.55rem; white-space:nowrap; }
 .delay-pill.late { background:var(--accent,#EB1C60); font-weight:700; }
-.call-item { display:flex; gap:0.55rem; align-items:center; padding:0.5rem 0.65rem; border-bottom:1px solid #f1f5f9; }
-.call-item.called { opacity:0.6; }
-.call-court { min-width:2.4rem; text-align:center; font-family:var(--heading-font); font-size:1.5rem; font-weight:800; line-height:1; }
+.call-item { display:flex; gap:0.7rem; align-items:flex-start; padding:0.7rem 0.8rem; border-bottom:1px solid #f1f5f9; }
+.call-item.called { background:#f0fdf4; }
+.call-court { min-width:3.4rem; text-align:center; font-family:var(--heading-font); font-size:2.1rem; font-weight:800; line-height:1; align-self:flex-start; padding-top:0.15rem; }
 .call-court small { display:block; font-size:0.55rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent-text,#c8174f); font-family:inherit; }
 .call-body { flex:1; min-width:0; }
-.call-names { font-weight:700; font-size:0.85rem; line-height:1.25; }
+.call-names { font-weight:800; font-size:1rem; line-height:1.3; }
 .call-names span { color:#94a3b8; font-weight:400; }
-.call-sub { font-size:0.72rem; color:#64748b; }
-.call-actions { display:flex; flex-direction:column; gap:0.25rem; }
-.call-actions .btn { padding:0.2rem 0.45rem; font-size:0.72rem; white-space:nowrap; }
+.call-sub { font-size:0.78rem; color:#64748b; }
+.call-actions { display:flex; flex-wrap:wrap; gap:0.35rem; margin-top:0.4rem; }
+.call-actions .btn { white-space:nowrap; }
 .call-empty { padding:0.75rem; color:#94a3b8; font-size:0.85rem; text-align:center; }
 
 /* ── Progress bar ─── */
@@ -208,7 +239,11 @@
 .run-match-score { color: #374151; white-space: nowrap; font-size: 0.8rem; }
 .run-match-actions { display: flex; column-gap: 0.3rem; row-gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap; }
 .run-match-court { color: #0f766e; font-weight: 600; font-size: 0.78rem; white-space: nowrap; }
-.court-dialog-btn { min-width: 2.5rem; }
+.court-dialog-btn { min-width: 3rem; min-height: 2.6rem; font-size: 1.05rem !important; }
+.court-dialog-btn.planned { background: var(--accent,#EB1C60) !important; color: #fff !important; border-color: var(--accent,#EB1C60) !important; box-shadow: 0 0 0 3px rgba(235,28,96,0.25); }
+.court-dialog-btn.planned:disabled { background: #fde2ea !important; color: #9f1239 !important; }
+.planned-busy { color: #b45309; font-weight: 600; }
+
 .court-dialog-btn:disabled { opacity: 0.4; cursor: not-allowed; text-decoration: line-through; }
 .arrival-name-btn { background: none; border: none; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer; }
 .arrival-name-btn:hover { text-decoration: underline; }
@@ -296,7 +331,7 @@
     <a href="{% url 'tournament_reception' tournament.pk %}" class="btn btn-secondary">🧾 {% trans "Reception" %}</a>
     <a href="{% url 'tournament_medal_table' tournament.pk %}" class="btn btn-secondary">🏅 {% trans "Medal table" %}</a>
     <form method="post" action="{% url 'tournament_replan' tournament.pk %}" style="display:inline;"
-          onsubmit="return confirm('{% trans "Give new times and courts to all pending matches, starting now? Finished and running matches are kept." %}');">
+          onsubmit="return confirm('{% filter escapejs %}{% trans "Give new times and courts to all pending matches, starting now? Finished and running matches are kept." %}{% endfilter %}');">
       {% csrf_token %}<button type="submit" class="btn btn-secondary" title="{% trans 'Re-plan pending matches from now' %}">🔄 {% trans "Re-plan from now" %}</button>
     </form>
     <a href="{% url 'tournament_court_links' tournament.pk %}" class="btn btn-secondary">📱 {% trans "Court referees" %}{% if tournament.court_access_enabled %} <span style="color:var(--accent,#EB1C60);">●</span>{% endif %}</a>
@@ -304,32 +339,8 @@
   </div>
 </div>
 
-{# ── Progress bar ─── #}
-{% if total_matches %}
-<div class="court-occupancy-count">{{ occupied_court_count }} / {{ court_choices|length }} {% trans "courts occupied" %}</div>
-<div class="court-indicators">
-  {% for court in court_indicators %}
-  <div class="court-icon{% if court.active_match %} court-occupied{% endif %}" role="group" aria-label="{% trans 'Court' %} {{ court.number }}">
-    <img src="{% static 'img/court.svg' %}" alt="">
-    <span class="court-number" aria-hidden="true">{{ court.number }}</span>
-    {% if court.active_match.started_at %}<span class="court-timer" data-started-at="{{ court.active_match.started_at|date:'U' }}" aria-label="{% trans 'Match duration' %}">0:00</span>{% endif %}
-    {% if court.active_match %}
-    <a class="court-result-action js-result-modal"
-       href="{% url 'match_record_result' court.active_match.pk %}?next={% url 'tournament_run' tournament.pk %}&popup=1"
-       aria-label="{% trans 'Register result' %} — {% trans 'Court' %} {{ court.number }}"
-       title="{% trans 'Register result' %}">{% trans "Result" %}</a>
-    {% endif %}
-  </div>
-  {% endfor %}
-</div>
-<div style="margin-bottom:0.4rem; display:flex; justify-content:space-between; gap:0.75rem; flex-wrap:wrap; font-size:0.78rem; color:#64748b;">
-  <span>{{ completed_matches }} / {{ total_matches }} {% trans "matches completed" %}</span>
-  {% if completed_matches == total_matches %}<span style="color:var(--accent-text,#c8174f); font-weight:700;">✓ {% trans "All matches completed" %}</span>{% endif %}
-</div>
-<div class="progress-bar-wrap">
-  <div class="progress-bar-fill" style="width:{% widthratio completed_matches total_matches 100 %}%;"></div>
-</div>
-{% endif %}
+{# ── Courts strip + progress (refreshed live) ─── #}
+<div id="live-courts">{% include 'tournaments/partials/_run_courts.html' %}</div>
 
 <div class="run-layout">
 
@@ -450,7 +461,7 @@
               <span style="color:#888; font-style:italic;">{{ match.bracket_label|bracket_label_i18n }}</span>
               {% endif %}
             </span>
-            <span class="run-match-court">{% if match.court and match.status == 'in_progress' %}🏟 {% trans "Court" %} {{ match.court }}{% endif %}</span>
+            <span class="run-match-court">{{ match|court_tag }}</span>
             <span class="run-match-actions">
               {% if match.status == 'pending' and match.team1 and match.team2 %}
               {% if match.t1_status or match.t2_status %}
@@ -459,7 +470,8 @@
               <button type="button" class="btn btn-primary btn-sm start-match-btn"
                       data-url="{% url 'match_start' match.pk %}"
                       data-next="{% url 'tournament_run' tournament.pk %}"
-                      data-label="#{{ match.match_number }} {{ match.team1.name }} {% trans "vs" %} {{ match.team2.name }}">▶ Start</button>
+                      data-planned="{{ match.court|default:'' }}"
+                      data-label="#{{ match.match_number }} {{ match.team1.name }} {% trans "vs" %} {{ match.team2.name }}">▶ {% trans "Start match" %}</button>
               {% endif %}
               {% endif %}
               {% if match.status == 'in_progress' %}
@@ -600,79 +612,8 @@
 
   {# ── Sidebar: panels row (I gang + Næste kampe side by side) ─── #}
   <div class="run-sidebar">
-    <div class="calls-panel" id="calls-panel" data-url="{% url 'tournament_calls' tournament.pk %}">
-      <div class="calls-head"><b>📢 {% trans "Loudspeaker" %}</b></div>
-      <div class="call-empty">…</div>
-    </div>
     <div class="panels-row">
-
-    {# ── Kampe i gang ─── #}
-    {% if active_matches %}
-    <div class="next-panel" style="border-color:var(--brand-soft-border,#f7c4d4);">
-      <div class="next-panel-header" style="background:var(--accent,#EB1C60);">
-        <span>⚡ {% trans "In progress" %} ({{ active_matches|length }})</span>
-      </div>
-      {% for match in active_matches %}
-      <div class="next-match-row" style="background:var(--brand-soft,#fdf0f4);">
-        <div class="next-match-no" style="color:var(--accent-text,#c8174f);">
-          #{{ match.match_number }} · {{ match.division.name }}
-          {% if match.court %}<span style="float:right; color:#0f766e;">🏟 {% trans "Court" %} {{ match.court }}</span>{% endif %}
-        </div>
-        <div class="next-match-teams">
-          {{ match.team1.name }}{{ match.t1_seed }}<br>
-          <span style="color:#94a3b8; font-size:0.75rem;">vs</span> {{ match.team2.name }}{{ match.t2_seed }}
-        </div>
-        <div style="margin-top:0.4rem; display:flex; flex-wrap:wrap; gap:0.35rem;">
-          <a href="{% url 'match_record_result' match.pk %}?next={% url 'tournament_run' tournament.pk %}" class="js-result-modal btn btn-primary btn-sm">{% trans "Result" %}</a>
-          <a href="{% url 'match_walkover' match.pk %}?next={% url 'tournament_run' tournament.pk %}" class="btn btn-secondary btn-sm" style="color:#d97706; border-color:#fde68a;">WO</a>
-          <form method="post" action="{% url 'match_postpone' match.pk %}" style="display:inline;">
-            {% csrf_token %}
-            <input type="hidden" name="next" value="{% url 'tournament_run' tournament.pk %}">
-            <button type="submit" class="btn btn-secondary btn-sm" style="color:#94a3b8;">{% trans "Postpone" %}</button>
-          </form>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %}
-
-    <div class="next-panel">
-      <div class="next-panel-header">
-        <span>🏸 {% trans "Next matches" %}</span>
-      </div>
-      {% if next_matches %}
-      {% for match in next_matches %}
-      <div class="next-match-row">
-        <div class="next-match-no">
-          #{{ match.match_number }} · {{ match.division.name }}
-        </div>
-        <div class="next-match-teams">
-          {{ match.team1.name }}{{ match.t1_seed }}<br>
-          <span style="color:#94a3b8; font-size:0.75rem;">vs</span> {{ match.team2.name }}{{ match.t2_seed }}
-        </div>
-        <div class="next-match-meta">
-          {% if match.scheduled_time %}{{ match.scheduled_time|time:"H:i" }}{% endif %}
-          {% if match.status_label %} · {{ match.status_label }}{% endif %}
-        </div>
-        <div style="margin-top:0.4rem; display:flex; align-items:center; gap:0.3rem;">
-          <button type="button" class="btn btn-primary btn-sm start-match-btn"
-                  data-url="{% url 'match_start' match.pk %}"
-                  data-next="{% url 'tournament_run' tournament.pk %}"
-                  data-label="#{{ match.match_number }} {{ match.team1.name }} {% trans "vs" %} {{ match.team2.name }}">▶ Start</button>
-        </div>
-      </div>
-      {% endfor %}
-      {% else %}
-      <div class="next-empty">
-        {% if total_matches and completed_matches == total_matches %}
-        🎉 {% trans "All matches completed!" %}
-        {% else %}
-        {% trans "No upcoming matches with a time." %}<br>
-        <span style="font-size:0.75rem;">{% trans "Generate time schedule to see times." %}</span>
-        {% endif %}
-      </div>
-      {% endif %}
-    </div>
+    <div id="live-side" data-url="{% url 'tournament_live' tournament.pk %}">{% include 'tournaments/partials/_run_side.html' %}</div>
 
     {# Quick links #}
     <div class="card" style="padding:0.85rem 1rem;">
@@ -698,6 +639,7 @@
     <input type="hidden" name="next" id="court-dialog-next">
     <h3 style="margin-top:0;">{% trans "Choose court" %}</h3>
     <p id="court-dialog-match" style="color:#64748b; font-size:0.85rem;"></p>
+    <p id="court-dialog-planned" style="font-size:0.95rem; margin:0.4rem 0; display:none;"></p>
     <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin:1rem 0;">
       {% for c in court_choices %}
       <button type="submit" name="court" value="{{ c }}" class="btn btn-secondary court-dialog-btn" {% if c|stringformat:"s" in occupied_courts %}disabled title="{% trans 'Court occupied' %}"{% endif %}>{{ c }}</button>
@@ -713,10 +655,11 @@
 
 {% block extra_js %}
 <script>
-// Loudspeaker calls: refreshed every 15 s, beep when a new call appears.
+// Live courts + right column: refreshed every 10 s; beep when a court gets a new match to call.
 (function () {
-  var panel = document.getElementById('calls-panel');
-  if (!panel) return;
+  var side = document.getElementById('live-side');
+  var courts = document.getElementById('live-courts');
+  if (!side) return;
   var known = null;
   function token() { var m = document.cookie.match(/csrftoken=([^;]+)/); return m ? m[1] : ''; }
   function beep() {
@@ -738,30 +681,46 @@
     if (v) u.voice = v;
     speechSynthesis.speak(u);
   }
-  function bind() {
-    panel.querySelectorAll('.js-called').forEach(function (b) {
-      b.addEventListener('click', function () {
-        fetch(b.dataset.url, {method: 'POST', credentials: 'same-origin', headers: {'X-CSRFToken': token(), 'X-Requested-With': 'XMLHttpRequest'}}).then(load);
-      });
-    });
-    panel.querySelectorAll('.js-say').forEach(function (b) {
-      b.addEventListener('click', function () { say(b.closest('.call-item').dataset.say); });
+  function checkNewCalls() {
+    var panel = document.getElementById('calls-panel');
+    if (!panel) return;
+    var ids = (panel.dataset.ids || '').trim().split(/\s+/).filter(Boolean);
+    if (known !== null && ids.some(function (id) { return known.indexOf(id) === -1; })) {
+      beep(); panel.classList.remove('flash'); void panel.offsetWidth; panel.classList.add('flash');
+    }
+    known = ids;
+  }
+  function updateDialog(occupied) {
+    document.querySelectorAll('.court-dialog-btn').forEach(function (b) {
+      b.disabled = occupied.indexOf(String(b.value)) !== -1;
     });
   }
+  var loading = false;
   function load() {
-    fetch(panel.dataset.url, {credentials: 'same-origin'}).then(function (r) { return r.text(); }).then(function (html) {
-      panel.innerHTML = html;
-      var ids = Array.prototype.map.call(panel.querySelectorAll('.call-item:not(.called)'), function (x) { return x.dataset.match; });
-      if (known !== null && ids.some(function (id) { return known.indexOf(id) === -1; })) {
-        beep(); panel.classList.remove('flash'); void panel.offsetWidth; panel.classList.add('flash');
-      }
-      known = ids;
-      bind();
-    }).catch(function () {});
+    if (loading || document.hidden) return;
+    loading = true;
+    fetch(side.dataset.url, {credentials: 'same-origin'}).then(function (r) { return r.json(); }).then(function (d) {
+      side.innerHTML = d.side;
+      if (courts) courts.innerHTML = d.courts;
+      updateDialog(d.occupied || []);
+      checkNewCalls();
+    }).catch(function () {}).then(function () { loading = false; });
   }
-  load(); setInterval(load, 15000);
+  side.addEventListener('click', function (e) {
+    var b = e.target.closest('.js-called');
+    if (b) {
+      fetch(b.dataset.url, {method: 'POST', credentials: 'same-origin', headers: {'X-CSRFToken': token(), 'X-Requested-With': 'XMLHttpRequest'}}).then(load);
+      return;
+    }
+    var s = e.target.closest('.js-say');
+    if (s) say(s.closest('.call-item').dataset.say);
+  });
+  checkNewCalls();
+  setInterval(load, 10000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) load(); });
 })();
 </script>
+
 <script>
 // Optælling af spilletid for aktive kampe på banerne.
 (function () {
@@ -812,25 +771,52 @@
 })();
 </script>
 <script>
-// Vælg bane-dialog: åbnes fra alle "▶ Start"-knapper
+// "Choose court" dialog, opened by every "▶ Start" button (also the ones added by the live refresh).
 (function () {
   var dialog = document.getElementById('court-dialog');
   var form = document.getElementById('court-dialog-form');
   var nextField = document.getElementById('court-dialog-next');
   var matchLabel = document.getElementById('court-dialog-match');
-  document.querySelectorAll('.start-match-btn').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      form.action = btn.dataset.url;
-      nextField.value = btn.dataset.next || '';
-      matchLabel.textContent = btn.dataset.label || '';
-      dialog.showModal();
+  var plannedInfo = document.getElementById('court-dialog-planned');
+  var T_PLANNED = '{% filter escapejs %}{% trans "Planned court" %}{% endfilter %}';
+  var T_BUSY = '{% filter escapejs %}{% trans "in use now, choose another court" %}{% endfilter %}';
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.start-match-btn');
+    if (!btn) return;
+    form.action = btn.dataset.url;
+    nextField.value = btn.dataset.next || '';
+    matchLabel.textContent = btn.dataset.label || '';
+    var planned = btn.dataset.planned || '';
+    var plannedBtn = null;
+    form.querySelectorAll('.court-dialog-btn').forEach(function (b) {
+      var isPlanned = planned !== '' && String(b.value) === String(planned);
+      b.classList.toggle('planned', isPlanned);
+      if (isPlanned) plannedBtn = b;
     });
+    plannedInfo.textContent = '';
+    if (planned) {
+      var strong = document.createElement('b');
+      strong.textContent = T_PLANNED + ': ' + planned;
+      plannedInfo.appendChild(strong);
+      if (plannedBtn && plannedBtn.disabled) {
+        var warn = document.createElement('span');
+        warn.className = 'planned-busy';
+        warn.textContent = ' — ' + T_BUSY;
+        plannedInfo.appendChild(warn);
+      }
+      plannedInfo.style.display = '';
+    } else {
+      plannedInfo.style.display = 'none';
+    }
+    dialog.showModal();
+    if (plannedBtn && !plannedBtn.disabled) plannedBtn.focus();
   });
   dialog.addEventListener('click', function (e) {
     if (e.target === dialog) dialog.close();
   });
 })();
 </script>
+
 <script>
 // Auto-scroll til dagens dag-anker ved pageload
 (function () {

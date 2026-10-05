@@ -7,6 +7,7 @@
 .fmt-pp.ok { background:#dcfce7; color:#166534; }
 .fmt-pp.warn { background:#fef3c7; color:#92400e; }
 .fmt-form { margin-top:0.6rem; }
+.fmt-target { font-size:0.85rem; margin-bottom:0.7rem; padding:0.5rem 0.7rem; background:#fff; border:1px solid #e2e8f0; border-radius:8px; display:flex; gap:0.4rem; align-items:center; flex-wrap:wrap; }
 .fmt-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:0.6rem 1rem; align-items:end; }
 .fmt-grid > label, .fmt-grid > div { font-size:0.82rem; font-weight:600; display:flex; flex-direction:column; gap:0.25rem; }
 .fmt-grid label.inline { flex-direction:row; align-items:center; gap:0.35rem; font-weight:500; }
@@ -69,14 +70,14 @@
         <form method="post" action="{% url 'tournament_rebuild_playoff_labels' tournament.pk %}" style="display:inline;">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger"
-                    onclick="return confirm('{% trans "Rebuild playoff labels? Use this if labels are broken (showing W-match #?)." %}')">
+                    onclick="return confirm('{% filter escapejs %}{% trans "Rebuild playoff labels? Use this if labels are broken (showing W-match #?)." %}{% endfilter %}')">
                 🔧 {% trans "Rebuild playoff labels" %}
             </button>
         </form>
         <form method="post" action="{% url 'tournament_renumber_by_schedule' tournament.pk %}" style="display:inline;">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger"
-                    onclick="return confirm('{% trans "Renumber matches by schedule order? Matches without a time are placed last." %}')">
+                    onclick="return confirm('{% filter escapejs %}{% trans "Renumber matches by schedule order? Matches without a time are placed last." %}{% endfilter %}')">
                 📋 {% trans "Renumber by schedule" %}
             </button>
         </form>
@@ -535,7 +536,7 @@ var MATCH_LOOKUP = {
     </div>
     {% endif %}
     <div style="font-weight:700; font-size:0.9rem; margin-bottom:0.5rem;">💡 {% blocktrans count n=division.teams.count %}Suggested format for {{ n }} participant{% plural %}Suggested formats for {{ n }} participants{% endblocktrans %}
-        <span style="font-weight:400; color:#64748b; font-size:0.8rem;">· {% trans "aim: 3 to 5 matches per player" %}</span></div>
+        <span style="font-weight:400; color:#64748b; font-size:0.8rem;">· {% blocktrans with a=division.target_min_matches b=division.target_max_matches %}aim: {{ a }} to {{ b }} matches per player{% endblocktrans %}</span></div>
     {% for opt in dd.format_options %}
     <form method="post" action="{% url 'division_apply_format' division.pk %}" style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; padding:0.35rem 0; {% if not forloop.last %}border-bottom:1px dashed #e2e8f0;{% endif %}">
         {% csrf_token %}
@@ -545,6 +546,8 @@ var MATCH_LOOKUP = {
         <input type="hidden" name="advance_count" value="{{ opt.advance_count }}">
         <input type="hidden" name="final_qualifiers" value="{{ opt.final_qualifiers }}">
         {% if opt.third_place_match %}<input type="hidden" name="third_place_match" value="1">{% endif %}
+        <input type="hidden" name="target_min" value="{{ division.target_min_matches }}">
+        <input type="hidden" name="target_max" value="{{ division.target_max_matches }}">
         <span style="flex:1; min-width:220px; font-size:0.88rem;">{% if forloop.first %}<strong>{{ opt.label }}</strong>{% else %}{{ opt.label }}{% endif %}
             <span style="color:#64748b; font-size:0.8rem;"> · {% blocktrans with m=opt.matches mins=opt.court_minutes %}{{ m }} matches (~{{ mins }} court-minutes){% endblocktrans %}</span>
             <span class="fmt-pp {% if opt.ok %}ok{% else %}warn{% endif %}">{% blocktrans with a=opt.min_matches_per_team b=opt.max_matches_per_team %}{{ a }}–{{ b }} matches per player{% endblocktrans %}</span></span>
@@ -557,6 +560,12 @@ var MATCH_LOOKUP = {
         <summary style="cursor:pointer; font-weight:700; color:var(--accent-text,#c8174f); font-size:0.9rem;">✏️ {% trans "Custom format" %}</summary>
         <form method="post" action="{% url 'division_apply_format' division.pk %}" class="fmt-form" data-preview="{% url 'division_format_preview' division.pk %}">
             {% csrf_token %}
+            <div class="fmt-target">
+                <b>{% trans "Matches per player wished" %}:</b>
+                {% trans "between" %} <input type="number" name="target_min" min="1" max="20" value="{{ division.target_min_matches }}" style="width:3.6rem;">
+                {% trans "and" %} <input type="number" name="target_max" min="1" max="20" value="{{ division.target_max_matches }}" style="width:3.6rem;">
+                <span style="color:#64748b;">{% trans "(the suggestions above are ordered by this range once saved)" %}</span>
+            </div>
             <div class="fmt-grid">
                 <label>{% trans "Groups" %}
                     <input type="number" name="group_count" min="1" max="16" value="{% if division.tournament_type == 'group' %}1{% else %}{{ division.group_count }}{% endif %}">

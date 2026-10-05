@@ -56,7 +56,7 @@
         <button type="submit" class="btn btn-secondary btn-sm">{% trans "Search" %}</button>
         <button type="submit" form="bulk-form" id="bulk-delete-btn"
                 class="btn btn-danger btn-sm" style="visibility:hidden;"
-                onclick="return confirm('{% trans "Delete the selected players? This cannot be undone." %}')">&#128465; {% trans "Delete selected" %} (<span id="bulk-count">0</span>)</button>
+                onclick="return confirm('{% filter escapejs %}{% trans "Delete the selected players? This cannot be undone." %}{% endfilter %}')">&#128465; {% trans "Delete selected" %} (<span id="bulk-count">0</span>)</button>
         {% if search or selected_division or selected_gender or selected_school %}
         <a href="{% url 'player_list' %}" class="btn btn-secondary btn-sm">✕ {% trans "Clear" %}</a>
         {% endif %}

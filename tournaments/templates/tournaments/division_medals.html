@@ -100,7 +100,7 @@
 
 {% if has_override %}
 <div style="max-width:700px; margin: 0 auto 1rem; background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:0.6rem 0.9rem; font-size:0.82rem; color:#92400e;">
-  ✏️ {% trans "Showing manual overrides." %} <a href="{% url 'division_medals_edit' division.pk %}" style="color:#92400e;">{% trans "Edit" %}</a> {% trans "or" %} <a href="{% url 'division_medals_reset' division.pk %}" style="color:#92400e;" onclick="return confirm('{% trans "Reset to automatic calculation?" %}')">{% trans "reset to automatic" %}</a>.
+  ✏️ {% trans "Showing manual overrides." %} <a href="{% url 'division_medals_edit' division.pk %}" style="color:#92400e;">{% trans "Edit" %}</a> {% trans "or" %} <a href="{% url 'division_medals_reset' division.pk %}" style="color:#92400e;" onclick="return confirm('{% filter escapejs %}{% trans "Reset to automatic calculation?" %}{% endfilter %}')">{% trans "reset to automatic" %}</a>.
 </div>
 {% endif %}
 

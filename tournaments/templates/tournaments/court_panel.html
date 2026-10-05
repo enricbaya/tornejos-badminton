@@ -19,6 +19,8 @@
 .c-card { background: #fff; border-radius: 14px; padding: 1rem 1.1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05); margin-bottom: 0.9rem; border: 2px solid transparent; }
 .c-card.suggested { border-color: var(--accent); }
 .c-meta { font-size: 0.8rem; color: #64748b; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.c-tag.adv { background: #f59e0b; color: #111; }
+.c-adv { font-size: 0.82rem; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 0.45rem 0.65rem; margin-bottom: 0.6rem; }
 .c-tag { background: var(--accent); color: #fff; border-radius: 99px; padding: 0.05rem 0.55rem; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
 .c-players { font-size: 1.2rem; font-weight: 700; margin: 0.45rem 0 0.6rem; line-height: 1.3; }
 .c-players .vs { color: #94a3b8; font-weight: 500; font-size: 0.9rem; margin: 0 0.3rem; }
@@ -34,6 +36,7 @@
 }
 .score-grid input.won { border-color: var(--accent); background: var(--brand-soft); }
 .score-grid input.dim { opacity: 0.35; }
+.score-grid input.locked { background: #e4e4e7; border-style: dashed; opacity: 0.5; }
 .score-help { font-size: 0.78rem; color: #64748b; margin-bottom: 0.8rem; }
 .winner-line { min-height: 1.6rem; font-weight: 700; color: var(--accent-text); margin-bottom: 0.6rem; }
 .c-msgs { list-style: none; padding: 0; margin: 0 0 0.8rem; }
@@ -93,7 +96,7 @@
     <details class="undo">
       <summary>{% trans "A player did not show up?" %}</summary>
       <form method="post" action="{% url 'court_walkover' tournament.pk court sig active.pk %}" style="margin-top:0.6rem; display:grid; gap:0.5rem;"
-            onsubmit="return confirm('{% trans "Record a walk-over (15-0, 15-0)?" %}');">
+            onsubmit="return confirm('{% filter escapejs %}{% trans "Record a walk-over (15-0, 15-0)?" %}{% endfilter %}');">
         {% csrf_token %}
         <button type="submit" name="winner" value="{{ active.team1_id }}" class="btn btn-secondary big-btn">🏳 {% blocktrans with name=active.team1.name %}{{ name }} wins by walk-over{% endblocktrans %}</button>
         <button type="submit" name="winner" value="{{ active.team2_id }}" class="btn btn-secondary big-btn">🏳 {% blocktrans with name=active.team2.name %}{{ name }} wins by walk-over{% endblocktrans %}</button>
@@ -119,13 +122,17 @@
   {% for m in choices %}
   <div class="c-card{% if m.is_suggested %} suggested{% endif %}">
     <div class="c-meta">
-      {% if m.is_suggested %}<span class="c-tag">{% trans "Suggested" %}</span>{% endif %}
+      {% if m.is_suggested and m.is_advanced %}<span class="c-tag adv">⏩ {% trans "Advanced match" %}</span>
+      {% elif m.is_suggested %}<span class="c-tag">{% trans "Next on this court" %}</span>{% endif %}
       {% if m.match_number %}<span>#{{ m.match_number }}</span>{% endif %}
       <span>{{ m.division.name }}</span>
       {% if m.scheduled_time %}<span>· {{ m.scheduled_time|time:"H:i" }}</span>{% endif %}
       {% if m.court %}<span>· {% trans "Court" %} {{ m.court }}</span>{% endif %}
     </div>
     <div class="c-players">{{ m.team1.name }}{{ m.team1|team_school }} <span class="vs">vs</span> {{ m.team2.name }}{{ m.team2|team_school }}</div>
+    {% if m.is_suggested and m.is_advanced and plan.due %}
+      <div class="c-adv">{% blocktrans with n=plan.due.match_number t=plan.due.scheduled_time|time:"H:i" %}The match planned on this court was #{{ n }} ({{ t }}){% endblocktrans %}: {{ plan.due_blockers|join:" · " }}</div>
+    {% endif %}
     {% if m.blockers %}
       <div class="c-block">⏳ {{ m.blockers|join:" · " }}</div>
       {% if m.only_arrival %}
@@ -144,7 +151,7 @@
     <details class="undo">
       <summary>{% trans "A player did not show up?" %}</summary>
       <form method="post" action="{% url 'court_walkover' tournament.pk court sig m.pk %}" style="margin-top:0.6rem; display:grid; gap:0.5rem;"
-            onsubmit="return confirm('{% trans "Record a walk-over (15-0, 15-0)?" %}');">
+            onsubmit="return confirm('{% filter escapejs %}{% trans "Record a walk-over (15-0, 15-0)?" %}{% endfilter %}');">
         {% csrf_token %}
         <button type="submit" name="winner" value="{{ m.team1_id }}" class="btn btn-secondary big-btn">🏳 {% blocktrans with name=m.team1.name %}{{ name }} wins by walk-over{% endblocktrans %}</button>
         <button type="submit" name="winner" value="{{ m.team2_id }}" class="btn btn-secondary big-btn">🏳 {% blocktrans with name=m.team2.name %}{{ name }} wins by walk-over{% endblocktrans %}</button>
@@ -191,13 +198,20 @@
         if (a > b) { wins[0]++; ia.classList.add('won'); } else { wins[1]++; ib.classList.add('won'); }
       }
     });
-    var split = (val('s1a') !== null && val('s2a') !== null &&
-                 setOk(val('s1a'), val('s1b')) && setOk(val('s2a'), val('s2b')) &&
-                 ((val('s1a') > val('s1b')) !== (val('s2a') > val('s2b'))));
-    form.querySelectorAll('[data-set="3"]').forEach(function (el) { el.classList.toggle('dim', !split && el.value === ''); });
+    var both = val('s1a') !== null && val('s1b') !== null && val('s2a') !== null && val('s2b') !== null;
+    var split = both && setOk(val('s1a'), val('s1b')) && setOk(val('s2a'), val('s2b')) &&
+                ((val('s1a') > val('s1b')) !== (val('s2a') > val('s2b')));
+    // Somebody already won the first two sets: set 3 is not played, lock and empty it.
+    var decided = both && setOk(val('s1a'), val('s1b')) && setOk(val('s2a'), val('s2b')) && !split;
+    form.querySelectorAll('[data-set="3"]').forEach(function (el) {
+      el.disabled = decided;
+      if (decided) { el.value = ''; el.classList.remove('won'); }
+      el.classList.toggle('dim', !split);
+      el.classList.toggle('locked', decided);
+    });
     var line = document.getElementById('winner-line');
-    if (wins[0] === 2) line.textContent = '🏆 {{ active.team1.name|escapejs }}';
-    else if (wins[1] === 2) line.textContent = '🏆 {{ active.team2.name|escapejs }}';
+    if (wins[0] >= 2 && wins[0] > wins[1]) line.textContent = '🏆 {{ active.team1.name|escapejs }}';
+    else if (wins[1] >= 2 && wins[1] > wins[0]) line.textContent = '🏆 {{ active.team2.name|escapejs }}';
     else line.textContent = '';
   }
   form.addEventListener('input', update);

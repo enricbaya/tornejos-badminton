@@ -73,24 +73,28 @@ def court_panel(request, tournament_pk, court, sig):
     )
     choices = []
     draft = request.session.pop(f'court_draft_{active.pk}', None) if active else None
+    plan_entry = None
     if not active:
+        from .live_info import court_plan
+        plan_entry = next((e for e in court_plan(tournament) if e['court'] == court), None)
+        proposal = plan_entry['proposal'] if plan_entry else None
         playing_pks, resting = get_busy_info()
         for m in _upcoming(tournament, playing_pks, resting):
+            if proposal is not None and m.pk == proposal.pk:
+                continue
             m.blockers = check_match_startable(m)
             # Only "not arrived yet" blockers can be solved by the referee on court.
             m.only_arrival = bool(m.blockers) and _only_arrival_blockers(m)
+            m.is_suggested = False
             choices.append(m)
-            if len(choices) >= CHOICES_SHOWN:
+            if len(choices) >= CHOICES_SHOWN - 1:
                 break
-        # Suggest the first match that can start now; prefer one planned for this court.
-        ready = [m for m in choices if not m.blockers]
-        planned_here = [m for m in ready if str(m.court or '') == str(court)]
-        suggested = (planned_here or ready or [None])[0]
-        for m in choices:
-            m.is_suggested = (m is suggested)
-        if suggested is not None:
-            choices.remove(suggested)
-            choices.insert(0, suggested)
+        if proposal is not None:
+            proposal.blockers = check_match_startable(proposal)
+            proposal.only_arrival = bool(proposal.blockers) and _only_arrival_blockers(proposal)
+            proposal.is_suggested = True
+            proposal.is_advanced = plan_entry['advanced']
+            choices.insert(0, proposal)
     points = 15 if tournament.scoring_model == 'best_of_5_15' else 21
     return render(request, 'tournaments/court_panel.html', {
         'tournament': tournament,
@@ -102,6 +106,7 @@ def court_panel(request, tournament_pk, court, sig):
         'max_points': 21 if points == 15 else 30,
         'court_total': court_count(tournament),
         'draft': draft or {},
+        'plan': plan_entry,
     })
 
 

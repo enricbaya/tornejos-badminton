@@ -89,7 +89,8 @@ from django.utils.safestring import mark_safe  # noqa: E402
 def team_school(team):
     """Small school/club label of a team ('' when none is set)."""
     label = getattr(team, 'school_label', '') if team else ''
-    return format_html('<span class="school-tag">{}</span>', label) if label else ''
+    # Leading space: name and school stay apart even if the stylesheet is missing or old.
+    return format_html(' <span class="school-tag">{}</span>', label) if label else ''
 
 
 @register.filter
@@ -167,3 +168,18 @@ def ordinal(n):
         return _ordinal(n)
     except (TypeError, ValueError):
         return n
+
+
+@register.filter
+def court_tag(match):
+    """'COURT 3' tag: where the match is being played, or the court planned in the time schedule."""
+    from django.utils.translation import gettext as _
+    if not match or not getattr(match, 'court', None):
+        return ''
+    if match.status == 'in_progress':
+        return format_html('<span class="court-tag playing" title="{}">🏸 {} {}</span>',
+                           _("Being played on this court"), _("Court"), match.court)
+    if match.status == 'pending':
+        return format_html('<span class="court-tag" title="{}">{} {}</span>',
+                           _("Court planned in the time schedule"), _("Court"), match.court)
+    return ''

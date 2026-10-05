@@ -130,3 +130,9 @@ footer.club-footer {
 }
 a.player-link { color: inherit; text-decoration: none; border-bottom: 1px dotted rgba(0,0,0,0.25); }
 a.player-link:hover { color: var(--accent-text); border-bottom-color: var(--accent); }
+
+/* Court tag on any match box: planned court (outline) or court being played (filled) */
+.court-tag { display: inline-flex; align-items: center; gap: 0.25rem; border: 1.5px solid #111; color: #111; background: #fff;
+             border-radius: 7px; padding: 0.05rem 0.45rem; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.02em;
+             white-space: nowrap; text-transform: uppercase; vertical-align: middle; }
+.court-tag.playing { background: var(--accent); border-color: var(--accent); color: #fff; }
