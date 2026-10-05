@@ -153,7 +153,8 @@ def _schedule_greedy(tournament, matches, days, start_at=None, busy=None):
     }
 
     player_free = dict(busy.get('players', {}))              # player_pk → datetime
-    bracket_slot_end = dict(busy.get('bracket_slots', {}))   # (div_id, round, slot) → datetime
+    bracket_slot_end = dict(busy.get('bracket_slots', {}))   # (div_id, section, round, slot) → datetime
+    league_round_end = {}                                     # (div_id, section, round) → datetime
     playoff_group_end = dict(busy.get('group_ends', {}))     # (div_id, day_pk) → datetime
     break_td = timedelta(minutes=tournament.player_break_time)
 
@@ -183,9 +184,17 @@ def _schedule_greedy(tournament, matches, days, start_at=None, busy=None):
             r = match.match_round
             s = match.bracket_slot
             div_id = match.division_id
-            feeder_end_1 = bracket_slot_end.get((div_id, r - 1, 2 * s - 1), priority_floor)
-            feeder_end_2 = bracket_slot_end.get((div_id, r - 1, 2 * s), priority_floor)
-            earliest = max(feeder_end_1, feeder_end_2) + break_td
+            sec = getattr(match, 'final_section', '')
+            if s is None:
+                # Final round-robin: one round after the other (players unknown yet).
+                prev = league_round_end.get((div_id, sec, r - 1))
+                earliest = (prev + break_td) if prev else priority_floor
+            else:
+                if getattr(match, 'is_third_place', False):
+                    s = 1  # fed by the two semi-finals, like the final
+                feeder_end_1 = bracket_slot_end.get((div_id, sec, r - 1, 2 * s - 1), priority_floor)
+                feeder_end_2 = bracket_slot_end.get((div_id, sec, r - 1, 2 * s), priority_floor)
+                earliest = max(feeder_end_1, feeder_end_2) + break_td
         else:
             player_pks = [
                 pk for pk in [
@@ -247,8 +256,12 @@ def _schedule_greedy(tournament, matches, days, start_at=None, busy=None):
             key = (match.division_id, day_pk)
             playoff_group_end[key] = max(playoff_group_end.get(key, end_time), end_time)
 
-        if match.bracket_slot is not None:
-            bracket_slot_end[(match.division_id, match.match_round, match.bracket_slot)] = end_time
+        if match.bracket_slot is not None and not getattr(match, 'is_third_place', False):
+            bracket_slot_end[(match.division_id, getattr(match, 'final_section', ''),
+                              match.match_round, match.bracket_slot)] = end_time
+        if match.bracket_slot is None and match.phase == 'playoff':
+            key = (match.division_id, getattr(match, 'final_section', ''), match.match_round)
+            league_round_end[key] = max(league_round_end.get(key, end_time), end_time)
 
         current_group_ends.append(end_time)
 
@@ -301,8 +314,8 @@ def replan_pending(tournament, now=None):
                 if pk:
                     # The scheduler adds the break itself.
                     players[pk] = max(players.get(pk, end), end)
-        if m.bracket_slot is not None:
-            bracket_slots[(m.division_id, m.match_round, m.bracket_slot)] = end
+        if m.bracket_slot is not None and not m.is_third_place:
+            bracket_slots[(m.division_id, m.final_section, m.match_round, m.bracket_slot)] = end
         if m.phase == 'group' and today:
             key = (m.division_id, today.pk)
             group_ends[key] = max(group_ends.get(key, end), end)

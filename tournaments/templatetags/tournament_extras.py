@@ -65,6 +65,12 @@ def bracket_label_i18n(label):
         lambda m: _("%(ordinal)s of group %(group)s") % {'ordinal': _ordinal(m.group(1)), 'group': m.group(2)},
         text,
     )
+    text = re.sub(
+        r'Top\.(\d+)',
+        lambda m: _("%(ordinal)s overall") % {'ordinal': _ordinal(m.group(1))},
+        text,
+    )
+    text = re.sub(r'Loser SF(\d)', lambda m: _("Loser of semi-final %(n)s") % {'n': m.group(1)}, text)
     text = text.replace('(fri)', _("(bye)"))
     text = re.sub(r'V-kamp #(\S+)', lambda m: _("Winner of #%(n)s") % {'n': m.group(1)}, text)
     return text
@@ -112,16 +118,23 @@ def signed(value):
 
 @register.filter
 def stage_label(stage, division):
-    """Readable knockout stage from medals.rank_teams (0 = did not reach the knockout)."""
-    from django.db.models import Max
+    """Readable final-phase stage from medals.rank_teams (0 = did not reach the final phase)."""
+    from django.db.models import Max, Min
     from django.utils.translation import gettext as _
     if not stage:
         return _("Group stage") if (division.has_groups or division.tournament_type == 'group') else '–'
-    qs = division.matches.filter(phase='playoff') if division.tournament_type == 'playoff' else division.matches.all()
-    final_round = qs.aggregate(m=Max('match_round'))['m'] or 0
-    left = final_round + 1 - stage  # 0 champion, 1 final, 2 semi-final, 3 quarter-final …
+    if division.final_format == 'league' and division.tournament_type == 'playoff':
+        return _("Final phase")
+    qs = division.matches.filter(is_third_place=False, bracket_slot__isnull=False)
+    if division.tournament_type == 'playoff':
+        qs = qs.filter(phase='playoff')
+    agg = qs.aggregate(lo=Min('match_round'), hi=Max('match_round'))
+    rounds = (agg['hi'] or 0) - (agg['lo'] or 0) + 1
+    left = rounds + 1 - int(stage)  # 0 champion, 1 final, 2 semi-final, 3 quarter-final …
     names = {0: _("Champion"), 1: _("Final"), 2: _("Semi-final"), 3: _("Quarter-final")}
-    return names.get(left, _("Round %(n)s") % {'n': stage})
+    label = names.get(left, _("Round %(n)s") % {'n': int(stage)})
+    third = _("3rd place")
+    return f"{label} · {third}" if stage != int(stage) else label
 
 
 @register.filter

@@ -14,7 +14,7 @@ def tournament_medals(tournament):
     result = []
     for d in tournament.divisions.prefetch_related('teams__player1', 'teams__player2').order_by('schedule_priority', 'name'):
         ctx = _division_medal_context(d)
-        if d.medals_by_age_group:
+        if 'subgroups' in ctx:
             podiums = [{'label': sg['label'], 'gold': sg['gold'], 'silver': sg['silver'], 'bronze': sg['bronze']}
                        for sg in ctx['subgroups']]
         else:

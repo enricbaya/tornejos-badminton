@@ -558,18 +558,16 @@ def tournament_detail(request, pk):
         return [{'player': p, 'checked': p.pk in checked_pks} for p in qs]
 
     def _format_options(d):
-        """Format suggestions for divisions whose match programme is not generated yet."""
-        if d.matches.exists():
+        """Format suggestions for divisions where no match has been played yet."""
+        if _division_has_results(d):
             return []
+        from .format_suggestion import suggest_flexible
         minutes = tournament.single_match_duration if d.discipline == 'single' else tournament.double_match_duration
-        options = suggest_formats(d.teams.count())
+        options = suggest_flexible(d.teams.count(), match_minutes=minutes)
+        current = _division_format_key(d)
         for opt in options:
-            opt['court_minutes'] = opt['matches'] * minutes
-            opt['is_current'] = (
-                opt['tournament_type'] == d.tournament_type
-                and (d.tournament_type in ('group', 'tree') or opt['group_count'] == d.group_count)
-                and (d.tournament_type != 'playoff' or opt['advance_count'] == d.advance_count)
-            )
+            opt['is_current'] = _division_format_key(opt['config'], opt['tournament_type']) == current
+            opt['court_minutes'] = opt.get('court_minutes', opt['matches'] * minutes)
         return options
 
     division_data = [
@@ -587,6 +585,8 @@ def tournament_detail(request, pk):
             'seeds_dict': _seeds_dict_for_division(d, seed_lookup),
             'group_teams': _group_teams(d),
             'format_options': _format_options(d),
+            'format_sections': _format_sections(d),
+            'current_format': _current_format_summary(d),
         }
         for d in divisions
     ]
@@ -844,24 +844,139 @@ def division_set_priority(request, pk):
     return redirect('tournament_detail', pk=division.tournament.pk)
 
 
+def _format_sections(division):
+    """Possible separate final phases of a division: {'gender': [(code, label, n)], 'age_group': [...]}."""
+    from .final_phase import division_sections
+    old = division.final_split
+    out = {}
+    try:
+        for split in ('gender', 'age_group'):
+            division.final_split = split
+            out[split] = [(c, lbl, len(m)) for c, lbl, m in division_sections(division)]
+    finally:
+        division.final_split = old
+    return out
+
+
+def _current_format_summary(division):
+    from .format_suggestion import evaluate_format
+    n = division.teams.count()
+    if n < 2:
+        return None
+    t = division.tournament
+    minutes = t.single_match_duration if division.discipline == 'single' else t.double_match_duration
+    cfg = {
+        'group_count': 1 if division.tournament_type == 'group' else division.group_count,
+        'final_format': division.final_format if division.tournament_type == 'playoff' else 'none',
+        'qualify_mode': division.qualify_mode, 'advance_count': division.advance_count,
+        'final_qualifiers': division.final_qualifiers, 'third_place_match': division.third_place_match,
+        'final_split': division.final_split, 'section_qualifiers': division.section_qualifiers,
+    }
+    if division.tournament_type == 'tree':
+        return None
+    return evaluate_format(cfg, n, _section_counts(division, division.final_split), minutes)
+
+
+def _division_has_results(division):
+    """True once a real match of the division has been played (byes do not count)."""
+    return division.matches.filter(status__in=['completed', 'in_progress']).exclude(score='Bye').exists()
+
+
+def _division_format_key(d, ttype=None):
+    """Comparable summary of a division's (or a config dict's) competition format."""
+    get = (lambda k, default=None: d.get(k, default)) if isinstance(d, dict) else (lambda k, default=None: getattr(d, k, default))
+    ttype = ttype or get('tournament_type')
+    if ttype == 'group':
+        return ('group',)
+    if ttype == 'groups':
+        return ('groups', get('group_count'))
+    ff = get('final_format') or 'knockout'
+    total = get('qualify_mode') == 'total' or bool(get('final_split'))
+    return ('playoff', get('group_count'), ff, get('final_split') or '', bool(get('third_place_match')),
+            get('final_qualifiers') if total else ('pg', get('advance_count')))
+
+
+def _format_config_from_request(data, division):
+    """Free format configuration from a POST/GET (configurator or suggested option)."""
+    from .final_phase import division_sections
+    cfg = {
+        'group_count': data.get('group_count') or 1,
+        'final_format': data.get('final_format') or 'none',
+        'qualify_mode': data.get('qualify_mode') or 'per_group',
+        'advance_count': data.get('advance_count') or 1,
+        'final_qualifiers': data.get('final_qualifiers') or 4,
+        'third_place_match': data.get('third_place_match') in ('1', 'on', 'true', 'True'),
+        'final_split': data.get('final_split') or '',
+    }
+    # Legacy suggested options post only tournament_type
+    ttype = data.get('tournament_type')
+    if ttype and 'final_format' not in data:
+        cfg['final_format'] = {'playoff': 'knockout'}.get(ttype, 'none')
+        if ttype == 'group':
+            cfg['group_count'] = 1
+    sq = {}
+    if cfg['final_split']:
+        old_split = division.final_split
+        division.final_split = cfg['final_split']
+        for code, _label, _members in division_sections(division):
+            val = data.get(f'sq_{code}')
+            if val not in (None, ''):
+                try:
+                    sq[code] = max(0, min(32, int(val)))
+                except ValueError:
+                    pass
+        division.final_split = old_split
+    cfg['section_qualifiers'] = sq
+    return cfg
+
+
+def _section_counts(division, split):
+    from .final_phase import division_sections
+    old = division.final_split
+    division.final_split = split
+    try:
+        return {code: len(members) for code, _l, members in division_sections(division)} if split else None
+    finally:
+        division.final_split = old
+
+
+@login_required
+def division_format_preview(request, pk):
+    """JSON: totals and matches per player for a format being configured."""
+    from .format_suggestion import evaluate_format
+    division = get_object_or_404(Division, pk=pk, tournament__owner=request.user)
+    cfg = _format_config_from_request(request.GET, division)
+    t = division.tournament
+    minutes = t.single_match_duration if division.discipline == 'single' else t.double_match_duration
+    res = evaluate_format(cfg, division.teams.count(), _section_counts(division, cfg['final_split']), minutes)
+    return JsonResponse({k: res[k] for k in ('label', 'matches', 'court_minutes', 'min_matches_per_team',
+                                             'max_matches_per_team', 'ok', 'sizes')})
+
+
 @login_required
 def division_apply_format(request, pk):
     """POST: apply a suggested competition format to a division without matches."""
     division = get_object_or_404(Division, pk=pk, tournament__owner=request.user)
     if request.method == 'POST' and not division.tournament.schedule_locked:
-        if division.matches.exists():
-            messages.error(request, _("The format can only be changed before the match programme is generated."))
+        if _division_has_results(division):
+            messages.error(request, _("The format can only be changed before any match has been played."))
         else:
-            ttype = request.POST.get('tournament_type')
-            if ttype in dict(Division.TOURNAMENT_TYPE_CHOICES):
-                try:
-                    division.group_count = max(1, min(16, int(request.POST.get('group_count', division.group_count))))
-                    division.advance_count = max(1, min(8, int(request.POST.get('advance_count', division.advance_count) or 1)))
-                except (TypeError, ValueError):
-                    pass
-                division.tournament_type = ttype
-                division.save(update_fields=['tournament_type', 'group_count', 'advance_count'])
-                messages.success(request, _("Format of \"%(name)s\" updated. You can now generate the match programme.") % {'name': division.name})
+            division.matches.all().delete()
+            from .format_suggestion import normalise_config
+            cfg = normalise_config(_format_config_from_request(request.POST, division), division.teams.count() or 2)
+            division.tournament_type = cfg['tournament_type']
+            division.group_count = cfg['group_count']
+            division.advance_count = cfg['advance_count']
+            division.final_format = cfg['final_format'] if cfg['final_format'] != 'none' else 'knockout'
+            division.qualify_mode = cfg['qualify_mode']
+            division.final_qualifiers = cfg['final_qualifiers']
+            division.third_place_match = cfg['third_place_match']
+            division.final_split = cfg['final_split']
+            division.section_qualifiers = cfg['section_qualifiers']
+            if division.third_place_match and division.bronze_count > 1:
+                division.bronze_count = 1
+            division.save()
+            messages.success(request, _("Format of \"%(name)s\" updated. You can now generate the match programme.") % {'name': division.name})
     return redirect('tournament_detail', pk=division.tournament.pk)
 
 
@@ -1437,6 +1552,11 @@ def _compute_medals(division):
                 for _ in range(count):
                     if pos < len(teams):
                         bucket.append(teams[pos]); pos += 1
+    elif division.third_place_match or division.final_format == 'league' or division.final_split:
+        from .final_phase import section_podiums
+        pods = section_podiums(division)
+        if pods:
+            gold, silver, bronze = pods[0]['gold'], pods[0]['silver'], pods[0]['bronze']
     else:
         phase_filter = {'phase': 'playoff'} if division.tournament_type == 'playoff' else {}
         bracket_matches = list(
@@ -1476,8 +1596,33 @@ def division_medals(request, pk):
     return render(request, 'tournaments/division_medals.html', ctx)
 
 
+def _final_section_medals(division):
+    """One podium per separate final phase (e.g. boys and girls), with manual corrections."""
+    from .final_phase import section_podiums
+    overrides = {}
+    for o in division.medal_overrides.filter(subgroup__startswith='final:').select_related('team').order_by('order'):
+        overrides.setdefault(o.subgroup, {}).setdefault(o.medal, []).append(o.team)
+    teams_by_code = {}
+    from .final_phase import division_sections
+    for code, _label, members in division_sections(division):
+        teams_by_code[code] = members
+    result = []
+    for p in section_podiums(division):
+        code = f"final:{p['code']}"
+        entry = {'code': code, 'label': p['label'], 'ranking': [], 'override': code in overrides,
+                 'teams': teams_by_code.get(p['code'], [])}
+        for medal in ('gold', 'silver', 'bronze'):
+            entry[medal] = overrides[code].get(medal, []) if code in overrides else p[medal]
+        result.append(entry)
+    return result
+
+
 def _division_medal_context(division):
     """Medals of a division, either one podium or one per age group × gender."""
+    if division.final_split and division.tournament_type == 'playoff' and not division.medals_by_age_group:
+        subgroups = _final_section_medals(division)
+        return {'division': division, 'subgroups': subgroups,
+                'has_override': any(sg['override'] for sg in subgroups)}
     if division.medals_by_age_group:
         from .medals import compute_subgroup_medals
         subgroups = compute_subgroup_medals(division)
@@ -1514,9 +1659,9 @@ def division_medals_edit(request, pk):
     division = get_object_or_404(Division, pk=pk, tournament__owner=request.user)
     all_teams = list(division.teams.select_related('player1', 'player2').order_by('name'))
 
-    if division.medals_by_age_group:
-        from .medals import PODIUM, compute_subgroup_medals
-        subgroups = compute_subgroup_medals(division)
+    if division.medals_by_age_group or (division.final_split and division.tournament_type == 'playoff'):
+        from .medals import PODIUM
+        subgroups = _division_medal_context(division)['subgroups']
         if request.method == 'POST':
             division.medal_overrides.exclude(subgroup='').delete()
             team_by_pk = {str(t.pk): t for t in all_teams}
@@ -1528,7 +1673,8 @@ def division_medals_edit(request, pk):
                                                      medal=medal, team=team, order=1)
             return redirect('division_medals', pk=pk)
         for sg in subgroups:
-            sg['teams'] = [r['team'] for r in sg['ranking']]
+            if sg['ranking']:
+                sg['teams'] = [r['team'] for r in sg['ranking']]
             sg['slots'] = [(m, sg[m][0] if sg[m] else None) for m in PODIUM]
         return render(request, 'tournaments/division_medals_edit.html', {
             'division': division,
@@ -1575,7 +1721,7 @@ def division_medals_reset(request, pk):
     if request.method == 'POST':
         from .models import MedalOverride
         division = get_object_or_404(Division, pk=pk, tournament__owner=request.user)
-        if division.medals_by_age_group:
+        if division.medals_by_age_group or division.final_split:
             division.medal_overrides.exclude(subgroup='').delete()
         else:
             division.medal_overrides.filter(subgroup='').delete()

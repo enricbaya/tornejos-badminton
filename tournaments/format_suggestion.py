@@ -94,3 +94,192 @@ def suggest_formats(n):
 def estimated_court_minutes(option, match_minutes):
     """Total court time the option needs, in minutes."""
     return option['matches'] * match_minutes
+
+
+# ---------------------------------------------------------------------------
+# Free configuration: evaluate any format and suggest the ones that give
+# every player about 3–4 matches and never more than 5.
+# ---------------------------------------------------------------------------
+
+TARGET_MIN = 3
+TARGET_MAX = 5
+
+
+def _stage_name(q):
+    size = 2 ** math.ceil(math.log2(max(2, q)))
+    return {2: _("final"), 4: _("semi-finals"), 8: _("quarter-finals"), 16: _("round of 16")}.get(size, _("knockout"))
+
+
+def normalise_config(cfg, n):
+    """Fill defaults and derive tournament_type from a free configuration dict."""
+    c = {
+        'group_count': max(1, min(16, int(cfg.get('group_count') or 1))),
+        'final_format': cfg.get('final_format') or 'none',        # none | knockout | league
+        'qualify_mode': cfg.get('qualify_mode') or 'per_group',   # per_group | total
+        'advance_count': max(1, min(8, int(cfg.get('advance_count') or 1))),
+        'final_qualifiers': max(2, min(32, int(cfg.get('final_qualifiers') or 4))),
+        'third_place_match': bool(cfg.get('third_place_match')),
+        'final_split': cfg.get('final_split') or '',
+        'section_qualifiers': dict(cfg.get('section_qualifiers') or {}),
+    }
+    c['group_count'] = min(c['group_count'], max(1, n // 2))
+    if c['final_format'] == 'none':
+        c['tournament_type'] = 'group' if c['group_count'] == 1 else 'groups'
+        c['third_place_match'] = False
+        c['final_split'] = ''
+    else:
+        c['tournament_type'] = 'playoff'
+    if c['final_split']:
+        c['qualify_mode'] = 'total'
+    if c['final_format'] == 'league':
+        c['third_place_match'] = False
+    return c
+
+
+def evaluate_format(cfg, n, section_counts=None, match_minutes=None):
+    """Matches in total and per player (min/max) for a configuration with n participants.
+
+    section_counts: {code: players} for a final phase split per gender / age group.
+    """
+    c = normalise_config(cfg, n)
+    sizes = _group_sizes(n, c['group_count'])
+    total = _round_robin_matches(sizes)
+    base_min, base_max = min(sizes) - 1, max(sizes) - 1
+    extra_min = extra_max = 0
+    qualified = 0
+    if c['final_format'] != 'none':
+        if c['final_split']:
+            sections = [(code, cnt, int(c['section_qualifiers'].get(code, c['final_qualifiers']) or 0))
+                        for code, cnt in (section_counts or {'': n}).items()]
+        elif c['qualify_mode'] == 'total':
+            sections = [('', n, c['final_qualifiers'])]
+        else:
+            sections = [('', n, c['group_count'] * c['advance_count'])]
+        mins, maxs = [], []
+        for _code, members, q in sections:
+            q = max(0, min(q, members))
+            if q < 2:
+                continue
+            if c['final_format'] == 'league':
+                total += q * (q - 1) // 2
+                mins.append(q - 1)
+                maxs.append(q - 1)
+                qualified += q
+            else:
+                rounds = math.ceil(math.log2(q))
+                total += q - 1
+                qualified += q
+                mins.append(1)
+                maxs.append(rounds)
+                if c['third_place_match']:
+                    if rounds >= 2:
+                        total += 1
+                    elif members >= 4:
+                        total += 1   # 3rd and 4th qualified play for bronze
+                        qualified += 2
+        if mins:
+            extra_min, extra_max = min(mins), max(maxs)
+    min_pp = base_min if qualified < n else base_min + extra_min
+    max_pp = base_max + extra_max
+    res = {
+        'config': c,
+        'tournament_type': c['tournament_type'],
+        'group_count': c['group_count'],
+        'advance_count': c['advance_count'],
+        'final_format': c['final_format'],
+        'qualify_mode': c['qualify_mode'],
+        'final_qualifiers': c['final_qualifiers'],
+        'third_place_match': c['third_place_match'],
+        'final_split': c['final_split'],
+        'matches': total,
+        'min_matches_per_team': min_pp,
+        'max_matches_per_team': max_pp,
+        'sizes': sizes,
+        'label': describe_format(c, sizes),
+        'ok': TARGET_MIN <= min_pp and max_pp <= TARGET_MAX,
+    }
+    if match_minutes:
+        res['court_minutes'] = total * match_minutes
+    return res
+
+
+def describe_format(c, sizes):
+    g = c['group_count']
+    size_txt = '/'.join(str(s) for s in sorted(set(sizes), reverse=True))
+    if g == 1:
+        base = _("One round-robin of %(n)s") % {'n': sizes[0]}
+    else:
+        base = _("%(g)s groups of %(sizes)s") % {'g': g, 'sizes': size_txt}
+    ff = c['final_format']
+    if ff == 'none':
+        return base + (_(", no final phase") if g > 1 else '')
+    if c['final_split']:
+        who = _("separate final phase per gender") if c['final_split'] == 'gender' else _("separate final phase per age group")
+        kind = _("final round-robin") if ff == 'league' else _("knockout")
+        txt = f"{base} + {kind}, {who}"
+    elif ff == 'league':
+        q = c['final_qualifiers'] if c['qualify_mode'] == 'total' else g * c['advance_count']
+        txt = base + ' + ' + _("final round-robin of the best %(q)s") % {'q': q}
+    elif c['qualify_mode'] == 'total':
+        q = c['final_qualifiers']
+        txt = base + ' + ' + _("%(stage)s between the best %(q)s") % {'stage': _stage_name(q), 'q': q}
+    else:
+        q = g * c['advance_count']
+        if c['advance_count'] >= max(sizes):
+            txt = base + ' + ' + _("%(stage)s with everybody, crossing the groups (1st v last…)") % {'stage': _stage_name(q)}
+        elif c['advance_count'] == 1:
+            txt = base + ' + ' + _("%(stage)s (the winner of each group)") % {'stage': _stage_name(q)}
+        else:
+            txt = base + ' + ' + _("%(stage)s (top %(a)s of each group)") % {'stage': _stage_name(q), 'a': c['advance_count']}
+    if c['third_place_match']:
+        txt += ' + ' + _("match for 3rd place")
+    return txt
+
+
+def _score(opt, n):
+    """Lower is better: inside 3–5 matches per player, close to 4 on average, short day."""
+    avg = opt['matches'] * 2 / n
+    penalty = 100 * max(0, TARGET_MIN - opt['min_matches_per_team'])
+    penalty += 100 * max(0, opt['max_matches_per_team'] - TARGET_MAX)
+    penalty += abs(avg - 3.75) * 8
+    penalty += opt['matches'] / 10
+    if opt['final_format'] != 'none':
+        penalty -= 3   # a final phase makes the medals clearer
+    return penalty
+
+
+def suggest_flexible(n, section_counts=None, match_minutes=None, limit=4):
+    """Several good formats for n participants, best first (all fields needed to apply them)."""
+    if n < 2:
+        return []
+    candidates = []
+    seen = set()
+    max_groups = max(1, n // 3)
+    for g in range(1, max_groups + 1):
+        sizes = _group_sizes(n, g)
+        if g > 1 and min(sizes) < 3:
+            continue
+        configs = [{'group_count': g, 'final_format': 'none'}]
+        if g > 1:
+            for a in (1, 2):
+                if 2 <= g * a <= 8:
+                    configs.append({'group_count': g, 'final_format': 'knockout', 'advance_count': a})
+                    if g * a >= 4:
+                        configs.append({'group_count': g, 'final_format': 'knockout', 'advance_count': a,
+                                        'third_place_match': True})
+            for q in (2, 4):
+                if q < n and q % g != 0:
+                    configs.append({'group_count': g, 'final_format': 'knockout', 'qualify_mode': 'total',
+                                    'final_qualifiers': q})
+            if 4 <= n:
+                configs.append({'group_count': g, 'final_format': 'league', 'qualify_mode': 'total', 'final_qualifiers': 3})
+                configs.append({'group_count': g, 'final_format': 'league', 'qualify_mode': 'total', 'final_qualifiers': 4})
+        for cfg in configs:
+            opt = evaluate_format(cfg, n, section_counts, match_minutes)
+            key = (opt['label'], opt['matches'])
+            if key in seen:
+                continue
+            seen.add(key)
+            candidates.append(opt)
+    candidates.sort(key=lambda o: _score(o, n))
+    return candidates[:limit]

@@ -57,22 +57,44 @@ def subgroup_labels(teams):
 
 
 def _stage_reached(division):
-    """team pk → how far the team got in the knockout (higher is better; 0 = no knockout)."""
+    """team pk → how far the team got in the final phase (higher is better; 0 = group stage only).
+
+    Knockout: the round reached, +1 for the champion, +0.5 for the winner of the
+    third-place match. Final round-robin: 1 plus a fraction for the final position.
+    Each separate final phase (per gender / age group) is measured on its own.
+    """
     if division.tournament_type not in ('playoff', 'tree'):
         return {}
-    qs = division.matches.all()
+    from .final_phase import league_rows
+    qs = division.matches.select_related('team1', 'team2')
     if division.tournament_type == 'playoff':
         qs = qs.filter(phase='playoff')
+    matches = list(qs)
     stage = {}
-    final_round = 0
-    for m in qs:
-        final_round = max(final_round, m.match_round)
-        for pk in (m.team1_id, m.team2_id):
-            if pk:
-                stage[pk] = max(stage.get(pk, 0), m.match_round)
-    final = [m for m in qs if m.match_round == final_round and m.status == 'completed' and m.winner_id]
-    for m in final:
-        stage[m.winner_id] = final_round + 1  # champion
+    for code in {m.final_section for m in matches}:
+        ms = [m for m in matches if m.final_section == code]
+        league = [m for m in ms if m.bracket_slot is None]
+        if league:
+            rows = league_rows(league)
+            n = len(rows)
+            for i, r in enumerate(rows):
+                stage[r['team'].pk] = 1 + (n - i) / (n + 1)
+            continue
+        ko = [m for m in ms if not m.is_third_place]
+        if not ko:
+            continue
+        first_round = min(m.match_round for m in ko)
+        final_round = max(m.match_round for m in ko)
+        for m in ko:
+            for pk in (m.team1_id, m.team2_id):
+                if pk:
+                    stage[pk] = max(stage.get(pk, 0), m.match_round - first_round + 1)
+        for m in ko:
+            if m.match_round == final_round and m.status == 'completed' and m.winner_id:
+                stage[m.winner_id] = final_round - first_round + 2  # champion
+        for m in ms:
+            if m.is_third_place and m.status == 'completed' and m.winner_id:
+                stage[m.winner_id] = stage.get(m.winner_id, 0) + 0.5
     return stage
 
 

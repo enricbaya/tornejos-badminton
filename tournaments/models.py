@@ -299,6 +299,37 @@ class Division(models.Model):
         default=0, verbose_name=_("Bronze medals"),
         help_text=_("0, 1 or 2. Use 2 for bracket tournaments where both semi-final losers receive bronze."),
     )
+    FINAL_FORMAT_CHOICES = [
+        ('knockout', _("Knockout")),
+        ('league', _("Final round-robin")),
+    ]
+    QUALIFY_MODE_CHOICES = [
+        ('per_group', _("The best of each group")),
+        ('total', _("The best overall")),
+    ]
+    FINAL_SPLIT_CHOICES = [
+        ('', _("No")),
+        ('gender', _("By gender")),
+        ('age_group', _("By age group")),
+    ]
+    final_format = models.CharField(
+        max_length=10, choices=FINAL_FORMAT_CHOICES, default='knockout', verbose_name=_("Final phase"))
+    qualify_mode = models.CharField(
+        max_length=10, choices=QUALIFY_MODE_CHOICES, default='per_group', verbose_name=_("Who goes through"),
+        help_text=_("The best of each group (advance count per group) or the best overall (final qualifiers), "
+                    "ranked by group position, % of matches won, set difference and point difference."))
+    final_qualifiers = models.PositiveSmallIntegerField(
+        default=4, verbose_name=_("Players in the final phase"),
+        help_text=_("Used when the best overall go through (per final, when the final phase is split)."))
+    third_place_match = models.BooleanField(
+        default=False, verbose_name=_("Match for third place"),
+        help_text=_("The semi-final losers play for bronze (or the 3rd and 4th qualified when there are no semi-finals)."))
+    final_split = models.CharField(
+        max_length=10, choices=FINAL_SPLIT_CHOICES, blank=True, default='', verbose_name=_("Separate final phases"),
+        help_text=_("One final phase per gender (or age group) after a mixed group stage."))
+    section_qualifiers = models.JSONField(
+        default=dict, blank=True, verbose_name=_("Players in each final"),
+        help_text=_("Per gender / age group: how many go through to that final phase."))
     medals_by_age_group = models.BooleanField(
         default=False, verbose_name=_("Medals per age group and gender"),
         help_text=_("Award gold, silver and bronze to the best three of each age group and gender in this category "
@@ -317,8 +348,11 @@ class Division(models.Model):
 
     @property
     def advancing_count(self):
-        """Number of teams per group that advance to a playoff (0 when there is no playoff)."""
-        return self.advance_count if self.tournament_type == 'playoff' else 0
+        """Number of teams per group that advance to a playoff (0 when there is no playoff, or when
+        the qualifiers are the best overall / per gender, which is not a fixed number per group)."""
+        if self.tournament_type != 'playoff' or self.qualify_mode == 'total' or self.final_split:
+            return 0
+        return self.advance_count
 
     def clean(self):
         super().clean()
@@ -395,6 +429,10 @@ class Match(models.Model):
         verbose_name=_("Phase"),
     )
     finished_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Finished at"))
+    final_section = models.CharField(
+        max_length=40, blank=True, default='', verbose_name=_("Final phase section"),
+        help_text=_("Gender or age group of this final phase, when the final phase is split."))
+    is_third_place = models.BooleanField(default=False, verbose_name=_("Third-place match"))
     called_at = models.DateTimeField(
         null=True, blank=True, verbose_name=_("Called at"),
         help_text=_("When the players were called over the loudspeaker."),

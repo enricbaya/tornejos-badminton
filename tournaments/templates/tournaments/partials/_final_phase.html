@@ -1,0 +1,57 @@
+{% load i18n tournament_extras %}
+{# Final phase of a division: one or more knockout brackets, third-place match, final round-robin. #}
+{# Context: bd (get_bracket_data), mode ('public' | 'run' | 'detail'), tournament #}
+{% for sec in bd.sections %}
+<div class="final-section">
+  {% if sec.label %}<h4 class="final-section-title">{{ sec.label }}</h4>{% endif %}
+
+  {% if sec.rounds %}
+  <div class="bracket-container">
+    {% for round in sec.rounds %}
+    <div class="bracket-round{% if round.is_last %} bracket-round-last{% endif %}">
+      <div class="bracket-round-label">{{ round.label }}</div>
+      {% for slot in round.slots %}
+      <div class="bracket-slot {% if slot.is_odd %}bracket-slot-odd{% else %}bracket-slot-even{% endif %}" style="height:{{ round.slot_height }}px;">
+        {% if slot.match %}{% include 'tournaments/partials/_bracket_card.html' with m=slot.match %}
+        {% else %}<div class="bracket-card"><div class="bracket-tbd">{% trans "Pending…" %}</div></div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if sec.third_place %}
+  <div class="third-place">
+    <div class="bracket-round-label">🥉 {% trans "Third place" %}</div>
+    {% include 'tournaments/partials/_bracket_card.html' with m=sec.third_place %}
+  </div>
+  {% endif %}
+
+  {% if sec.league_matches %}
+  <div class="bracket-round-label" style="margin:0.4rem 0;">{% trans "Final round-robin" %}</div>
+  {% if sec.league_rows %}
+  <div class="pub-table-wrap"><table>
+    <thead><tr><th>#</th><th>{% trans "Player" %}</th><th>{% trans "P" context "standings" %}</th><th>{% trans "W" context "standings" %}</th><th>{% trans "L" context "standings" %}</th><th>{% trans "Pts" context "standings" %}</th></tr></thead>
+    <tbody>
+    {% for r in sec.league_rows %}
+      <tr><td>{% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}{{ forloop.counter }}{% endif %}</td>
+        <td>{% if mode == 'public' %}{{ r.team|team_html:tournament.pk }}{% else %}{{ r.team.name }}{{ r.team|team_school }}{% endif %}</td>
+        <td>{{ r.played }}</td><td>{{ r.won }}</td><td>{{ r.lost }}</td><td><strong>{{ r.points }}</strong></td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+  <ul class="league-pending">
+    {% for m in sec.league_matches %}<li>{{ m.bracket_label|bracket_label_i18n }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+  {% endif %}
+</div>
+{% endfor %}
+<style>
+.final-section + .final-section { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px dashed #e4e4e7; }
+.final-section-title { margin: 0 0 0.5rem; font-size: 1rem; color: var(--accent-text, #c8174f); }
+.third-place { max-width: 260px; margin-top: 0.6rem; }
+.league-pending { margin: 0; padding-left: 1.1rem; color: #64748b; font-size: 0.85rem; font-style: italic; }
+</style>

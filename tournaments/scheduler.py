@@ -197,6 +197,13 @@ def generate_bracket(division):
             )
             created.append(match)
 
+    # ── Match for third place ────────────────────────────────────────────
+    if division.third_place_match and total_rounds >= 2:
+        from .final_phase import THIRD_PLACE_LABEL
+        created.append(Match.objects.create(
+            division=division, team1=None, team2=None, match_round=total_rounds, bracket_slot=2,
+            is_third_place=True, bracket_label=THIRD_PLACE_LABEL, status='pending'))
+
     # ── Auto-advance byes ────────────────────────────────────────────────
     for match in [m for m in created if m.team2 is None and m.status == 'completed']:
         _advance_bracket_inline(match)
@@ -219,20 +226,20 @@ def _advance_bracket_inline(match):
     # fill_playoff_bracket_from_group instead.
     if division.tournament_type == 'playoff' and match.phase == 'group':
         return
-    if not match.winner or match.bracket_slot is None:
+    if not match.winner or match.bracket_slot is None or match.is_third_place:
         return
 
     next_round = match.match_round + 1
     next_slot = math.ceil(match.bracket_slot / 2)
     is_odd = (match.bracket_slot % 2 == 1)
 
-    qs = Match.objects.filter(
-        division=division,
-        match_round=next_round,
-        bracket_slot=next_slot,
-    )
+    same_bracket = Match.objects.filter(division=division, final_section=match.final_section,
+                                        bracket_slot__isnull=False, is_third_place=False)
     if division.tournament_type == 'playoff':
-        qs = qs.filter(phase='playoff')
+        same_bracket = same_bracket.filter(phase='playoff')
+    _send_loser_to_third_place(match, same_bracket)
+
+    qs = same_bracket.filter(match_round=next_round, bracket_slot=next_slot)
 
     placeholder = qs.first()
 
@@ -251,6 +258,28 @@ def _advance_bracket_inline(match):
     placeholder.save(update_fields=['team1', 'team2', 'bracket_label'])
 
 
+def _send_loser_to_third_place(match, same_bracket):
+    """After a semi-final: the loser goes to the third-place match of the same bracket."""
+    from .models import Match
+    if not match.team1_id or not match.team2_id:
+        return
+    final_round = max(same_bracket.values_list('match_round', flat=True), default=None)
+    if final_round is None or match.match_round != final_round - 1:
+        return
+    third = Match.objects.filter(division=match.division, final_section=match.final_section,
+                                 is_third_place=True, status='pending').first()
+    if third is None:
+        return
+    loser = match.team2 if match.winner_id == match.team1_id else match.team1
+    if match.bracket_slot % 2 == 1:
+        third.team1 = loser
+    else:
+        third.team2 = loser
+    if third.team1_id and third.team2_id:
+        third.bracket_label = None
+    third.save(update_fields=['team1', 'team2', 'bracket_label'])
+
+
 def advance_bracket(match):
     """Public entry point – called after a match result is saved."""
     _advance_bracket_inline(match)
@@ -258,134 +287,78 @@ def advance_bracket(match):
 
 def fill_playoff_bracket_from_group(division, group_number):
     """
-    Called after any group-stage match in a playoff division completes.
-    If all matches in *group_number* are now done, resolves the group
-    standings and fills the corresponding playoff-bracket slots with the
-    actual teams.  Also handles bye slots: sets winner and advances them.
+    Called after any group-stage match in a playoff division completes: puts the
+    qualified players into the final-phase placeholders that can be resolved now
+    (a finished group fills "Nr.X gr.Y"; all groups finished fill "Top.N").
     """
-    from .models import Match
-    from .standings import compute_group_standings
-
+    from .final_phase import fill_final_phase
     if group_number is None:
         return
-
-    # Only proceed if every group match is completed
-    pending = (
-        division.matches
-        .filter(phase='group', group_number=group_number)
-        .exclude(status='completed')
-        .count()
-    )
-    if pending > 0:
-        return
-
-    # Build {label → team} for this group
-    position_to_team = {}
-    for gnum, rows in compute_group_standings(division):
-        if gnum == group_number:
-            for pos, row in enumerate(rows, start=1):
-                position_to_team[f'Nr.{pos} gr.{group_number}'] = row['team']
-            break
-
-    if not position_to_team:
-        return
-
-    # Find playoff bracket matches that reference this group in their label
-    bracket_matches = list(
-        division.matches
-        .filter(phase='playoff', bracket_label__icontains=f'gr.{group_number}')
-        .select_related('team1', 'team2')
-    )
-
-    for match in bracket_matches:
-        label = match.bracket_label or ''
-
-        if '(fri)' in label:
-            # Bye slot: "Nr.X gr.Y (fri)"
-            seed_label = label.replace(' (fri)', '').strip()
-            team = position_to_team.get(seed_label)
-            if team and match.team1 is None:
-                match.team1 = team
-                match.winner = team
-                match.save(update_fields=['team1', 'winner'])
-                _advance_bracket_inline(match)
-        else:
-            # Regular slot: "Nr.X gr.Y vs Nr.A gr.B"
-            parts = label.split(' vs ', 1)
-            if len(parts) != 2:
-                continue
-            t1_label, t2_label = parts[0].strip(), parts[1].strip()
-            update_fields = []
-            if match.team1 is None and t1_label in position_to_team:
-                match.team1 = position_to_team[t1_label]
-                update_fields.append('team1')
-            if match.team2 is None and t2_label in position_to_team:
-                match.team2 = position_to_team[t2_label]
-                update_fields.append('team2')
-            if update_fields:
-                if match.team1 and match.team2:
-                    match.bracket_label = None
-                    update_fields.append('bracket_label')
-                match.save(update_fields=update_fields)
+    fill_final_phase(division)
 
 
-def get_bracket_data(division):
-    """
-    Build the bracket visualisation data for a tree or playoff division.
-    Returns {'rounds': [...], 'total_rounds': int} or None.
-    """
-    if division.tournament_type == 'playoff':
-        matches = list(
-            division.matches
-            .filter(phase='playoff')
-            .select_related('team1', 'team2', 'winner')
-            .order_by('match_round', 'bracket_slot')
-        )
-    else:
-        matches = list(
-            division.matches
-            .select_related('team1', 'team2', 'winner')
-            .order_by('match_round', 'bracket_slot')
-        )
-
+def _bracket_rounds(matches):
+    """Visual rounds of one knockout bracket (list of matches with bracket_slot)."""
     if not matches:
-        return None
-
-    round1 = [m for m in matches if m.match_round == min(m.match_round for m in matches)]
-    if not round1:
-        return None
-
-    bracket_size = len(round1) * 2
-    total_rounds = int(math.log2(bracket_size)) if bracket_size > 1 else 1
+        return [], 0
     min_round = min(m.match_round for m in matches)
-
-    # Key by (round, bracket_slot)
+    round1 = [m for m in matches if m.match_round == min_round]
+    bracket_size = 2 ** math.ceil(math.log2(max(2, max(m.bracket_slot for m in round1) * 2)))
+    total_rounds = int(math.log2(bracket_size)) if bracket_size > 1 else 1
     lookup = {(m.match_round, m.bracket_slot): m for m in matches}
-
     BASE_HEIGHT = 80  # px per round-1 slot
-
     rounds = []
     for r_offset in range(total_rounds):
         r = min_round + r_offset
         n_slots = bracket_size // (2 ** (r_offset + 1))
-        slot_height = BASE_HEIGHT * (2 ** r_offset)
-        slots = [
-            {
-                'slot': s,
-                'match': lookup.get((r, s)),
-                'is_odd': s % 2 == 1,
-            }
-            for s in range(1, n_slots + 1)
-        ]
         rounds.append({
             'label': get_round_label(r_offset + 1, total_rounds),
             'round': r,
             'is_last': r_offset == total_rounds - 1,
-            'slot_height': slot_height,
-            'slots': slots,
+            'slot_height': BASE_HEIGHT * (2 ** r_offset),
+            'slots': [{'slot': s, 'match': lookup.get((r, s)), 'is_odd': s % 2 == 1}
+                      for s in range(1, n_slots + 1)],
         })
+    return rounds, total_rounds
 
-    return {'rounds': rounds, 'total_rounds': total_rounds}
+
+def get_bracket_data(division):
+    """
+    Build the visualisation data of the final phase of a tree or playoff division.
+
+    Returns None when there is nothing to show, else a dict with ``sections``:
+    one per final phase (one, or one per gender / age group), each with the
+    knockout ``rounds``, the ``third_place`` match and/or the final round-robin
+    (``league_rows`` + ``league_matches``). ``rounds``/``total_rounds`` of the
+    first section are kept at the top level for older templates.
+    """
+    from .final_phase import division_sections, league_rows, section_label
+
+    qs = division.matches.select_related('team1', 'team2', 'winner').order_by('match_round', 'bracket_slot', 'pk')
+    if division.tournament_type == 'playoff':
+        qs = qs.filter(phase='playoff')
+    matches = list(qs)
+    if not matches:
+        return None
+    order = {c: i for i, (c, _l, _t) in enumerate(division_sections(division))}
+    codes = sorted({m.final_section for m in matches}, key=lambda c: order.get(c, 99))
+    sections = []
+    for code in codes:
+        ms = [m for m in matches if m.final_section == code]
+        ko = [m for m in ms if m.bracket_slot is not None and not m.is_third_place]
+        league = [m for m in ms if m.bracket_slot is None]
+        rounds, total = _bracket_rounds(ko)
+        sections.append({
+            'code': code,
+            'label': section_label(code, division.final_split),
+            'rounds': rounds,
+            'total_rounds': total,
+            'third_place': next((m for m in ms if m.is_third_place), None),
+            'league_matches': league,
+            'league_rows': league_rows(league) if league else [],
+        })
+    first = sections[0]
+    return {'rounds': first['rounds'], 'total_rounds': first['total_rounds'], 'sections': sections}
 
 
 # ---------------------------------------------------------------------------
@@ -448,95 +421,10 @@ def generate_playoff(division, with_bracket=True):
     if not with_bracket:
         return created
 
-    # ── Playoff bracket ───────────────────────────────────────────────
-    total_advancing = group_count * advance_count
-    total_rounds = math.ceil(math.log2(total_advancing)) if total_advancing > 1 else 1
-    bracket_size = 2 ** total_rounds
-    byes_needed = bracket_size - total_advancing
-
-    # Bracket round numbering starts after group rounds
-    max_group_round = max((m.match_round for m in created), default=0)
-    bracket_base_round = max_group_round + 1
-
-    seed_order = _seeding_order(bracket_size)
-
-    # Slot → label: "V1G1" means "winner X of group 1"
-    # Pattern: advance_count winners from G1, then G2, etc.
-    advancing_seeds = []
-    for advance_pos in range(1, advance_count + 1):
-        for g_num in range(1, group_count + 1):
-            advancing_seeds.append(f'Nr.{advance_pos} gr.{g_num}')
-
-    slots = []
-    for s in seed_order:
-        if s <= total_advancing:
-            slots.append(advancing_seeds[s - 1])
-        else:
-            slots.append(None)  # bye
-
-    # Round 1 of bracket
-    n_r1_slots = bracket_size // 2
-    for i in range(n_r1_slots):
-        slot_num = i + 1
-        t1_label = slots[i * 2]
-        t2_label = slots[i * 2 + 1]
-
-        if t1_label is None and t2_label is None:
-            continue
-
-        if t2_label is None:
-            # bye – auto-completed placeholder
-            match = Match.objects.create(
-                division=division,
-                team1=None, team2=None,
-                winner=None, score='Bye',
-                match_round=bracket_base_round,
-                bracket_slot=slot_num,
-                bracket_label=f'{t1_label} (fri)',
-                phase='playoff',
-                status='completed',
-                walkover=True,
-            )
-        elif t1_label is None:
-            match = Match.objects.create(
-                division=division,
-                team1=None, team2=None,
-                winner=None, score='Bye',
-                match_round=bracket_base_round,
-                bracket_slot=slot_num,
-                bracket_label=f'{t2_label} (fri)',
-                phase='playoff',
-                status='completed',
-                walkover=True,
-            )
-        else:
-            match = Match.objects.create(
-                division=division,
-                team1=None, team2=None,
-                match_round=bracket_base_round,
-                bracket_slot=slot_num,
-                bracket_label=f'{t1_label} vs {t2_label}',
-                phase='playoff',
-                status='pending',
-            )
-        created.append(match)
-
-    # Remaining bracket rounds (placeholders)
-    for r_offset in range(1, total_rounds):
-        r = bracket_base_round + r_offset
-        n_slots = bracket_size // (2 ** (r_offset + 1))
-        for s in range(1, n_slots + 1):
-            match = Match.objects.create(
-                division=division,
-                team1=None, team2=None,
-                match_round=r,
-                bracket_slot=s,
-                bracket_label=_bracket_placeholder_label(r_offset + 1, total_rounds, n_slots, s),
-                phase='playoff',
-                status='pending',
-            )
-            created.append(match)
-
+    # ── Final phase (knockout or final round-robin, possibly split by gender) ──
+    from .final_phase import build_final_phase
+    base_round = max((m.match_round for m in created), default=0) + 1
+    created += build_final_phase(division, base_round, groups)
     return created
 
 
@@ -597,74 +485,7 @@ def regenerate_playoff_with_groups(division, groups):
     if division.tournament_type != 'playoff':
         return created  # 'groups': several round-robins, no playoff bracket
 
-    # ── Re-use the playoff bracket generation from generate_playoff ──────
-    #    Re-call it but skip the group stage since we already created it.
-    #    To avoid code duplication we just inline the bracket part.
-    total_advancing = group_count * advance_count
-    total_rounds = math.ceil(math.log2(total_advancing)) if total_advancing > 1 else 1
-    bracket_size = 2 ** total_rounds
-
-    max_group_round = max((m.match_round for m in created), default=0)
-    bracket_base_round = max_group_round + 1
-
-    seed_order = _seeding_order(bracket_size)
-
-    advancing_seeds = []
-    for advance_pos in range(1, advance_count + 1):
-        for g_num in range(1, group_count + 1):
-            advancing_seeds.append(f'Nr.{advance_pos} gr.{g_num}')
-
-    slots = []
-    for s in seed_order:
-        if s <= total_advancing:
-            slots.append(advancing_seeds[s - 1])
-        else:
-            slots.append(None)
-
-    n_r1_slots = bracket_size // 2
-    for i in range(n_r1_slots):
-        slot_num = i + 1
-        t1_label = slots[i * 2]
-        t2_label = slots[i * 2 + 1]
-
-        if t1_label is None and t2_label is None:
-            continue
-
-        if t2_label is None:
-            match = Match.objects.create(
-                division=division, team1=None, team2=None,
-                winner=None, score='Bye',
-                match_round=bracket_base_round, bracket_slot=slot_num,
-                bracket_label=f'{t1_label} (fri)', phase='playoff',
-                status='completed', walkover=True,
-            )
-        elif t1_label is None:
-            match = Match.objects.create(
-                division=division, team1=None, team2=None,
-                winner=None, score='Bye',
-                match_round=bracket_base_round, bracket_slot=slot_num,
-                bracket_label=f'{t2_label} (fri)', phase='playoff',
-                status='completed', walkover=True,
-            )
-        else:
-            match = Match.objects.create(
-                division=division, team1=None, team2=None,
-                match_round=bracket_base_round, bracket_slot=slot_num,
-                bracket_label=f'{t1_label} vs {t2_label}',
-                phase='playoff', status='pending',
-            )
-        created.append(match)
-
-    for r_offset in range(1, total_rounds):
-        r = bracket_base_round + r_offset
-        n_slots = bracket_size // (2 ** (r_offset + 1))
-        for s in range(1, n_slots + 1):
-            match = Match.objects.create(
-                division=division, team1=None, team2=None,
-                match_round=r, bracket_slot=s,
-                bracket_label=_bracket_placeholder_label(r_offset + 1, total_rounds, n_slots, s),
-                phase='playoff', status='pending',
-            )
-            created.append(match)
-
+    from .final_phase import build_final_phase
+    base_round = max((m.match_round for m in created), default=0) + 1
+    created += build_final_phase(division, base_round, [list(g) for g in groups])
     return created

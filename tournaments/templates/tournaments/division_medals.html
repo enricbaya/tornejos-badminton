@@ -110,23 +110,23 @@
 </div>
 {% endif %}
 
-{% if division.medals_by_age_group %}
-<div class="criteria-note">
+{% if subgroups %}
+{% if division.medals_by_age_group %}<div class="criteria-note">
   {% trans "All players of the category are ranked together, in this order: stage reached (champion, finalist, semi-finalist…), position in their group, % of matches won, set difference and point difference. The best three of each age group and gender get the medals." %}
-</div>
+</div>{% endif %}
 {% for sg in subgroups %}
 <div class="medal-card">
   <div class="medal-header">
     <div class="medal-icon">🏅</div>
     <div>
       <div class="medal-title">{{ sg.label }}</div>
-      <div class="medal-subtitle">{% blocktrans count n=sg.ranking|length %}{{ n }} participant{% plural %}{{ n }} participants{% endblocktrans %}{% if sg.override %} · ✏️ {% trans "manual" %}{% endif %}</div>
+      <div class="medal-subtitle">{% if sg.ranking %}{% blocktrans count n=sg.ranking|length %}{{ n }} participant{% plural %}{{ n }} participants{% endblocktrans %}{% else %}{% trans "Final phase" %}{% endif %}{% if sg.override %} · ✏️ {% trans "manual" %}{% endif %}</div>
     </div>
   </div>
   {% for t in sg.gold %}<div class="medal-row">🥇 {{ t.name }}{{ t|team_school }}</div>{% endfor %}
   {% for t in sg.silver %}<div class="medal-row">🥈 {{ t.name }}{{ t|team_school }}</div>{% endfor %}
   {% for t in sg.bronze %}<div class="medal-row">🥉 {{ t.name }}{{ t|team_school }}</div>{% endfor %}
-  <details class="ranking">
+  {% if sg.ranking %}<details class="ranking">
     <summary>{% trans "Full ranking" %}</summary>
     <table>
       <thead><tr><th>#</th><th>{% trans "Player" %}</th><th>{% trans "Stage" %}</th><th>{% trans "Group pos." %}</th><th>{% trans "% won" %}</th><th>{% trans "Sets" %}</th><th>{% trans "Points" %}</th></tr></thead>
@@ -136,7 +136,7 @@
       {% endfor %}
       </tbody>
     </table>
-  </details>
+  </details>{% endif %}
 </div>
 {% empty %}
 <div class="empty-note">{% trans "This category has no participants yet." %}</div>
