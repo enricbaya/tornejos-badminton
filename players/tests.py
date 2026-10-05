@@ -632,23 +632,22 @@ class PlayerUploadTest(TestCase):
 
     def test_missing_column_aborts_entire_upload(self):
         """If a required column is missing no players are created."""
-        data = _make_xlsx_bytes([('Alice', 20, 'K')], headers=('name', 'age', 'gender'))
+        data = _make_xlsx_bytes([('Alice', 20, 'U13')], headers=('name', 'age', 'division'))
         f = _make_upload_file(data)
         response = self.client.post(reverse('player_upload'), {'excel_file': f})
         self.assertRedirects(response, reverse('player_list'))
         self.assertEqual(Player.objects.filter(owner=self.user).count(), 0)
         msgs = [str(m) for m in response.wsgi_request._messages]
-        self.assertTrue(any('missing' in m.lower() or 'mangler' in m.lower() for m in msgs))
+        self.assertTrue(any('missing' in m.lower() or 'falten' in m.lower() for m in msgs))
 
     def test_missing_multiple_columns_names_them_all(self):
-        data = _make_xlsx_bytes([('Alice',)], headers=('name',))
+        data = _make_xlsx_bytes([(20,)], headers=('age',))
         f = _make_upload_file(data)
         response = self.client.post(reverse('player_upload'), {'excel_file': f})
         msgs = [str(m) for m in response.wsgi_request._messages]
         combined = ' '.join(msgs)
-        self.assertIn('age', combined)
+        self.assertIn('name', combined)
         self.assertIn('gender', combined)
-        self.assertIn('division', combined)
 
     # ── row-level age validation ───────────────────────────────────────────
 

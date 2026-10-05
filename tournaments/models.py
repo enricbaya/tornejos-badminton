@@ -116,6 +116,10 @@ class Tournament(models.Model):
         related_name='tournaments',
         verbose_name=_("Club user"),
     )
+    registration_open = models.BooleanField(
+        default=False, verbose_name=_("Online registration open"),
+        help_text=_("Families and schools can register players with the public registration link."),
+    )
     court_access_enabled = models.BooleanField(
         default=False,
         verbose_name=_("Court referees enabled"),
@@ -295,6 +299,11 @@ class Division(models.Model):
         default=0, verbose_name=_("Bronze medals"),
         help_text=_("0, 1 or 2. Use 2 for bracket tournaments where both semi-final losers receive bronze."),
     )
+    medals_by_age_group = models.BooleanField(
+        default=False, verbose_name=_("Medals per age group and gender"),
+        help_text=_("Award gold, silver and bronze to the best three of each age group and gender in this category "
+                    "(e.g. Benjamí girls, Benjamí boys, Aleví girls…), instead of one podium for the whole category."),
+    )
     teams = models.ManyToManyField('players.Team', related_name='divisions', blank=True, verbose_name=_("Participants"))
 
     class Meta:
@@ -385,11 +394,30 @@ class Match(models.Model):
         choices=[('group', _("Group stage")), ('playoff', _("Playoff bracket"))],
         verbose_name=_("Phase"),
     )
-
+    finished_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Finished at"))
+    called_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Called at"),
+        help_text=_("When the players were called over the loudspeaker."),
+    )
 
     class Meta:
         verbose_name = _("Match")
         verbose_name_plural = _("Matches")
+
+    def save(self, *args, **kwargs):
+        """Keep finished_at in step with the status (used for the real pace and delay)."""
+        from django.utils import timezone
+        changed = False
+        if self.status == 'completed' and self.finished_at is None:
+            self.finished_at = timezone.now()
+            changed = True
+        elif self.status != 'completed' and self.finished_at is not None:
+            self.finished_at = None
+            changed = True
+        update_fields = kwargs.get('update_fields')
+        if changed and update_fields is not None:
+            kwargs['update_fields'] = set(update_fields) | {'finished_at'}
+        super().save(*args, **kwargs)
 
     def __str__(self):
         """Return a readable match label.
@@ -434,9 +462,13 @@ class MedalOverride(models.Model):
     medal = models.CharField(max_length=10, choices=MEDAL_CHOICES, verbose_name=_("Medal"))
     team = models.ForeignKey('players.Team', on_delete=models.CASCADE, related_name='medal_overrides', verbose_name=_("Team"))
     order = models.PositiveSmallIntegerField(default=1, verbose_name=_("Order"))
+    subgroup = models.CharField(
+        max_length=80, blank=True, default='', verbose_name=_("Age group and gender"),
+        help_text=_("Only for categories with medals per age group and gender."),
+    )
 
     class Meta:
-        unique_together = [('division', 'medal', 'order')]
+        unique_together = [('division', 'subgroup', 'medal', 'order')]
         verbose_name = _("Medal override")
         verbose_name_plural = _("Medal overrides")
         ordering = ['medal', 'order']
@@ -448,3 +480,36 @@ class MedalOverride(models.Model):
             str: Medal, team name, and division name.
         """
         return f"{self.get_medal_display()}: {self.team.name} ({self.division.name})"
+
+
+class Registration(models.Model):
+    """A player registered through the public form, waiting for the club to accept it."""
+    STATUS_CHOICES = [
+        ('pending', _("Pending")),
+        ('accepted', _("Accepted")),
+        ('rejected', _("Rejected")),
+    ]
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='registrations',
+                                   verbose_name=_("Tournament"))
+    name = models.CharField(max_length=100, verbose_name=_("Name and surnames"))
+    gender = models.CharField(max_length=1, choices=[('M', _("Male")), ('K', _("Female"))], verbose_name=_("Gender"))
+    birth_year = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Year of birth"))
+    age_group = models.CharField(max_length=30, blank=True, verbose_name=_("Age group"))
+    school = models.CharField(max_length=100, blank=True, verbose_name=_("School / club"))
+    division = models.ForeignKey(Division, on_delete=models.SET_NULL, null=True, blank=True,
+                                 related_name='registrations', verbose_name=_("Category"))
+    contact_name = models.CharField(max_length=100, blank=True, verbose_name=_("Contact person"))
+    contact = models.CharField(max_length=120, blank=True, verbose_name=_("Contact phone or e-mail"))
+    notes = models.TextField(blank=True, max_length=500, verbose_name=_("Notes"))
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending', verbose_name=_("Status"))
+    player = models.ForeignKey('players.Player', on_delete=models.SET_NULL, null=True, blank=True,
+                               related_name='registrations', verbose_name=_("Player"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
+
+    class Meta:
+        ordering = ['status', 'created_at']
+        verbose_name = _("Registration")
+        verbose_name_plural = _("Registrations")
+
+    def __str__(self):
+        return f"{self.name} ({self.tournament.name})"

@@ -1,5 +1,8 @@
 from django.contrib import admin
+from .admin_users import ClubOwnerAdminMixin, install as _install_club_user_admin
 from .models import Tournament, Division, Match, UserProfile
+
+_install_club_user_admin()
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
@@ -9,11 +12,11 @@ class UserProfileAdmin(admin.ModelAdmin):
     list_editable = ('language', 'tier')
 
 @admin.register(Tournament)
-class TournamentAdmin(admin.ModelAdmin):
+class TournamentAdmin(ClubOwnerAdminMixin, admin.ModelAdmin):
     """Configure admin list behavior for tournaments."""
 
-    list_display = ('name', 'date', 'division_model', 'scoring_model')
-    list_filter = ('division_model', 'scoring_model')
+    list_display = ('name', 'date', 'owner_club', 'scoring_model')
+    list_filter = ('owner', 'scoring_model')
     search_fields = ('name',)
 
 @admin.register(Division)

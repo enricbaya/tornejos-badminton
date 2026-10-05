@@ -7,7 +7,7 @@ from django.utils.translation import gettext as _
 from pathlib import Path
 import openpyxl
 from .models import Player, Team, DivisionCategory, DEFAULT_DIVISION_CATEGORIES
-from .forms import PlayerForm, TeamForm
+from .forms import PlayerForm, TeamForm, school_options
 from tournaments.player_status import get_busy_info, player_status as _player_status
 
 @login_required
@@ -22,6 +22,7 @@ def player_list(request):
     """
     division = request.GET.get('division', '')
     gender = request.GET.get('gender', '')
+    school = request.GET.get('school', '')
     search = request.GET.get('search', '').strip()
     sort = request.GET.get('sort', 'name')
     direction = request.GET.get('dir', 'asc')
@@ -31,6 +32,7 @@ def player_list(request):
         'gender': 'gender',
         'age': 'age',
         'division': 'division',
+        'school': 'school',
     }
     sort_field = VALID_SORT_FIELDS.get(sort, 'name')
     if direction == 'desc':
@@ -41,6 +43,10 @@ def player_list(request):
         players = [p for p in players if p.division == division]
     if gender:
         players = [p for p in players if p.gender == gender]
+    if school == '-':
+        players = [p for p in players if not p.school]
+    elif school:
+        players = [p for p in players if p.school == school]
     if search:
         players = [p for p in players if search.lower() in p.name.lower()]
 
@@ -70,6 +76,8 @@ def player_list(request):
         'gender_choices': Player.GENDER_CHOICES,
         'selected_division': division,
         'selected_gender': gender,
+        'school_choices': school_options(request.user),
+        'selected_school': school,
         'search': search,
         'sort': sort,
         'dir': direction,
@@ -80,27 +88,52 @@ def player_list(request):
             ('name',     _("Name")),
             ('gender',   _("Gender")),
             ('age',      _("Age")),
-            ('division', _("Division")),
+            ('division', _("Age group")),
+            ('school',   _("School / club")),
             ('',         ''),
         ],
     })
 
 @login_required
 def player_template_download(request):
-    path = Path(__file__).parent / 'excel' / 'players.xlsx'
-    if not path.is_file():
-        raise Http404
-    return FileResponse(
-        open(path, 'rb'),
-        as_attachment=True,
-        filename='players.xlsx',
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    )
+    from .excel_template import build_player_template
+    data = build_player_template(request.user)
+    from django.http import HttpResponse
+    resp = HttpResponse(data, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    resp['Content-Disposition'] = 'attachment; filename="%s.xlsx"' % _("players-template")
+    return resp
 
 # Maps values a user might write in the gender column to the model's M/K codes.
-# Danish: M = mand, K = kvinde
-# English: M = male, F = female
-_GENDER_MAP = {'m': 'M', 'k': 'K', 'f': 'K'}
+# Danish: M = mand, K = kvinde · English: M = male, F = female
+# Catalan: M/H = masculí/home/noi, F/D = femení/dona/noia
+_GENDER_MAP = {
+    'm': 'M', 'k': 'K', 'f': 'K', 'h': 'M', 'd': 'K',
+    'masculí': 'M', 'masculi': 'M', 'home': 'M', 'noi': 'M', 'male': 'M', 'nen': 'M',
+    'femení': 'K', 'femeni': 'K', 'dona': 'K', 'noia': 'K', 'female': 'K', 'nena': 'K',
+}
+
+
+def _norm_header(value):
+    return ' '.join(str(value).strip().lower().split()) if value is not None else ''
+
+
+# Column titles accepted in the Excel file (Catalan template, English, Danish).
+_HEADER_ALIASES = {
+    'nom': 'name', 'nom i cognoms': 'name', 'jugador': 'name', 'navn': 'name',
+    'edat': 'age', 'alder': 'age',
+    'sexe': 'gender', 'gènere': 'gender', 'genere': 'gender', 'køn': 'gender',
+    "grup d'edat": 'division', 'grup edat': 'division', 'categoria': 'division', 'age group': 'division',
+    'escola / club': 'school', 'escola/club': 'school', 'escola': 'school', 'club': 'school',
+    'school / club': 'school', 'school': 'school', 'klub': 'school',
+}
+
+def _match_division(raw, valid):
+    """Exact age group, or the same name ignoring upper/lower case ('' when unknown)."""
+    if raw in valid:
+        return raw
+    by_lower = {v.lower(): v for v in valid}
+    return by_lower.get(raw.lower(), '')
+
 
 @login_required
 def player_upload(request):
@@ -125,16 +158,19 @@ def player_upload(request):
 
     rows = iter(ws.rows)
     raw_headers = next(rows, [])
-    headers = [str(c.value).strip().lower() if c.value is not None else '' for c in raw_headers]
+    from .excel_template import template_headers
+    aliases = dict(_HEADER_ALIASES)
+    aliases.update({_norm_header(label): field for field, label in template_headers()})
+    headers = [aliases.get(_norm_header(c.value), _norm_header(c.value)) for c in raw_headers]
 
-    # ── Structural validation: all 4 required columns must be present ──────
-    REQUIRED_COLUMNS = {'name', 'age', 'gender', 'division'}
+    # ── Structural validation: name and gender are required columns ──────
+    REQUIRED_COLUMNS = {'name', 'gender'}
     missing = REQUIRED_COLUMNS - set(headers)
     if missing:
         wb.close()
         messages.error(
             request,
-            _("The spreadsheet is missing required columns: %(cols)s. Expected columns: name, age, gender, division.")
+            _("The spreadsheet is missing required columns: %(cols)s. Use the template: name, gender, age, age group, school / club.")
             % {'cols': ', '.join(sorted(missing))},
         )
         return redirect('player_list')
@@ -154,6 +190,7 @@ def player_upload(request):
     else:
         limit_remaining = None
 
+    known_schools = {s.lower(): s for s in school_options(request.user)}
     created = 0
     no_division = 0
     limit_blocked = 0
@@ -199,12 +236,13 @@ def player_upload(request):
         # Division: exact match required; unmatched values are accepted but
         # stored empty (the user can assign a division per-player afterwards).
         raw_division = str(vals.get('division', '')).strip()
-        if raw_division in valid_divisions:
-            division = raw_division
-        else:
-            division = ''
-            if raw_division:
-                no_division += 1
+        division = _match_division(raw_division, valid_divisions)
+        if raw_division and not division:
+            no_division += 1
+        school = ' '.join(str(vals.get('school', '') or '').split())
+        school = known_schools.get(school.lower(), school)
+        if school:
+            known_schools.setdefault(school.lower(), school)
 
         if limit_remaining is not None:
             if limit_remaining <= 0:
@@ -217,6 +255,7 @@ def player_upload(request):
             age=age,
             gender=gender,
             division=division,
+            school=school,
             owner=request.user,
         )
         created += 1
@@ -227,7 +266,7 @@ def player_upload(request):
     if created:
         parts.append(_("%(n)s player(s) added.") % {'n': created})
     if no_division:
-        parts.append(_("%(n)s player(s) had an unrecognised division and were added without one.") % {'n': no_division})
+        parts.append(_("%(n)s player(s) had an unrecognised age group and were added without one.") % {'n': no_division})
     if limit_blocked:
         parts.append(
             _("%(n)s player(s) were not added — the club has reached its player limit. Need more? Contact us for a custom plan.")
@@ -462,7 +501,7 @@ def team_list(request):
     col_defs = [
         ('name',      _("Team")),
         ('pair_type', _("Type")),
-        ('division',  _("Division")),
+        ('division',  _("Age group")),
         ('',          _("Player 1")),
         ('',          _("Player 2")),
         ('',          ''),
@@ -688,7 +727,7 @@ def division_category_seed_defaults(request):
             if was_created:
                 created += 1
         if created:
-            messages.success(request, _("%(n)s default categories have been added.") % {'n': created})
+            messages.success(request, _("%(n)s default age groups have been added.") % {'n': created})
         else:
-            messages.info(request, _("All default categories already exist."))
+            messages.info(request, _("All default age groups already exist."))
     return redirect('division_category_list')

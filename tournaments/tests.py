@@ -1707,7 +1707,7 @@ class TournamentImportTest(TestCase):
         response = self._upload(data)
         self.assertEqual(Tournament.objects.count(), count_before + 1)
         new_t = Tournament.objects.order_by('-pk').first()
-        self.assertIn('gendannet', new_t.name)
+        self.assertTrue(any(w in new_t.name for w in ('gendannet', 'restored', 'recuperat')))
         self.assertRedirects(response, reverse('tournament_detail', args=[new_t.pk]))
 
     def test_import_deduplicates_players(self):

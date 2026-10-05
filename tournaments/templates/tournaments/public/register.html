@@ -1,0 +1,66 @@
+{% extends 'base_viewer.html' %}
+{% load i18n %}
+{% block title %}{% trans "Registration" %} – {{ tournament.name }}{% endblock %}
+
+{% block extra_head %}{{ block.super }}
+<style>
+.reg-wrap { max-width: 560px; margin: 0 auto; }
+.reg-card { background:#fff; border-radius:16px; padding:1.25rem 1.3rem; box-shadow:0 1px 3px rgba(0,0,0,0.06), 0 6px 20px rgba(0,0,0,0.05); }
+.reg-card .form-group { margin-bottom:0.9rem; }
+.reg-card label { font-weight:600; font-size:0.92rem; display:block; margin-bottom:0.25rem; }
+.reg-card input[type=text], .reg-card select, .reg-card textarea { width:100%; font-size:1rem; padding:0.6rem 0.7rem; border-radius:10px; border:1.5px solid #d4d4d8; font-family:inherit; }
+.reg-card small { color:#64748b; font-size:0.78rem; }
+.reg-card ul.radio { list-style:none; padding:0; margin:0; display:flex; gap:0.6rem; }
+.reg-card ul.radio li label, #id_gender label { font-weight:500; display:flex; gap:0.35rem; align-items:center; border:1.5px solid #d4d4d8; border-radius:10px; padding:0.5rem 0.9rem; cursor:pointer; }
+#id_gender { display:flex; gap:0.6rem; }
+#id_gender div { margin:0; }
+.consent label { font-weight:400; display:flex; gap:0.5rem; align-items:flex-start; font-size:0.85rem; color:#475569; }
+.hp { position:absolute; left:-5000px; width:1px; height:1px; overflow:hidden; }
+.errorlist { color:#b91c1c; font-size:0.82rem; margin:0.2rem 0 0; padding-left:1rem; }
+.reg-done { text-align:center; padding:2rem 1.2rem; }
+.reg-done .big { font-size:3rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reg-wrap">
+  <h1 style="margin-bottom:0.2rem;">📝 {% trans "Registration" %}</h1>
+  <div style="color:#64748b; margin-bottom:1rem;">{{ tournament.name }} · {{ tournament.date }}</div>
+
+  {% if closed %}
+  <div class="reg-card reg-done"><div class="big">🔒</div><p>{% trans "Online registration for this tournament is closed. Please contact the club." %}</p>
+    <a href="{% url 'public_tournament' tournament.pk %}" class="btn btn-secondary">{% trans "Go to the tournament" %}</a></div>
+
+  {% elif done %}
+  <div class="reg-card reg-done">
+    <div class="big">✅</div>
+    <h2 style="margin:0.3rem 0;">{% trans "Registration received" %}</h2>
+    <p>{% if last_name %}{% blocktrans with name=last_name %}{{ name }} is registered. The club will review it and add them to the right category.{% endblocktrans %}{% else %}{% trans "The club will review it and add the player to the right category." %}{% endif %}</p>
+    <a href="{{ request.path }}" class="btn btn-primary">+ {% trans "Register another player" %}</a>
+  </div>
+
+  {% else %}
+  {% if messages %}{% for m in messages %}<div class="flash flash-{{ m.tags }}" style="margin-bottom:0.8rem;">{{ m }}</div>{% endfor %}{% endif %}
+  <form method="post" class="reg-card" novalidate>
+    {% csrf_token %}
+    <div class="hp" aria-hidden="true">{{ form.website }}</div>
+    {% for field in form %}
+      {% if field.name != 'website' and field.name != 'consent' %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+        {{ field }}
+        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      {% endif %}
+    {% endfor %}
+    <datalist id="school-options">{% for s in form.school_options %}<option value="{{ s }}">{% endfor %}</datalist>
+    <div class="form-group consent">
+      <label>{{ form.consent }} <span>{{ form.consent.label }}</span></label>
+      {% if form.consent.errors %}<ul class="errorlist">{% for e in form.consent.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+    <button type="submit" class="btn btn-primary" style="width:100%; min-height:50px; font-size:1.05rem;">{% trans "Send registration" %}</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

@@ -23,8 +23,10 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.template.response import TemplateResponse
 from tournaments.models import Tournament
-from tournaments.public_views import public_landing, public_tournament, public_schedule
+from tournaments.public_views import public_landing, public_tournament, public_schedule, public_player
 from tournaments import court_views
+from tournaments.registration_views import public_register
+from tournaments import connection_views
 
 # Admin titles in the club's language (Django's default is "Django administration").
 from django.utils.translation import gettext_lazy as _
@@ -73,10 +75,16 @@ urlpatterns = [
     # ── Public / anonymous viewer ──────────────────────────────────────────
     path('public/', public_landing, name='public_landing'),
     path('public/tournament/<int:pk>/', public_tournament, name='public_tournament'),
+    path('public/tournament/<int:pk>/jugador/<int:player_pk>/', public_player, name='public_player'),
+    path('public/tournament/<int:pk>/inscripcio/', public_register, name='public_register'),
+    path('prova-connexio/', connection_views.connection_test, name='connection_test'),
+    path('prova-connexio/ping/', connection_views.connection_ping, name='connection_ping'),
+    path('prova-connexio/dades/', connection_views.connection_payload, name='connection_payload'),
     # Court referee pages (signed link per court, no login)
     path('pista/<int:tournament_pk>/<int:court>/<str:sig>/', court_views.court_panel, name='court_panel'),
     path('pista/<int:tournament_pk>/<int:court>/<str:sig>/start/<int:match_pk>/', court_views.court_start, name='court_start'),
     path('pista/<int:tournament_pk>/<int:court>/<str:sig>/result/<int:match_pk>/', court_views.court_result, name='court_result'),
     path('pista/<int:tournament_pk>/<int:court>/<str:sig>/cancel/<int:match_pk>/', court_views.court_cancel, name='court_cancel'),
+    path('pista/<int:tournament_pk>/<int:court>/<str:sig>/walkover/<int:match_pk>/', court_views.court_walkover, name='court_walkover'),
     path('public/tournament/<int:pk>/spilleplan/', public_schedule, name='public_schedule'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

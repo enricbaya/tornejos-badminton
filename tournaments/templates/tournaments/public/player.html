@@ -1,0 +1,115 @@
+{% extends 'base_viewer.html' %}
+{% load i18n tournament_extras %}
+{% block title %}{{ player.name }} – {{ tournament.name }}{% endblock %}
+
+{% block extra_head %}{{ block.super }}
+<style>
+.pp-head { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem; }
+.pp-avatar { width:64px; height:64px; border-radius:50%; background:#111; color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--heading-font); font-size:1.7rem; font-weight:800; border-bottom:4px solid var(--accent); flex:none; }
+.pp-name { margin:0; }
+.pp-meta { color:#64748b; font-size:0.92rem; display:flex; gap:0.4rem 0.9rem; flex-wrap:wrap; margin-top:0.2rem; }
+.pp-stats { display:grid; grid-template-columns:repeat(4, 1fr); gap:0.6rem; margin:0 0 1.2rem; }
+.pp-stat { background:#fff; border-radius:12px; padding:0.7rem 0.9rem; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.pp-stat b { display:block; font-family:var(--heading-font); font-size:1.6rem; line-height:1.1; }
+@media (max-width:480px) { .pp-stats { gap:0.4rem; } .pp-stat { padding:0.55rem 0.5rem; } .pp-stat span { font-size:0.62rem; letter-spacing:0.02em; } }
+.pp-stat span { font-size:0.78rem; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; }
+.pp-list { list-style:none; padding:0; margin:0 0 1.4rem; }
+.pp-item { background:#fff; border-radius:12px; padding:0.75rem 0.95rem; margin-bottom:0.55rem; box-shadow:0 1px 3px rgba(0,0,0,0.06); display:flex; gap:0.9rem; align-items:center; border-left:4px solid #e4e4e7; }
+.pp-item.won { border-left-color:#16a34a; }
+.pp-item.lost { border-left-color:#dc2626; }
+.pp-item.live { border-left-color:var(--accent); background:var(--brand-soft); }
+.pp-when { min-width:64px; text-align:center; }
+.pp-when b { display:block; font-size:1.15rem; }
+.pp-when small { display:block; color:#64748b; font-size:0.75rem; }
+.pp-body { flex:1; min-width:0; }
+.pp-opp { font-weight:700; }
+.pp-sub { font-size:0.8rem; color:#64748b; }
+.pp-res { font-weight:800; font-size:0.85rem; white-space:nowrap; }
+.pp-res.won { color:#16a34a; } .pp-res.lost { color:#dc2626; }
+.pp-div { margin-bottom:1.2rem; }
+.pp-div h3 { margin:0 0 0.4rem; }
+.pp-div tr.me td { background:var(--brand-soft); font-weight:700; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:0.8rem;"><a href="{% url 'public_tournament' tournament.pk %}" class="btn btn-secondary btn-sm">← {{ tournament.name }}</a></div>
+
+<div class="pp-head">
+  <div class="pp-avatar">{{ player.name|slice:":1"|upper }}</div>
+  <div>
+    <h1 class="pp-name">{{ player.name }}</h1>
+    <div class="pp-meta">
+      <span>🏫 {{ player.school_display }}</span>
+      {% if player.division %}<span>{{ player.division }}</span>{% endif %}
+      {% if status == 'playing' %}<span style="color:var(--accent-text); font-weight:700;">🏸 {% trans "Playing now" %}</span>
+      {% elif status == 'resting' %}<span style="color:#d97706;">⏱ {% trans "Resting" %} <span class="rest-timer" data-until="{{ rest_until|unix_ts }}"></span></span>{% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="pp-stats">
+  <div class="pp-stat"><b>{{ played|length }}</b><span>{% trans "Played" %}</span></div>
+  <div class="pp-stat"><b style="color:#16a34a;">{{ won_total }}</b><span>{% trans "Won" %}</span></div>
+  <div class="pp-stat"><b style="color:#dc2626;">{{ lost_total }}</b><span>{% trans "Lost" %}</span></div>
+  <div class="pp-stat"><b>{{ upcoming|length }}</b><span>{% trans "To play" %}</span></div>
+</div>
+
+<h2>{% trans "Next matches" %}</h2>
+{% if delay and upcoming %}<p style="font-size:0.85rem; color:var(--accent-text); margin-top:-0.4rem;">⏱ {% blocktrans %}The tournament is running about {{ delay }} min late: ~ marks the estimated time.{% endblocktrans %}</p>{% endif %}
+{% if upcoming %}
+<ul class="pp-list">
+  {% for m in upcoming %}
+  <li class="pp-item{% if m.status == 'in_progress' %} live{% endif %}">
+    <div class="pp-when">
+      {% if m.status == 'in_progress' %}<b>🏸</b><small>{% trans "Court" %} {{ m.court }}</small>
+      {% elif m.scheduled_time %}<b>{{ m.scheduled_time|time:"H:i" }}</b>{% if m.estimated_time %}<small style="color:var(--accent-text); font-weight:700;">~{{ m.estimated_time|time:"H:i" }}</small>{% endif %}<small>{% if m.court %}{% trans "Court" %} {{ m.court }}{% endif %}</small>
+      {% else %}<b>–</b>{% endif %}
+    </div>
+    <div class="pp-body">
+      <div class="pp-opp">{% trans "vs" %} {% if m.opp %}{{ m.opp|team_html:tournament.pk }}{% elif m.bracket_label %}{{ m.bracket_label|bracket_label_i18n }}{% else %}{% trans "to be decided" %}{% endif %}</div>
+      <div class="pp-sub"><a href="{% url 'public_tournament' tournament.pk %}#div-{{ m.division.pk }}">{{ m.division.name }}</a>{% if m.phase == 'group' and m.group_number %} · {% blocktrans with n=m.group_number %}Group {{ n }}{% endblocktrans %}{% endif %}{% if m.match_number %} · #{{ m.match_number }}{% endif %}</div>
+    </div>
+    {% if m.status == 'in_progress' %}<span class="pp-res" style="color:var(--accent-text);">{% trans "In progress" %}</span>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p style="color:#64748b;">{% trans "No matches left to play." %}</p>
+{% endif %}
+
+{% if played %}
+<h2>{% trans "Results" %}</h2>
+<ul class="pp-list">
+  {% for m in played %}
+  <li class="pp-item {% if m.won %}won{% elif m.won == False %}lost{% endif %}">
+    <div class="pp-when"><b>{{ m.score_own|default:"–" }}</b>{% if m.walkover %}<small>WO</small>{% endif %}</div>
+    <div class="pp-body">
+      <div class="pp-opp">{% trans "vs" %} {{ m.opp|team_html:tournament.pk }}</div>
+      <div class="pp-sub"><a href="{% url 'public_tournament' tournament.pk %}#div-{{ m.division.pk }}">{{ m.division.name }}</a>{% if m.phase == 'group' and m.group_number %} · {% blocktrans with n=m.group_number %}Group {{ n }}{% endblocktrans %}{% endif %}</div>
+    </div>
+    <span class="pp-res {% if m.won %}won{% elif m.won == False %}lost{% endif %}">{% if m.won %}{% trans "Won" context "match result" %}{% elif m.won == False %}{% trans "Lost" context "match result" %}{% endif %}</span>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<h2>{% trans "Standings" %}</h2>
+{% for di in division_info %}
+<div class="pp-div">
+  <h3><a href="{% url 'public_tournament' tournament.pk %}#div-{{ di.division.pk }}">{{ di.division.name }}</a>
+    {% if di.position %}<span style="font-size:0.85rem; color:#64748b; font-weight:500;"> · {% if di.group %}{% blocktrans with n=di.group pos=di.position|ordinal %}{{ pos }} in group {{ n }}{% endblocktrans %}{% else %}{{ di.position|ordinal }}{% endif %}</span>{% endif %}
+  </h3>
+  {% if di.rows %}
+  <div class="pub-table-wrap"><table>
+    <thead><tr><th>#</th><th>{% trans "Player" %}</th><th>{% trans "P" context "standings" %}</th><th>{% trans "W" context "standings" %}</th><th>{% trans "L" context "standings" %}</th><th>{% trans "Pts" context "standings" %}</th></tr></thead>
+    <tbody>
+    {% for row in di.rows %}
+      <tr {% if row.team.pk == di.team.pk %}class="me"{% endif %}><td>{{ forloop.counter }}</td><td>{{ row.team|team_html:tournament.pk }}</td><td>{{ row.played }}</td><td>{{ row.won }}</td><td>{{ row.lost }}</td><td>{{ row.points }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% endif %}
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,6 +1,9 @@
 from django.urls import path
 from . import views
 from . import court_views
+from . import day_views
+from . import final_views
+from . import registration_views
 
 urlpatterns = [
     path('', views.tournament_list, name='tournament_list'),
@@ -10,6 +13,7 @@ urlpatterns = [
     path('<int:pk>/delete/', views.tournament_delete, name='tournament_delete'),
     path('<int:pk>/export/', views.tournament_export, name='tournament_export'),
     path('import/', views.tournament_import, name='tournament_import'),
+    path('backup/', final_views.club_backup, name='club_backup'),
     path('<int:tournament_pk>/division/create/', views.division_create, name='division_create'),
     path('division/<int:pk>/teams/', views.division_update_teams, name='division_update_teams'),
     path('division/<int:pk>/seeds/', views.division_update_seeds, name='division_update_seeds'),
@@ -35,6 +39,7 @@ urlpatterns = [
     path('division/<int:pk>/medals/', views.division_medals, name='division_medals'),
     path('division/<int:pk>/medals/edit/', views.division_medals_edit, name='division_medals_edit'),
     path('division/<int:pk>/medals/reset/', views.division_medals_reset, name='division_medals_reset'),
+    path('division/<int:pk>/medals/mode/', views.division_medals_mode, name='division_medals_mode'),
     path('<int:pk>/schedule/', views.tournament_schedule, name='tournament_schedule'),
     path('<int:pk>/schedule/print/', views.tournament_schedule_print, name='tournament_schedule_print'),
     path('<int:pk>/schedule/generate/', views.tournament_generate_time_schedule, name='tournament_generate_time_schedule'),
@@ -50,4 +55,17 @@ urlpatterns = [
     path('<int:pk>/rebuild-playoff-labels/', views.tournament_rebuild_playoff_labels, name='tournament_rebuild_playoff_labels'),
     path('<int:pk>/bigscreen/', views.tournament_bigscreen, name='tournament_bigscreen'),
     path('<int:pk>/run/', views.tournament_run, name='tournament_run'),
+    path('<int:pk>/reception/', day_views.tournament_reception, name='tournament_reception'),
+    path('<int:pk>/player/<int:player_pk>/withdraw/', day_views.tournament_player_withdraw, name='tournament_player_withdraw'),
+    path('<int:pk>/player/<int:player_pk>/reinstate/', day_views.tournament_player_reinstate, name='tournament_player_reinstate'),
+    path('<int:pk>/replan/', day_views.tournament_replan, name='tournament_replan'),
+    path('<int:pk>/calls/', day_views.tournament_calls, name='tournament_calls'),
+    path('<int:pk>/medals/', final_views.tournament_medal_table, name='tournament_medal_table'),
+    path('<int:pk>/registrations/', registration_views.tournament_registrations, name='tournament_registrations'),
+    path('<int:pk>/registrations/toggle/', registration_views.registration_toggle, name='registration_toggle'),
+    path('<int:pk>/registrations/accept-all/', registration_views.registration_accept_all, name='registration_accept_all'),
+    path('<int:pk>/registrations/<int:reg_pk>/accept/', registration_views.registration_accept, name='registration_accept'),
+    path('<int:pk>/registrations/<int:reg_pk>/reject/', registration_views.registration_reject, name='registration_reject'),
+    path('<int:pk>/diplomas/', final_views.tournament_diplomas, name='tournament_diplomas'),
+    path('match/<int:pk>/called/', day_views.match_mark_called, name='match_mark_called'),
 ]

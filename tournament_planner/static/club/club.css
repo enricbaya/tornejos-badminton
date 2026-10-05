@@ -121,3 +121,12 @@ footer.club-footer {
 .club-footer-instagram:hover { background: var(--accent); color: #fff; text-decoration: none; }
 .club-footer-instagram .instagram-icon { width: 26px; height: 26px; }
 .club-footer-instagram-handle { font-family: var(--heading-font); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.02em; }
+
+/* School / club next to player names, and links to the public player page */
+.school-tag {
+    display: inline-block; margin-left: 0.35em; padding: 0 0.45em; border-radius: 99px;
+    font-size: 0.72em; font-weight: 600; line-height: 1.5; vertical-align: 0.1em;
+    background: #f4f4f5; color: #52525b; white-space: nowrap; letter-spacing: 0;
+}
+a.player-link { color: inherit; text-decoration: none; border-bottom: 1px dotted rgba(0,0,0,0.25); }
+a.player-link:hover { color: var(--accent-text); border-bottom-color: var(--accent); }

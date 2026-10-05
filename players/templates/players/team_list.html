@@ -12,7 +12,7 @@
         <input type="text" name="search" value="{{ search }}" placeholder="{% trans 'Search name…' %}" style="min-width:160px;">
 
         <select name="division" onchange="this.form.submit()">
-            <option value="">{% trans "All divisions" %}</option>
+            <option value="">{% trans "All age groups" %}</option>
             {% for value, label in division_choices %}
             <option value="{{ value }}" {% if value == selected_division %}selected{% endif %}>{{ label }}</option>
             {% endfor %}

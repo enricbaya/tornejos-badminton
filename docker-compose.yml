@@ -90,7 +90,7 @@ services:
     environment:
       POSTGRES_HOST: db
       POSTGRES_PORT: "5432"
-      TZ: ${TZ:-Europe/Copenhagen}
+      TZ: ${TZ:-Europe/Madrid}
       BACKUP_HOUR: ${BACKUP_HOUR:-2}
       BACKUP_RETENTION_DAILY: ${BACKUP_RETENTION_DAILY:-14}
       BACKUP_RETENTION_MONTHLY: ${BACKUP_RETENTION_MONTHLY:-12}

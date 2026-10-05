@@ -1,0 +1,86 @@
+{% extends 'base_public.html' %}
+{% load i18n %}
+{% block title %}{% trans "Connection test" %}{% endblock %}
+{% block extra_head %}
+<meta name="robots" content="noindex">
+<style>
+.ct-wrap { max-width:520px; margin:0 auto; text-align:center; }
+.ct-light { width:150px; height:150px; border-radius:50%; margin:1.2rem auto; display:flex; align-items:center; justify-content:center;
+            font-size:3.4rem; background:#e4e4e7; transition:background 0.3s; }
+.ct-light.good { background:#16a34a; } .ct-light.fair { background:#f59e0b; } .ct-light.bad { background:#dc2626; }
+.ct-verdict { font-family:var(--heading-font); font-size:1.6rem; font-weight:800; min-height:2rem; }
+.ct-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.6rem; margin:1.2rem 0; }
+.ct-cell { background:#fff; border-radius:12px; padding:0.7rem; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.ct-cell b { display:block; font-size:1.35rem; font-family:var(--heading-font); }
+.ct-cell span { font-size:0.75rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; }
+.ct-help { text-align:left; font-size:0.88rem; color:#475569; background:#fff; border-radius:12px; padding:0.9rem 1.1rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="ct-wrap">
+  <h1>📶 {% trans "Connection test" %}</h1>
+  <p style="color:#64748b;">{% trans "Open this page at the venue on each phone and on the judge-table computer, in the places where they will be used." %}</p>
+  <div class="ct-light" id="light">⏳</div>
+  <div class="ct-verdict" id="verdict">{% trans "Testing…" %}</div>
+  <div class="ct-grid">
+    <div class="ct-cell"><b id="lat">–</b><span>{% trans "Response" %}</span></div>
+    <div class="ct-cell"><b id="speed">–</b><span>{% trans "Download" %}</span></div>
+    <div class="ct-cell"><b id="loss">–</b><span>{% trans "Failures" %}</span></div>
+  </div>
+  <button type="button" class="btn btn-primary" id="again" style="min-height:48px; padding:0 1.5rem;">↻ {% trans "Test again" %}</button>
+  <div class="ct-help" style="margin-top:1.2rem;">
+    <b>{% trans "How to read it" %}</b>
+    <ul style="margin:0.4rem 0 0; padding-left:1.1rem;">
+      <li>🟢 {% trans "Good: the app will work smoothly." %}</li>
+      <li>🟠 {% trans "Fair: it works, but pages may take a few seconds. Try the venue Wi-Fi or another spot." %}</li>
+      <li>🔴 {% trans "Bad: look for another connection (venue Wi-Fi, a phone hotspot) and keep the paper score sheets ready." %}</li>
+    </ul>
+  </div>
+</div>
+<script>
+(function () {
+  var T = {
+    good: "{% trans 'Good connection' %}", fair: "{% trans 'Fair connection' %}", bad: "{% trans 'Bad connection' %}",
+    offline: "{% trans 'No connection' %}", testing: "{% trans 'Testing…' %}"
+  };
+  var light = document.getElementById('light'), verdict = document.getElementById('verdict');
+  function q(u) { return u + (u.indexOf('?') < 0 ? '?' : '&') + 't=' + Date.now() + Math.random(); }
+  function timed(url, opts) {
+    var ctrl = new AbortController(); var to = setTimeout(function () { ctrl.abort(); }, 8000);
+    var t0 = performance.now();
+    return fetch(q(url), Object.assign({cache: 'no-store', signal: ctrl.signal}, opts || {}))
+      .then(function (r) { return r.arrayBuffer().then(function (b) { clearTimeout(to); return {ms: performance.now() - t0, bytes: b.byteLength, ok: r.ok}; }); })
+      .catch(function () { clearTimeout(to); return {ms: null, bytes: 0, ok: false}; });
+  }
+  async function run() {
+    light.className = 'ct-light'; light.textContent = '⏳'; verdict.textContent = T.testing;
+    var lats = [], fails = 0;
+    for (var i = 0; i < 8; i++) {
+      var r = await timed('{% url "connection_ping" %}');
+      if (r.ok) lats.push(r.ms); else fails++;
+    }
+    var speeds = [];
+    for (var j = 0; j < 3; j++) {
+      var d = await timed('{% url "connection_payload" %}');
+      if (d.ok && d.ms) speeds.push(d.bytes * 8 / 1000 / d.ms); else fails++;   // Mbit/s
+    }
+    lats.sort(function (a, b) { return a - b; });
+    var lat = lats.length ? Math.round(lats[Math.floor(lats.length / 2)]) : null;
+    var mbps = speeds.length ? Math.max.apply(null, speeds) : 0;
+    document.getElementById('lat').textContent = lat === null ? '–' : lat + ' ms';
+    document.getElementById('speed').textContent = speeds.length ? mbps.toFixed(1) + ' Mb/s' : '–';
+    document.getElementById('loss').textContent = fails + ' / 11';
+    var level;
+    if (!lats.length) level = 'offline';
+    else if (fails === 0 && lat < 300 && mbps >= 2) level = 'good';
+    else if (fails <= 2 && lat < 1000 && mbps >= 0.5) level = 'fair';
+    else level = 'bad';
+    light.className = 'ct-light ' + (level === 'offline' ? 'bad' : level);
+    light.textContent = {good: '✓', fair: '!', bad: '✕', offline: '✕'}[level];
+    verdict.textContent = T[level];
+  }
+  document.getElementById('again').addEventListener('click', run);
+  run();
+})();
+</script>
+{% endblock %}

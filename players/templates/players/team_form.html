@@ -9,7 +9,7 @@
             {% csrf_token %}
 
             <div class="form-group">
-                <label for="div-filter">{% trans "Filter players by division" %}</label>
+                <label for="div-filter">{% trans "Filter players by age group" %}</label>
                 <select id="div-filter" style="width:100%; padding:0.52rem 0.8rem; border:1.5px solid #d1d9e6; border-radius:7px; font-size:0.875rem; background:white;">
                     <option value="">— {% trans "Show all players" %} —</option>
                     {% for val, label in division_choices %}

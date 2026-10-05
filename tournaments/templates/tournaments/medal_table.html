@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load i18n static tournament_extras %}
+{% block title %}{% trans "Medal table" %} – {{ tournament.name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.mt-summary { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:0.6rem; margin:1rem 0 1.5rem; }
+.mt-stat { background:#fff; border-radius:12px; padding:0.75rem 0.9rem; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.mt-stat b { display:block; font-family:var(--heading-font); font-size:1.7rem; line-height:1.1; }
+.mt-stat span { font-size:0.75rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; }
+.mt-stat small { display:block; color:#64748b; font-size:0.78rem; margin-top:0.15rem; }
+.mt-div { background:#fff; border-radius:14px; box-shadow:0 1px 3px rgba(0,0,0,0.06); margin-bottom:1rem; overflow:hidden; break-inside:avoid; }
+.mt-div h2 { margin:0; padding:0.7rem 1rem; background:#111; color:#fff; font-size:1.1rem; display:flex; justify-content:space-between; gap:1rem; }
+.mt-div h2 small { font-weight:500; font-size:0.78rem; color:#f9a8c3; }
+.mt-pod { padding:0.55rem 1rem; border-bottom:1px solid #f1f5f9; display:grid; grid-template-columns:minmax(120px, 0.6fr) 1fr; gap:0.3rem 1rem; }
+.mt-pod:last-child { border-bottom:none; }
+.mt-pod .lbl { font-weight:700; color:var(--accent-text); }
+.mt-pod .row { display:flex; gap:0.4rem; align-items:baseline; font-size:0.95rem; }
+.mt-empty { padding:0.8rem 1rem; color:#94a3b8; font-size:0.9rem; }
+.print-only { display:none; }
+@media (max-width:640px) { .mt-pod { grid-template-columns:1fr; } }
+@media print {
+  header, nav, footer, .no-print, .messages { display:none !important; }
+  body { background:#fff; }
+  .print-only { display:flex; align-items:center; gap:1rem; margin-bottom:1rem; }
+  .mt-stat, .mt-div { box-shadow:none; border:1px solid #ddd; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="print-only">
+  <img src="{% static 'club/logo_negre.png' %}" alt="" style="height:60px;">
+  <div><h1 style="margin:0;">{% trans "Medal table" %}</h1><div>{{ tournament.name }} · {{ tournament.date }}</div></div>
+</div>
+
+<div class="page-actions no-print">
+  <div>
+    <h1>🏅 {% trans "Medal table" %}</h1>
+    <div style="color:#64748b; font-size:0.85rem;">{{ tournament.name }} · {{ tournament.date }}</div>
+  </div>
+  <div class="btn-group">
+    <a href="{% url 'tournament_run' tournament.pk %}" class="btn btn-secondary">← {% trans "Tournament run" %}</a>
+    <button type="button" class="btn btn-secondary" onclick="window.print()">🖨 {% trans "Print / save as PDF" %}</button>
+    <a href="{% url 'tournament_diplomas' tournament.pk %}" class="btn btn-primary" target="_blank">📜 {% trans "Medal diplomas" %}</a>
+    <a href="{% url 'tournament_diplomas' tournament.pk %}?all=1" class="btn btn-secondary" target="_blank">📜 {% trans "Diplomas for everyone" %}</a>
+  </div>
+</div>
+
+<h2 style="margin-bottom:0;">{% trans "Tournament summary" %}</h2>
+<div class="mt-summary">
+  <div class="mt-stat"><b>{{ summary.participants }}</b><span>{% trans "Participants" %}</span><small>{{ summary.girls }} {% trans "girls" %} · {{ summary.boys }} {% trans "boys" %}</small></div>
+  <div class="mt-stat"><b>{{ summary.schools }}</b><span>{% trans "Schools / clubs" %}</span><small>{{ summary.independent }} {% trans "independent" %}</small></div>
+  <div class="mt-stat"><b>{{ summary.categories }}</b><span>{% trans "Categories" %}</span></div>
+  <div class="mt-stat"><b>{{ summary.matches_played }}</b><span>{% trans "Matches played" %}</span><small>{% blocktrans with total=summary.matches_total wo=summary.walkovers %}of {{ total }} · {{ wo }} walk-overs{% endblocktrans %}</small></div>
+  <div class="mt-stat"><b style="font-size:1.25rem;">{{ summary.duration_min|hm }}</b><span>{% trans "Real duration" %}</span><small>{% if summary.first_start %}{{ summary.first_start|time:"H:i" }}–{{ summary.last_end|time:"H:i" }}{% else %}–{% endif %}</small></div>
+  <div class="mt-stat"><b>{{ summary.avg_match_min|default:"–" }}{% if summary.avg_match_min %}′{% endif %}</b><span>{% trans "Average match" %}</span><small>{% blocktrans with n=summary.from_courts %}{{ n }} results from the courts{% endblocktrans %}</small></div>
+</div>
+
+<h2>{% trans "Medals" %}</h2>
+{% for entry in medals %}
+<div class="mt-div">
+  <h2>{{ entry.division.name }}{% if not entry.done %}<small>⚠ {% trans "not finished yet" %}</small>{% endif %}</h2>
+  {% for p in entry.podiums %}
+  <div class="mt-pod">
+    <div class="lbl">{{ p.label|default:"" }}</div>
+    <div>
+      {% for t in p.gold %}<div class="row">🥇 <b>{{ t.name }}</b>{{ t|team_school }}</div>{% endfor %}
+      {% for t in p.silver %}<div class="row">🥈 {{ t.name }}{{ t|team_school }}</div>{% endfor %}
+      {% for t in p.bronze %}<div class="row">🥉 {{ t.name }}{{ t|team_school }}</div>{% endfor %}
+    </div>
+  </div>
+  {% empty %}
+  <div class="mt-empty">{% trans "No medals yet." %}</div>
+  {% endfor %}
+</div>
+{% endfor %}
+{% endblock %}

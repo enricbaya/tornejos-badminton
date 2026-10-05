@@ -11,9 +11,11 @@
             <div class="form-group">
                 <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {{ field }}
+                {% if field.help_text %}<small style="color:#64748b;">{{ field.help_text }}</small>{% endif %}
                 {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
             </div>
             {% endfor %}
+            <datalist id="school-options">{% for s in form.school_options %}<option value="{{ s }}">{% endfor %}</datalist>
             <div style="margin-top:1.5rem;" class="btn-group">
                 <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
                 <a href="{% url 'player_list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>

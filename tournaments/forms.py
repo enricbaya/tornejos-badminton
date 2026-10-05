@@ -133,7 +133,7 @@ class DivisionForm(forms.ModelForm):
 
     class Meta:
         model = Division
-        fields = ['name', 'discipline', 'tournament_type', 'group_count', 'advance_count', 'schedule_priority', 'gold_count', 'silver_count', 'bronze_count']
+        fields = ['name', 'discipline', 'tournament_type', 'group_count', 'advance_count', 'schedule_priority', 'gold_count', 'silver_count', 'bronze_count', 'medals_by_age_group']
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': _('e.g. Mens singles A, Womens doubles B …')}),
             'group_count': forms.NumberInput(attrs={'min': 2, 'max': 16}),

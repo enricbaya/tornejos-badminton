@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load i18n tournament_extras %}
+{% block title %}{% trans "Reception" %} – {{ tournament.name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.rc-counters { display:grid; grid-template-columns:repeat(3, 1fr); gap:0.6rem; margin:0.8rem 0 1rem; }
+.rc-counter { border-radius:12px; padding:0.7rem 0.9rem; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.06); cursor:pointer; border:2px solid transparent; }
+.rc-counter b { display:block; font-family:var(--heading-font); font-size:1.9rem; line-height:1; }
+.rc-counter span { font-size:0.78rem; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; }
+.rc-counter.on { border-color:var(--accent); }
+.rc-search { width:100%; font-size:1.1rem; padding:0.7rem 0.9rem; border-radius:12px; border:2px solid #e4e4e7; margin-bottom:0.8rem; }
+.rc-search:focus { outline:none; border-color:var(--accent); }
+.rc-list { display:grid; gap:0.45rem; }
+.rc-row { display:flex; align-items:center; gap:0.8rem; background:#fff; border-radius:12px; padding:0.6rem 0.8rem; box-shadow:0 1px 2px rgba(0,0,0,0.05); border-left:5px solid #e4e4e7; }
+.rc-row.present { border-left-color:#16a34a; }
+.rc-row.withdrawn { opacity:0.55; border-left-color:#71717a; }
+.rc-check { width:46px; height:46px; border-radius:50%; border:2px solid #d4d4d8; background:#fff; font-size:1.4rem; cursor:pointer; flex:none; display:flex; align-items:center; justify-content:center; }
+.rc-row.present .rc-check { background:#16a34a; border-color:#16a34a; color:#fff; }
+.rc-main { flex:1; min-width:0; }
+.rc-name { font-weight:700; font-size:1.02rem; }
+.rc-sub { font-size:0.8rem; color:#64748b; }
+.rc-next { font-size:0.8rem; color:#475569; white-space:nowrap; text-align:right; }
+.rc-actions form { display:inline; }
+.rc-actions .btn { padding:0.25rem 0.6rem; font-size:0.75rem; }
+@media (max-width:640px) { .rc-next { display:none; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+  <div>
+    <h1>🧾 {% trans "Reception" %}</h1>
+    <div style="color:#64748b; font-size:0.85rem;">{{ tournament.name }}</div>
+  </div>
+  <div class="btn-group">
+    <a href="{% url 'tournament_run' tournament.pk %}" class="btn btn-secondary">← {% trans "Tournament run" %}</a>
+  </div>
+</div>
+
+<div class="rc-counters">
+  <div class="rc-counter" data-filter="present"><b id="n-present">{{ present }}</b><span>{% trans "Present" %}</span></div>
+  <div class="rc-counter" data-filter="absent"><b id="n-absent">{{ absent }}</b><span>{% trans "Not arrived" %}</span></div>
+  <div class="rc-counter" data-filter="withdrawn"><b>{{ withdrawn }}</b><span>{% trans "Withdrawn" context "counter" %}</span></div>
+</div>
+
+<input type="search" class="rc-search" id="rc-search" placeholder="🔎 {% trans 'Type a name or school…' %}" autocomplete="off" autofocus>
+
+<div class="rc-list" id="rc-list">
+{% for p in players %}
+  <div class="rc-row {% if p.withdrawn %}withdrawn{% elif p.has_arrived %}present{% endif %}"
+       data-text="{{ p.name|lower }} {{ p.school|lower }} {{ p.division|lower }}"
+       data-state="{% if p.withdrawn %}withdrawn{% elif p.has_arrived %}present{% else %}absent{% endif %}">
+    {% if not p.withdrawn %}
+    <button type="button" class="rc-check" data-url="{% url 'player_toggle_arrived' p.pk %}" title="{% trans 'Mark as present / not arrived' %}">{% if p.has_arrived %}✓{% endif %}</button>
+    {% else %}<span class="rc-check" style="cursor:default;">✕</span>{% endif %}
+    <div class="rc-main">
+      <div class="rc-name"><a class="player-link" href="{% url 'public_player' tournament.pk p.pk %}" target="_blank">{{ p.name }}</a></div>
+      <div class="rc-sub">{{ p.school_display }}{% if p.division %} · {{ p.division }}{% endif %} · {{ p.categories|join:", " }}</div>
+    </div>
+    <div class="rc-next">
+      {% if p.withdrawn %}{% trans "Withdrawn" %}
+      {% elif p.next_match %}{% trans "Next" %}: {% if p.next_match.status == 'in_progress' %}🏸 {% trans "Court" %} {{ p.next_match.court }}{% elif p.next_match.scheduled_time %}{{ p.next_match.scheduled_time|time:"H:i" }}{% if p.next_match.court %} · {% trans "Court" %} {{ p.next_match.court }}{% endif %}{% else %}#{{ p.next_match.match_number }}{% endif %}
+      {% else %}–{% endif %}
+    </div>
+    <div class="rc-actions">
+      {% if p.withdrawn %}
+      <form method="post" action="{% url 'tournament_player_reinstate' tournament.pk p.pk %}">{% csrf_token %}<button class="btn btn-secondary">↩ {% trans "Reinstate" %}</button></form>
+      {% else %}
+      <form method="post" action="{% url 'tournament_player_withdraw' tournament.pk p.pk %}"
+            onsubmit="return confirm('{% blocktrans with name=p.name|escapejs %}Withdraw {{ name }} from the tournament? All their pending matches will be lost by walk-over (15-0, 15-0).{% endblocktrans %}');">
+        {% csrf_token %}<button class="btn btn-secondary" title="{% trans 'Withdraw from the tournament' %}">🚪 {% trans "Withdraw" %}</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+{% empty %}
+  <div class="card" style="text-align:center; color:#64748b;">{% trans "No players are entered in this tournament yet." %}</div>
+{% endfor %}
+</div>
+
+<script>
+(function () {
+  var search = document.getElementById('rc-search');
+  var rows = Array.prototype.slice.call(document.querySelectorAll('.rc-row'));
+  var filter = '';
+  function apply() {
+    var q = search.value.trim().toLowerCase();
+    rows.forEach(function (r) {
+      var ok = (!q || r.dataset.text.indexOf(q) !== -1) && (!filter || r.dataset.state === filter);
+      r.style.display = ok ? '' : 'none';
+    });
+  }
+  search.addEventListener('input', apply);
+  document.querySelectorAll('.rc-counter').forEach(function (c) {
+    c.addEventListener('click', function () {
+      filter = (filter === c.dataset.filter) ? '' : c.dataset.filter;
+      document.querySelectorAll('.rc-counter').forEach(function (x) { x.classList.toggle('on', x.dataset.filter === filter); });
+      apply();
+    });
+  });
+  var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+  function token() {
+    var m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : (csrf ? csrf.value : '');
+  }
+  var nP = document.getElementById('n-present'), nA = document.getElementById('n-absent');
+  document.querySelectorAll('button.rc-check').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var row = b.closest('.rc-row');
+      fetch(b.dataset.url, {method: 'POST', headers: {'X-CSRFToken': token(), 'X-Requested-With': 'XMLHttpRequest'}, credentials: 'same-origin'})
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          var was = row.dataset.state === 'present';
+          row.classList.toggle('present', d.has_arrived);
+          row.dataset.state = d.has_arrived ? 'present' : 'absent';
+          b.textContent = d.has_arrived ? '✓' : '';
+          if (was !== d.has_arrived) {
+            nP.textContent = Number(nP.textContent) + (d.has_arrived ? 1 : -1);
+            nA.textContent = Number(nA.textContent) + (d.has_arrived ? -1 : 1);
+          }
+          if (search.value) { search.value = ''; apply(); search.focus(); }
+        });
+    });
+  });
+})();
+</script>
+{% endblock %}

@@ -68,7 +68,7 @@
       <span>{{ active.division.name }}</span>
       {% if active.started_at %}<span>· <span class="timer" data-start="{{ active.started_at|date:'U' }}"></span></span>{% endif %}
     </div>
-    <div class="c-players">{{ active.team1.name }} <span class="vs">vs</span> {{ active.team2.name }}</div>
+    <div class="c-players">{{ active.team1.name }}{{ active.team1|team_school }} <span class="vs">vs</span> {{ active.team2.name }}{{ active.team2|team_school }}</div>
 
     <form method="post" action="{% url 'court_result' tournament.pk court sig active.pk %}" id="score-form">
       {% csrf_token %}
@@ -89,6 +89,16 @@
       <div class="winner-line" id="winner-line"></div>
       <button type="submit" class="btn btn-primary big-btn">✔ {% trans "Save result and free the court" %}</button>
     </form>
+
+    <details class="undo">
+      <summary>{% trans "A player did not show up?" %}</summary>
+      <form method="post" action="{% url 'court_walkover' tournament.pk court sig active.pk %}" style="margin-top:0.6rem; display:grid; gap:0.5rem;"
+            onsubmit="return confirm('{% trans "Record a walk-over (15-0, 15-0)?" %}');">
+        {% csrf_token %}
+        <button type="submit" name="winner" value="{{ active.team1_id }}" class="btn btn-secondary big-btn">🏳 {% blocktrans with name=active.team1.name %}{{ name }} wins by walk-over{% endblocktrans %}</button>
+        <button type="submit" name="winner" value="{{ active.team2_id }}" class="btn btn-secondary big-btn">🏳 {% blocktrans with name=active.team2.name %}{{ name }} wins by walk-over{% endblocktrans %}</button>
+      </form>
+    </details>
 
     <details class="undo">
       <summary>{% trans "Wrong match started?" %}</summary>
@@ -115,7 +125,7 @@
       {% if m.scheduled_time %}<span>· {{ m.scheduled_time|time:"H:i" }}</span>{% endif %}
       {% if m.court %}<span>· {% trans "Court" %} {{ m.court }}</span>{% endif %}
     </div>
-    <div class="c-players">{{ m.team1.name }} <span class="vs">vs</span> {{ m.team2.name }}</div>
+    <div class="c-players">{{ m.team1.name }}{{ m.team1|team_school }} <span class="vs">vs</span> {{ m.team2.name }}{{ m.team2|team_school }}</div>
     {% if m.blockers %}
       <div class="c-block">⏳ {{ m.blockers|join:" · " }}</div>
       {% if m.only_arrival %}
@@ -129,6 +139,17 @@
         {% csrf_token %}
         <button type="submit" class="btn btn-primary big-btn">▶ {% trans "Start on this court" %}</button>
       </form>
+    {% endif %}
+    {% if m.is_suggested or m.only_arrival %}
+    <details class="undo">
+      <summary>{% trans "A player did not show up?" %}</summary>
+      <form method="post" action="{% url 'court_walkover' tournament.pk court sig m.pk %}" style="margin-top:0.6rem; display:grid; gap:0.5rem;"
+            onsubmit="return confirm('{% trans "Record a walk-over (15-0, 15-0)?" %}');">
+        {% csrf_token %}
+        <button type="submit" name="winner" value="{{ m.team1_id }}" class="btn btn-secondary big-btn">🏳 {% blocktrans with name=m.team1.name %}{{ name }} wins by walk-over{% endblocktrans %}</button>
+        <button type="submit" name="winner" value="{{ m.team2_id }}" class="btn btn-secondary big-btn">🏳 {% blocktrans with name=m.team2.name %}{{ name }} wins by walk-over{% endblocktrans %}</button>
+      </form>
+    </details>
     {% endif %}
   </div>
   {% empty %}

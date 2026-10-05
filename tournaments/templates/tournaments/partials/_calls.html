@@ -1,0 +1,25 @@
+{% load i18n %}
+<div class="calls-head">
+  <b>📢 {% trans "Loudspeaker" %}</b>
+  {% if delay %}<span class="delay-pill late">⏱ +{{ delay }} min</span>{% else %}<span class="delay-pill">⏱ {% trans "On time" %}</span>{% endif %}
+</div>
+{% for c in calls %}
+{% with m=c.match %}
+<div class="call-item{% if m.called_at %} called{% endif %}" data-match="{{ m.pk }}"
+     data-say="{% if c.court %}{% blocktrans with court=c.court %}Court {{ court }}{% endblocktrans %}. {% endif %}{{ m.team1.name }} {% trans 'against' %} {{ m.team2.name }}. {{ m.division.name }}.">
+  <div class="call-court">{% if c.court %}<small>{% trans "Court" %}</small>{{ c.court }}{% else %}–{% endif %}</div>
+  <div class="call-body">
+    <div class="call-names">{{ m.team1.name }} <span>vs</span> {{ m.team2.name }}</div>
+    <div class="call-sub">{{ m.division.name }}{% if m.match_number %} · #{{ m.match_number }}{% endif %} ·
+      {% if c.reason == 'court_free' %}{% trans "court free" %}{% else %}{% trans "planned" %} {{ m.scheduled_time|time:"H:i" }}{% endif %}
+      {% if m.called_at %} · <b>{% trans "called at" %} {{ m.called_at|time:"H:i" }}</b>{% endif %}</div>
+  </div>
+  <div class="call-actions">
+    <button type="button" class="btn btn-secondary btn-sm js-say" title="{% trans 'Read aloud' %}">🔊</button>
+    <button type="button" class="btn {% if m.called_at %}btn-secondary{% else %}btn-primary{% endif %} btn-sm js-called" data-url="{% url 'match_mark_called' m.pk %}">{% if m.called_at %}{% trans "Call again" %}{% else %}✔ {% trans "Called" %}{% endif %}</button>
+  </div>
+</div>
+{% endwith %}
+{% empty %}
+<div class="call-empty">{% trans "Nobody to call right now." %}</div>
+{% endfor %}

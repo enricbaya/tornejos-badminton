@@ -18,9 +18,9 @@
             {% endfor %}
             {% endif %}
             <div class="form-group">
-                <label for="id_confirm" style="font-weight:600;">{% trans "Write" %} <code>DELETE TOURNAMENT</code> {% trans "to confirm:" %}</label>
+                <label for="id_confirm" style="font-weight:600;">{% trans "Write" %} <code>{{ confirm_word }}</code> {% trans "to confirm:" %}</label>
                 <input type="text" id="id_confirm" name="confirm"
-                       placeholder="DELETE TOURNAMENT"
+                       placeholder="{{ confirm_word }}"
                        autocomplete="off"
                        style="width:100%; margin-top:0.4rem;">
             </div>

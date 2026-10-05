@@ -185,6 +185,8 @@ def court_result(request, tournament_pk, court, sig, match_pk):
         advance_bracket(match)
         if match.division.tournament_type == 'playoff' and match.phase == 'group':
             fill_playoff_bracket_from_group(match.division, match.group_number)
+        from .live_ops import apply_withdrawals
+        apply_withdrawals(tournament)
         messages.success(request, _("Result saved. Court %(court)s is free.") % {'court': court})
         return _panel_redirect(tournament, court, sig)
     else:
@@ -194,6 +196,31 @@ def court_result(request, tournament_pk, court, sig, match_pk):
     # Keep what the referee typed so they only have to fix the wrong set.
     request.session[f'court_draft_{match.pk}'] = {k: request.POST.get(k, '') for k in
                                                    ('s1a', 's1b', 's2a', 's2b', 's3a', 's3b')}
+    return _panel_redirect(tournament, court, sig)
+
+
+def court_walkover(request, tournament_pk, court, sig, match_pk):
+    """A player did not show up: the opponent wins 15-0, 15-0 and the court is free."""
+    tournament = _get_court(request, tournament_pk, court, sig)
+    if request.method != 'POST':
+        return _panel_redirect(tournament, court, sig)
+    from .live_ops import apply_withdrawals, record_walkover
+    with transaction.atomic():
+        match = get_object_or_404(Match.objects.select_for_update(), pk=match_pk, division__tournament=tournament,
+                                  status__in=['pending', 'in_progress'])
+        if match.status == 'in_progress' and str(match.court) != str(court):
+            raise Http404
+        winner = {str(match.team1_id): match.team1, str(match.team2_id): match.team2}.get(request.POST.get('winner', ''))
+        if not winner or not match.team1_id or not match.team2_id:
+            messages.error(request, _("Choose the player who showed up."))
+            return _panel_redirect(tournament, court, sig)
+        for p in winner.players:
+            if not p.has_arrived:
+                p.has_arrived = True
+                p.save(update_fields=['has_arrived'])
+        record_walkover(match, winner, court=court)
+    apply_withdrawals(tournament)
+    messages.success(request, _("Walk-over recorded – %(winner)s wins.") % {'winner': winner.name})
     return _panel_redirect(tournament, court, sig)
 
 

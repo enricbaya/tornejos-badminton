@@ -7,6 +7,7 @@
     <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
         <a href="{% url 'tournament_create' %}" class="btn btn-primary">+ {% trans "Create tournament" %}</a>
         <a href="{% url 'tournament_import' %}" class="btn btn-secondary">📥 {% trans "Import backup" %}</a>
+        <a href="{% url 'club_backup' %}" class="btn btn-secondary" title="{% trans 'Download a copy of all tournaments and players (do it just before and just after each tournament)' %}">💾 {% trans "Backup everything" %}</a>
     </div>
 </div>
 {% if tournaments %}

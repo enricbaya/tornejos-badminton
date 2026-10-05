@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Registrations" %} – {{ tournament.name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.rg-top { display:grid; grid-template-columns: 1fr 170px; gap:1rem; align-items:start; }
+.rg-status { padding:1rem 1.2rem; border-radius:12px; }
+.rg-status.on { background:var(--brand-soft); border:1.5px solid var(--brand-soft-border); }
+.rg-status.off { background:#f4f4f5; border:1.5px solid #e4e4e7; }
+.rg-link { display:flex; gap:0.4rem; margin-top:0.6rem; }
+.rg-link input { flex:1; font-size:0.8rem; padding:0.4rem; border:1px solid #e4e4e7; border-radius:6px; }
+.rg-qr { background:#fff; border-radius:12px; padding:0.6rem; }
+.rg-table td { vertical-align:middle; font-size:0.9rem; }
+.rg-table .sub { font-size:0.78rem; color:#64748b; }
+.rg-table form { display:inline-flex; gap:0.3rem; align-items:center; }
+.rg-table select { font-size:0.8rem; padding:0.25rem 1.6rem 0.25rem 0.4rem; min-width:190px; max-width:240px; }
+.tag-existing { font-size:0.7rem; background:#fef3c7; color:#92400e; border-radius:99px; padding:0.05rem 0.45rem; }
+@media (max-width:700px) { .rg-top { grid-template-columns:1fr; } .rg-qr { max-width:170px; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+  <div>
+    <h1>📝 {% trans "Registrations" %}</h1>
+    <div style="color:#64748b; font-size:0.85rem;">{{ tournament.name }}</div>
+  </div>
+  <div class="btn-group">
+    <a href="{% url 'tournament_detail' tournament.pk %}" class="btn btn-secondary">← {% trans "Planning" %}</a>
+    <a href="{% url 'player_template_download' %}" class="btn btn-secondary">⬇ {% trans "Excel template for schools" %}</a>
+  </div>
+</div>
+
+<div class="rg-top">
+  <div class="rg-status {% if tournament.registration_open %}on{% else %}off{% endif %}">
+    <form method="post" action="{% url 'registration_toggle' tournament.pk %}" style="float:right;">
+      {% csrf_token %}
+      {% if tournament.registration_open %}<button class="btn btn-secondary">⏸ {% trans "Close registration" %}</button>
+      {% else %}<button class="btn btn-primary">▶ {% trans "Open registration" %}</button>{% endif %}
+    </form>
+    <b>{% if tournament.registration_open %}{% trans "Online registration is open" %}{% else %}{% trans "Online registration is closed" %}{% endif %}</b>
+    <div style="font-size:0.88rem; color:#52525b; margin-top:0.3rem;">
+      {% trans "Share this link (or the QR code) with families and schools. Registrations wait here until you accept them; accepted players are added to the player list and, if a category was chosen, to that category." %}
+    </div>
+    <div class="rg-link"><input type="text" value="{{ link }}" readonly onclick="this.select()"><a href="{{ link }}" target="_blank" class="btn btn-secondary btn-sm">{% trans "Open" %}</a></div>
+    <div style="font-size:0.82rem; color:#64748b; margin-top:0.6rem;">💡 {% trans "Schools that prefer a spreadsheet can fill in the Excel template; upload it from Players → Upload Excel." %}</div>
+  </div>
+  <div class="rg-qr">{{ qr|safe }}</div>
+</div>
+
+<h2 style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+  <span>{% trans "Waiting" %} ({{ pending|length }})</span>
+  {% if pending %}
+  <form method="post" action="{% url 'registration_accept_all' tournament.pk %}" onsubmit="return confirm('{% trans "Accept all waiting registrations?" %}');">
+    {% csrf_token %}<button class="btn btn-primary btn-sm">✔ {% trans "Accept all" %}</button>
+  </form>
+  {% endif %}
+</h2>
+{% if pending %}
+<table class="rg-table">
+  <thead><tr><th>{% trans "Player" %}</th><th>{% trans "School / club" %}</th><th>{% trans "Contact" %}</th><th></th></tr></thead>
+  <tbody>
+  {% for r in pending %}
+    <tr>
+      <td><b>{{ r.name }}</b> {% if r.existing_player %}<span class="tag-existing" title="{% trans 'A player with this name already exists: it will be reused.' %}">{% trans "already in the list" %}</span>{% endif %}
+        <div class="sub">{{ r.get_gender_display }}{% if r.birth_year %} · {{ r.birth_year }}{% endif %}{% if r.age_group %} · {{ r.age_group }}{% endif %}{% if r.notes %} · 💬 {{ r.notes }}{% endif %}</div></td>
+      <td>{{ r.school|default:"—" }}</td>
+      <td class="sub">{{ r.contact_name }}{% if r.contact %}<br>{{ r.contact }}{% endif %}</td>
+      <td style="white-space:nowrap;">
+        <form method="post" action="{% url 'registration_accept' tournament.pk r.pk %}">
+          {% csrf_token %}
+          {% if divisions %}
+          <select name="division" title="{% trans 'Category' %}">
+            <option value="">{% trans "No category yet" %}</option>
+            {% for d in divisions %}<option value="{{ d.pk }}" {% if r.division_id == d.pk %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+          </select>
+          {% endif %}
+          <button class="btn btn-primary btn-sm">✔</button>
+        </form>
+        <form method="post" action="{% url 'registration_reject' tournament.pk r.pk %}" onsubmit="return confirm('{% trans "Reject this registration?" %}');">
+          {% csrf_token %}<button class="btn btn-secondary btn-sm" title="{% trans 'Reject' %}">✕</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p style="color:#64748b;">{% trans "No registrations waiting." %}</p>
+{% endif %}
+
+{% if handled %}
+<details style="margin-top:1.5rem;">
+  <summary style="cursor:pointer; font-weight:700;">{% trans "Already handled" %} ({{ handled|length }})</summary>
+  <table class="rg-table" style="margin-top:0.5rem;">
+    <tbody>
+    {% for r in handled %}
+      <tr>
+        <td><b>{{ r.name }}</b><div class="sub">{{ r.school|default:"—" }}</div></td>
+        <td>{% if r.status == 'accepted' %}✔ {% trans "Accepted" %}{% if r.division %} · {{ r.division.name }}{% endif %}{% else %}✕ {% trans "Rejected" %}{% endif %}</td>
+        <td>{% if r.status == 'rejected' %}<form method="post" action="{% url 'registration_reject' tournament.pk r.pk %}">{% csrf_token %}<input type="hidden" name="undo" value="1"><button class="btn btn-secondary btn-sm">↩ {% trans "Back to waiting" %}</button></form>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</details>
+{% endif %}
+{% endblock %}

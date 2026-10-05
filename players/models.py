@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 # Create your models here.
 
 # Default categories used for seeding and pre-population
-DEFAULT_DIVISION_CATEGORIES = ['U9', 'U11', 'U13', 'U15', 'U17', 'U19', 'A', 'B', 'C']
+DEFAULT_DIVISION_CATEGORIES = ['Prebenjamí', 'Benjamí', 'Aleví', 'Infantil', 'Cadet', 'Juvenil', 'Sènior']
 
 
 class DivisionCategory(models.Model):
@@ -21,8 +21,8 @@ class DivisionCategory(models.Model):
 
     class Meta:
         ordering = ['sort_order', 'name']
-        verbose_name = _("Category")
-        verbose_name_plural = _("Categories")
+        verbose_name = _("Age group")
+        verbose_name_plural = _("Age groups")
         constraints = [
             models.UniqueConstraint(fields=['owner', 'name'], name='unique_owner_category'),
         ]
@@ -45,8 +45,13 @@ class Player(models.Model):
         ('M', _("Male")),
         ('K', _("Female")),
     ]
-    division = models.CharField(max_length=30, blank=True, verbose_name=_("Division"))
+    division = models.CharField(max_length=30, blank=True, verbose_name=_("Age group"))
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='M', verbose_name=_("Gender"))
+    school = models.CharField(
+        max_length=100, blank=True, default='',
+        verbose_name=_("School / club"),
+        help_text=_("School or club the player represents. Leave empty if they play independently."),
+    )
     rest_until = models.DateTimeField(
         null=True, blank=True,
         verbose_name=_("Resting until"),
@@ -57,6 +62,11 @@ class Player(models.Model):
         verbose_name=_("Arrived"),
         help_text=_("Whether the player has checked in at the judge table."),
     )
+    withdrawn = models.BooleanField(
+        default=False,
+        verbose_name=_("Withdrawn"),
+        help_text=_("The player has left the tournament: their pending matches are lost by walk-over."),
+    )
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -65,6 +75,10 @@ class Player(models.Model):
         verbose_name=_("Club user"),
     )
 
+
+    @property
+    def school_display(self):
+        return self.school or _("Independent")
 
     class Meta:
         verbose_name = _("Player")
@@ -94,7 +108,7 @@ class Team(models.Model):
     )
     division = models.CharField(
         max_length=30, blank=True, null=True,
-        verbose_name=_("Division"),
+        verbose_name=_("Age group"),
     )
     name = models.CharField(max_length=100, blank=True, null=True, verbose_name=_("Name"))
 
@@ -110,6 +124,15 @@ class Team(models.Model):
             bool: ``True`` when ``player2`` is missing, else ``False``.
         """
         return self.player2 is None
+
+    @property
+    def school_label(self):
+        """Distinct schools/clubs of the team's players ('' when none is set)."""
+        seen = []
+        for p in self.players:
+            if p.school and p.school not in seen:
+                seen.append(p.school)
+        return ' / '.join(seen)
 
     @property
     def players(self):

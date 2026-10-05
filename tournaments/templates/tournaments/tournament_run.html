@@ -16,6 +16,25 @@
   .run-sidebar { order: -1; }
 }
 
+/* ── Loudspeaker calls ─── */
+.calls-panel { background:#fff; border-radius:12px; border:2px solid #111; margin-bottom:1rem; overflow:hidden; }
+.calls-panel.flash { animation: callflash 1.2s ease-in-out 3; }
+@keyframes callflash { 50% { border-color: var(--accent,#EB1C60); box-shadow: 0 0 0 4px rgba(235,28,96,0.25); } }
+.calls-head { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; background:#111; color:#fff; padding:0.5rem 0.75rem; font-size:0.9rem; }
+.delay-pill { font-size:0.75rem; background:#27272a; border-radius:99px; padding:0.1rem 0.55rem; white-space:nowrap; }
+.delay-pill.late { background:var(--accent,#EB1C60); font-weight:700; }
+.call-item { display:flex; gap:0.55rem; align-items:center; padding:0.5rem 0.65rem; border-bottom:1px solid #f1f5f9; }
+.call-item.called { opacity:0.6; }
+.call-court { min-width:2.4rem; text-align:center; font-family:var(--heading-font); font-size:1.5rem; font-weight:800; line-height:1; }
+.call-court small { display:block; font-size:0.55rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent-text,#c8174f); font-family:inherit; }
+.call-body { flex:1; min-width:0; }
+.call-names { font-weight:700; font-size:0.85rem; line-height:1.25; }
+.call-names span { color:#94a3b8; font-weight:400; }
+.call-sub { font-size:0.72rem; color:#64748b; }
+.call-actions { display:flex; flex-direction:column; gap:0.25rem; }
+.call-actions .btn { padding:0.2rem 0.45rem; font-size:0.72rem; white-space:nowrap; }
+.call-empty { padding:0.75rem; color:#94a3b8; font-size:0.85rem; text-align:center; }
+
 /* ── Progress bar ─── */
 .progress-bar-wrap {
   height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 1.5rem;
@@ -274,6 +293,12 @@
   </div>
   <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
     <a href="{% url 'tournament_bigscreen' tournament.pk %}" class="btn btn-secondary" target="_blank">📺 {% trans "Big screen" %}</a>
+    <a href="{% url 'tournament_reception' tournament.pk %}" class="btn btn-secondary">🧾 {% trans "Reception" %}</a>
+    <a href="{% url 'tournament_medal_table' tournament.pk %}" class="btn btn-secondary">🏅 {% trans "Medal table" %}</a>
+    <form method="post" action="{% url 'tournament_replan' tournament.pk %}" style="display:inline;"
+          onsubmit="return confirm('{% trans "Give new times and courts to all pending matches, starting now? Finished and running matches are kept." %}');">
+      {% csrf_token %}<button type="submit" class="btn btn-secondary" title="{% trans 'Re-plan pending matches from now' %}">🔄 {% trans "Re-plan from now" %}</button>
+    </form>
     <a href="{% url 'tournament_court_links' tournament.pk %}" class="btn btn-secondary">📱 {% trans "Court referees" %}{% if tournament.court_access_enabled %} <span style="color:var(--accent,#EB1C60);">●</span>{% endif %}</a>
     <a href="{% url 'tournament_detail' tournament.pk %}" class="btn btn-secondary">⚙ {% trans "Planning" %}</a>
   </div>
@@ -512,7 +537,7 @@
                 <td class="rank">{{ forloop.counter }}</td>
                 <td>
                   {% if row.status == 'playing' %}<span class="status-dot dot-playing"></span>{% elif row.status == 'resting' %}<span class="status-dot dot-resting"></span>{% endif %}
-                  <strong>{{ row.team.name }}</strong>{{ dd.seeds_dict|dict_get:row.team.pk }}
+                  <strong>{{ row.team.name }}</strong>{{ row.team|team_school }}{{ dd.seeds_dict|dict_get:row.team.pk }}
                 </td>
                 <td>{{ row.played }}</td><td>{{ row.won }}</td><td>{{ row.lost }}</td>
                 <td class="pts">{{ row.points }}</td>
@@ -538,7 +563,7 @@
                 <td class="rank">{{ forloop.counter }}</td>
                 <td>
                   {% if row.status == 'playing' %}<span class="status-dot dot-playing"></span>{% elif row.status == 'resting' %}<span class="status-dot dot-resting"></span>{% endif %}
-                  <strong>{{ row.team.name }}</strong>{{ dd.seeds_dict|dict_get:row.team.pk }}
+                  <strong>{{ row.team.name }}</strong>{{ row.team|team_school }}{{ dd.seeds_dict|dict_get:row.team.pk }}
                   {% if forloop.counter <= division.advancing_count %}<span style="font-size:0.65rem; color:var(--accent-text,#c8174f); margin-left:0.2rem;">↑</span>{% endif %}
                 </td>
                 <td>{{ row.played }}</td><td>{{ row.won }}</td><td>{{ row.lost }}</td>
@@ -615,6 +640,10 @@
 
   {# ── Sidebar: panels row (I gang + Næste kampe side by side) ─── #}
   <div class="run-sidebar">
+    <div class="calls-panel" id="calls-panel" data-url="{% url 'tournament_calls' tournament.pk %}">
+      <div class="calls-head"><b>📢 {% trans "Loudspeaker" %}</b></div>
+      <div class="call-empty">…</div>
+    </div>
     <div class="panels-row">
 
     {# ── Kampe i gang ─── #}
@@ -723,6 +752,56 @@
 {% endblock %}
 
 {% block extra_js %}
+<script>
+// Loudspeaker calls: refreshed every 15 s, beep when a new call appears.
+(function () {
+  var panel = document.getElementById('calls-panel');
+  if (!panel) return;
+  var known = null;
+  function token() { var m = document.cookie.match(/csrftoken=([^;]+)/); return m ? m[1] : ''; }
+  function beep() {
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.25].forEach(function (t) {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.frequency.value = 880; o.connect(g); g.connect(ctx.destination);
+        g.gain.setValueAtTime(0.15, ctx.currentTime + t); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.2);
+        o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.22);
+      });
+    } catch (e) {}
+  }
+  function say(text) {
+    if (!window.speechSynthesis) return;
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = document.documentElement.lang || 'ca';
+    var v = speechSynthesis.getVoices().filter(function (x) { return x.lang && x.lang.indexOf(u.lang.slice(0, 2)) === 0; })[0];
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  }
+  function bind() {
+    panel.querySelectorAll('.js-called').forEach(function (b) {
+      b.addEventListener('click', function () {
+        fetch(b.dataset.url, {method: 'POST', credentials: 'same-origin', headers: {'X-CSRFToken': token(), 'X-Requested-With': 'XMLHttpRequest'}}).then(load);
+      });
+    });
+    panel.querySelectorAll('.js-say').forEach(function (b) {
+      b.addEventListener('click', function () { say(b.closest('.call-item').dataset.say); });
+    });
+  }
+  function load() {
+    fetch(panel.dataset.url, {credentials: 'same-origin'}).then(function (r) { return r.text(); }).then(function (html) {
+      panel.innerHTML = html;
+      var ids = Array.prototype.map.call(panel.querySelectorAll('.call-item:not(.called)'), function (x) { return x.dataset.match; });
+      if (known !== null && ids.some(function (id) { return known.indexOf(id) === -1; })) {
+        beep(); panel.classList.remove('flash'); void panel.offsetWidth; panel.classList.add('flash');
+      }
+      known = ids;
+      bind();
+    }).catch(function () {});
+  }
+  load(); setInterval(load, 15000);
+})();
+</script>
 <script>
 // Optælling af spilletid for aktive kampe på banerne.
 (function () {

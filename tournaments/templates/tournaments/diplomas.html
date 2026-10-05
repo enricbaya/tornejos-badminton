@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+{% load i18n static %}
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+<meta charset="UTF-8">
+<title>{% trans "Diplomas" %} – {{ tournament.name }}</title>
+{% include '_club_head.html' %}
+<style>
+@page { size: A4 landscape; margin: 0; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #e4e4e7; font-family: 'Inter', system-ui, sans-serif; color: #111; }
+.toolbar { position: sticky; top: 0; z-index: 5; display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;
+           padding: 0.7rem 1rem; background: #111; color: #fff; font-size: 0.9rem; }
+.toolbar button, .toolbar a { background: #EB1C60; color: #fff; border: none; border-radius: 8px; padding: 0.45rem 0.9rem;
+                              font-weight: 700; cursor: pointer; text-decoration: none; font-size: 0.9rem; }
+.toolbar a.alt { background: #3f3f46; }
+.sheet { width: 297mm; height: 210mm; margin: 10mm auto; background: #fff; position: relative; overflow: hidden;
+         page-break-after: always; break-after: page; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+.frame { position: absolute; inset: 9mm 9mm 9mm 24mm; border: 2.5mm solid #111; border-radius: 4mm; }
+.frame::after { content: ""; position: absolute; inset: 2.5mm; border: 0.6mm solid #EB1C60; border-radius: 2mm; }
+.ribbon { position: absolute; left: 0; top: 0; bottom: 0; width: 16mm; background: #EB1C60; }
+.content { position: absolute; inset: 20mm 22mm 18mm 38mm; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.logo { height: 30mm; margin-bottom: 4mm; }
+.kicker { font-family: 'Barlow', sans-serif; font-weight: 700; letter-spacing: 0.5em; text-transform: uppercase; color: #EB1C60; font-size: 13pt; }
+.title { font-family: 'Barlow', sans-serif; font-weight: 800; font-size: 54pt; line-height: 1; margin: 2mm 0 6mm; letter-spacing: 0.02em; }
+.awarded { font-size: 13pt; color: #52525b; }
+.name { font-family: 'Barlow', sans-serif; font-weight: 800; font-size: 36pt; margin: 3mm 0 1mm; border-bottom: 1mm solid #111; padding: 0 10mm 2mm; }
+.school { font-size: 13pt; color: #52525b; margin-bottom: 5mm; }
+.medal { display: flex; align-items: center; gap: 5mm; font-size: 18pt; font-weight: 700; }
+.medal .disc { width: 20mm; height: 20mm; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+               font-family: 'Barlow', sans-serif; font-size: 22pt; font-weight: 800; color: #fff; }
+.disc.gold { background: radial-gradient(circle at 35% 30%, #fde68a, #d4a017 70%); color: #5b4300; }
+.disc.silver { background: radial-gradient(circle at 35% 30%, #f4f4f5, #a1a1aa 70%); color: #3f3f46; }
+.disc.bronze { background: radial-gradient(circle at 35% 30%, #fcd9b6, #b8692e 70%); color: #4a2410; }
+.disc.part { background: #111; border: 1.2mm solid #EB1C60; font-size: 14pt; }
+.category { font-size: 13pt; color: #3f3f46; margin-top: 2mm; }
+.foot { margin-top: auto; width: 100%; display: flex; justify-content: space-between; align-items: flex-end; font-size: 11pt; color: #52525b; }
+.foot .sign { text-align: center; }
+.foot .sign div { width: 60mm; border-top: 0.4mm solid #a1a1aa; padding-top: 1.5mm; }
+.foot img { height: 14mm; }
+.empty { max-width: 600px; margin: 3rem auto; background: #fff; border-radius: 12px; padding: 2rem; text-align: center; }
+@media print {
+  body { background: #fff; }
+  .toolbar { display: none; }
+  .sheet { margin: 0; box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <b>📜 {% trans "Diplomas" %} · {{ diplomas|length }}</b>
+  <button type="button" onclick="window.print()">🖨 {% trans "Print / save as PDF" %}</button>
+  {% if include_all %}<a class="alt" href="?">{% trans "Only medallists" %}</a>{% else %}<a class="alt" href="?all=1">{% trans "Add participation diplomas" %}</a>{% endif %}
+  <span style="opacity:0.7;">{% trans "Paper: A4 landscape, no margins." %}</span>
+</div>
+
+{% for d in diplomas %}
+<section class="sheet">
+  <div class="ribbon"></div>
+  <div class="frame"></div>
+  <div class="content">
+    <img class="logo" src="{% static 'club/logo_negre.png' %}" alt="Club Bàdminton Igualada">
+    <div class="kicker">{{ tournament.name }}</div>
+    <div class="title">{% trans "DIPLOMA" %}</div>
+    <div class="awarded">{% trans "awarded to" %}</div>
+    <div class="name">{{ d.player.name }}</div>
+    <div class="school">{{ d.player.school_display }}</div>
+    <div class="medal">
+      {% if d.medal %}<span class="disc {{ d.medal }}">{% if d.medal == 'gold' %}1{% elif d.medal == 'silver' %}2{% else %}3{% endif %}</span>
+      {% else %}<span class="disc part">🏸</span>{% endif %}
+      <span>{{ d.place }}</span>
+    </div>
+    {% if d.category %}<div class="category">{{ d.category }}{% if d.subgroup %} · {{ d.subgroup }}{% endif %}</div>{% endif %}
+    <div class="foot">
+      <div>{{ tournament.date|date:"j F Y" }}</div>
+      <div class="sign"><div>{% trans "The organisation" %}</div></div>
+      <img src="{% static 'club/kentia.png' %}" alt="Kentia Jardins">
+    </div>
+  </div>
+</section>
+{% empty %}
+<div class="empty">{% trans "There are no medallists yet. Diplomas are created from the results." %}{% if not include_all %} <a href="?all=1">{% trans "Add participation diplomas" %}</a>{% endif %}</div>
+{% endfor %}
+</body>
+</html>

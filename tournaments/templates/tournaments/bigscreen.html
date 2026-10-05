@@ -10,6 +10,8 @@
 <link rel="icon" type="image/png" href="{% static 'club/favicon-64.png' %}">
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
+.delay-badge { background:#EB1C60; color:#fff; font-weight:800; font-size:1.6rem; border-radius:12px; padding:0.25rem 0.9rem; white-space:nowrap; }
+.school-tag { display:inline-block; margin-left:0.4em; padding:0 0.5em; border-radius:99px; font-size:0.6em; font-weight:600; vertical-align:0.15em; background:rgba(255,255,255,0.12); color:rgba(255,255,255,0.8); white-space:nowrap; }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
@@ -250,7 +252,10 @@
       <div class="topbar-subtitle">{% trans "Next matches" %}</div>
     </div>
   </div>
-  <div class="topbar-clock" id="clock">––:––</div>
+  <div style="display:flex; align-items:center; gap:1.2rem;">
+    {% if delay %}<div class="delay-badge">⏱ +{{ delay }} min</div>{% endif %}
+    <div class="topbar-clock" id="clock">––:––</div>
+  </div>
 </div>
 
 <div class="main">
@@ -262,7 +267,7 @@
     <div class="court-tile">
       <div class="court-num">{{ court.number }}</div>
       <div>
-        <div class="court-players">{{ court.match.team1.name }} <span class="vs-small">vs</span> {{ court.match.team2.name }}</div>
+        <div class="court-players">{{ court.match.team1.name }}{{ court.match.team1|team_school }} <span class="vs-small">vs</span> {{ court.match.team2.name }}{{ court.match.team2|team_school }}</div>
         <div class="court-div">{{ court.match.division.name }}{% if court.match.match_number %} · #{{ court.match.match_number }}{% endif %}</div>
       </div>
     </div>
@@ -281,19 +286,19 @@
   <div class="match-card">
 
     <div class="match-meta">
-      <div class="match-time">{{ match.scheduled_time|time:"H:i" }}</div>
+      <div class="match-time">{% if match.estimated_time %}~{{ match.estimated_time|time:"H:i" }}{% else %}{{ match.scheduled_time|time:"H:i" }}{% endif %}</div>
 
       {% if match.match_number %}<div class="match-no">#{{ match.match_number }}</div>{% endif %}
     </div>
 
     <div class="match-teams">
       <div class="team">
-        {% if match.team1 %}{{ match.team1.name }}{% if match.t1_seed %}<span class="team-seed">{{ match.t1_seed }}</span>{% endif %}{% if match.t1_status == 'playing' %} <span title="{% trans "Match in progress" %}" style="margin-left:0.25rem;">🏸</span>{% elif match.t1_status == 'resting' %} <span style="font-size:0.85rem; color:#F5C400; white-space:nowrap; margin-left:0.25rem;">⏱ <span class="rest-timer" data-until="{{ match.t1_rest_until|unix_ts }}"></span></span>{% endif %}
+        {% if match.team1 %}{{ match.team1.name }}{{ match.team1|team_school }}{% if match.t1_seed %}<span class="team-seed">{{ match.t1_seed }}</span>{% endif %}{% if match.t1_status == 'playing' %} <span title="{% trans "Match in progress" %}" style="margin-left:0.25rem;">🏸</span>{% elif match.t1_status == 'resting' %} <span style="font-size:0.85rem; color:#F5C400; white-space:nowrap; margin-left:0.25rem;">⏱ <span class="rest-timer" data-until="{{ match.t1_rest_until|unix_ts }}"></span></span>{% endif %}
         {% else %}<span style="color:var(--muted); font-style:italic;">{{ match.bracket_label|bracket_label_i18n }}</span>{% endif %}
       </div>
       <div class="vs">vs</div>
       <div class="team">
-        {% if match.team2 %}{{ match.team2.name }}{% if match.t2_seed %}<span class="team-seed">{{ match.t2_seed }}</span>{% endif %}{% if match.t2_status == 'playing' %} <span title="{% trans "Match in progress" %}" style="margin-left:0.25rem;">🏸</span>{% elif match.t2_status == 'resting' %} <span style="font-size:0.85rem; color:#F5C400; white-space:nowrap; margin-left:0.25rem;">⏱ <span class="rest-timer" data-until="{{ match.t2_rest_until|unix_ts }}"></span></span>{% endif %}
+        {% if match.team2 %}{{ match.team2.name }}{{ match.team2|team_school }}{% if match.t2_seed %}<span class="team-seed">{{ match.t2_seed }}</span>{% endif %}{% if match.t2_status == 'playing' %} <span title="{% trans "Match in progress" %}" style="margin-left:0.25rem;">🏸</span>{% elif match.t2_status == 'resting' %} <span style="font-size:0.85rem; color:#F5C400; white-space:nowrap; margin-left:0.25rem;">⏱ <span class="rest-timer" data-until="{{ match.t2_rest_until|unix_ts }}"></span></span>{% endif %}
         {% else %}<span style="color:var(--muted); font-style:italic;">{% trans "Pending" %}</span>{% endif %}
       </div>
     </div>

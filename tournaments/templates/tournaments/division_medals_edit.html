@@ -47,6 +47,27 @@
   <form method="post">
     {% csrf_token %}
 
+    {% if subgroups %}
+    {% for sg in subgroups %}
+    {% with sg_i=forloop.counter0 %}
+    <div class="medal-section">
+      <div class="medal-header"><div class="medal-icon">🏅</div><div class="medal-title">{{ sg.label }}</div></div>
+      {% for medal, selected in sg.slots %}
+      <div class="slot-row">
+        <span class="slot-label">{% if medal == 'gold' %}🥇{% elif medal == 'silver' %}🥈{% else %}🥉{% endif %}</span>
+        <select name="sg{{ sg_i }}_{{ medal }}">
+          <option value="">— {% trans "None" %} —</option>
+          {% for team in sg.teams %}
+          <option value="{{ team.pk }}"{% if selected and selected.pk == team.pk %} selected{% endif %}>{{ team.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endfor %}
+    </div>
+    {% endwith %}
+    {% endfor %}
+    {% else %}
+
     {% if division.gold_count %}
     <div class="medal-section">
       <div class="medal-header">
@@ -106,6 +127,8 @@
       {% endfor %}
     </div>
     {% endif %}
+
+    {% endif %}{# subgroups #}
 
     <div class="actions">
       <button type="submit" class="btn btn-primary">💾 {% trans "Save overrides" %}</button>

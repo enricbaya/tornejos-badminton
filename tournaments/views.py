@@ -128,6 +128,14 @@ def tournament_edit(request, pk):
     return render(request, 'tournaments/tournament_form.html', {'form': form, 'tournament': tournament, 'day_formset': day_formset})
 
 
+def _confirm_ok(request, english, *others):
+    """True when the typed confirmation matches the phrase in the active language,
+    in English, or any legacy phrase (case and extra spaces ignored)."""
+    typed = ' '.join(request.POST.get('confirm', '').split()).upper()
+    accepted = {english, _(english), *others}
+    return typed in {' '.join(a.split()).upper() for a in accepted}
+
+
 @login_required
 def tournament_delete(request, pk):
     """Delete a tournament after confirmation phrase validation.
@@ -141,21 +149,35 @@ def tournament_delete(request, pk):
     """
     tournament = get_object_or_404(Tournament, pk=pk, owner=request.user)
     if request.method == 'POST':
-        if request.POST.get('confirm', '').strip() != 'SLET TURNERING':
-            messages.error(request, _("You must type DELETE TOURNAMENT to confirm."))
-            return render(request, 'tournaments/tournament_confirm_delete.html', {'tournament': tournament})
+        if not _confirm_ok(request, 'DELETE TOURNAMENT', 'SLET TURNERING'):
+            messages.error(request, _("You must type %(word)s to confirm.") % {'word': _("DELETE TOURNAMENT")})
+            return render(request, 'tournaments/tournament_confirm_delete.html',
+                          {'tournament': tournament, 'confirm_word': _("DELETE TOURNAMENT")})
         name = tournament.name
         tournament.delete()
         messages.success(request, _("Tournament \"%(name)s\" has been deleted.") % {'name': name})
         return redirect('tournament_list')
-    return render(request, 'tournaments/tournament_confirm_delete.html', {'tournament': tournament})
+    return render(request, 'tournaments/tournament_confirm_delete.html',
+                  {'tournament': tournament, 'confirm_word': _("DELETE TOURNAMENT")})
 
 
 @login_required
 def tournament_export(request, pk):
     """Download a full JSON backup of a tournament."""
-    from players.models import Player, Team as PlayerTeam
     tournament = get_object_or_404(Tournament, pk=pk, owner=request.user)
+    data = tournament_export_data(tournament)
+    filename = f"turnering_{tournament.pk}_{tournament.date}.json"
+    response = HttpResponse(
+        json.dumps(data, ensure_ascii=False, indent=2),
+        content_type="application/json; charset=utf-8",
+    )
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+
+def tournament_export_data(tournament):
+    """Everything needed to rebuild the tournament elsewhere, as a JSON-ready dict."""
+    from players.models import Player, Team as PlayerTeam
 
     division_qs = list(tournament.divisions.prefetch_related('teams__player1', 'teams__player2', 'seeds'))
 
@@ -210,6 +232,7 @@ def tournament_export(request, pk):
                 "age": p.age,
                 "division": p.division,
                 "gender": p.gender,
+                "school": p.school,
             }
             for p in players.values()
         ],
@@ -233,7 +256,15 @@ def tournament_export(request, pk):
                 "group_count": d.group_count,
                 "advance_count": d.advance_count,
                 "schedule_priority": d.schedule_priority,
+                "gold_count": d.gold_count,
+                "silver_count": d.silver_count,
+                "bronze_count": d.bronze_count,
+                "medals_by_age_group": d.medals_by_age_group,
                 "team_ids": list(d.teams.values_list('pk', flat=True)),
+                "medal_overrides": [
+                    {"medal": o.medal, "team_id": o.team_id, "order": o.order, "subgroup": o.subgroup}
+                    for o in d.medal_overrides.all()
+                ],
             }
             for d in division_qs
         ],
@@ -254,6 +285,9 @@ def tournament_export(request, pk):
                 "court": m.court,
                 "group_number": m.group_number,
                 "phase": m.phase,
+                "started_at": m.started_at.isoformat() if m.started_at else None,
+                "finished_at": m.finished_at.isoformat() if m.finished_at else None,
+                "entered_by_court": m.entered_by_court,
             }
             for m in matches
         ],
@@ -266,14 +300,7 @@ def tournament_export(request, pk):
             for s in seeds
         ],
     }
-
-    filename = f"turnering_{tournament.pk}_{tournament.date}.json"
-    response = HttpResponse(
-        json.dumps(data, ensure_ascii=False, indent=2),
-        content_type="application/json; charset=utf-8",
-    )
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
-    return response
+    return data
 
 
 @login_required
@@ -338,7 +365,7 @@ def _do_tournament_import(request, data):
     td = data['tournament']
     tournament = Tournament.objects.create(
         owner=request.user,
-        name=td['name'] + ' (gendannet)',
+        name=td['name'] + _(" (restored)"),
         date=parse_date(td['date']),
         division_model=td['division_model'],
         scoring_model=td['scoring_model'],
@@ -381,8 +408,11 @@ def _do_tournament_import(request, data):
             name=pd['name'],
             gender=pd['gender'],
             division=pd['division'],
-            defaults={'age': pd.get('age', 0)},
+            defaults={'age': pd.get('age', 0), 'school': pd.get('school', '') or ''},
         )
+        if pd.get('school') and not player.school:
+            player.school = pd['school']
+            player.save(update_fields=['school'])
         player_map[pd['_id']] = player
 
     # Teams: dedup by (player1, player2)
@@ -419,10 +449,20 @@ def _do_tournament_import(request, data):
             group_count=dd.get('group_count', 2),
             advance_count=dd.get('advance_count', 2),
             schedule_priority=dd.get('schedule_priority', 5),
+            gold_count=dd.get('gold_count', 1),
+            silver_count=dd.get('silver_count', 1),
+            bronze_count=dd.get('bronze_count', 0),
+            medals_by_age_group=dd.get('medals_by_age_group', False),
         )
         teams_for_div = [team_map[tid] for tid in dd.get('team_ids', []) if tid in team_map]
         division.teams.set(teams_for_div)
         division_map[dd['_id']] = division
+        from .models import MedalOverride
+        for od in dd.get('medal_overrides', []):
+            if od.get('team_id') in team_map:
+                MedalOverride.objects.get_or_create(
+                    division=division, subgroup=od.get('subgroup', ''), medal=od['medal'], order=od.get('order', 1),
+                    defaults={'team': team_map[od['team_id']]})
 
     # Matches
     for md in data.get('matches', []):
@@ -446,6 +486,9 @@ def _do_tournament_import(request, data):
             court=md.get('court'),
             group_number=md.get('group_number'),
             phase=md.get('phase', 'group'),
+            started_at=parse_datetime(md['started_at']) if md.get('started_at') else None,
+            finished_at=parse_datetime(md['finished_at']) if md.get('finished_at') else None,
+            entered_by_court=md.get('entered_by_court', '') or '',
         )
 
     # Seeds
@@ -579,6 +622,7 @@ def tournament_detail(request, pk):
     pending_matches  = sum(dd['pending_count']    for dd in division_data)
 
     return render(request, 'tournaments/tournament_detail.html', {
+        'pending_registrations': tournament.registrations.filter(status='pending').count(),
         'tournament': tournament,
         'division_data': division_data,
         'division_form': division_form,
@@ -919,6 +963,8 @@ def match_record_result(request, pk):
             advance_bracket(match)
             if match.division.tournament_type == 'playoff' and match.phase == 'group':
                 fill_playoff_bracket_from_group(match.division, match.group_number)
+            from .live_ops import apply_withdrawals
+            apply_withdrawals(match.division.tournament)
             messages.success(request, _("Result saved."))
             if popup_mode:
                 return HttpResponse(status=204)
@@ -944,10 +990,8 @@ def _walkover_score(match):
     Returns:
         str: Default score line for walkover.
     """
-    scoring = match.division.tournament.scoring_model
-    if scoring == 'best_of_5_15':
-        return '15-0, 15-0'
-    return '21-0, 21-0'
+    from .live_ops import walkover_score
+    return walkover_score(match, match.winner)
 
 
 @login_required
@@ -1024,15 +1068,9 @@ def match_walkover(request, pk):
     if request.method == 'POST':
         form = WalkoverForm(request.POST, match=match)
         if form.is_valid():
-            match.winner = form.cleaned_data['winner']
-            match.score = _walkover_score(match)
-            match.status = 'completed'
-            match.walkover = True
-            match.save()
-            set_player_rest(match)
-            advance_bracket(match)
-            if match.division.tournament_type == 'playoff' and match.phase == 'group':
-                fill_playoff_bracket_from_group(match.division, match.group_number)
+            from .live_ops import apply_withdrawals, record_walkover
+            record_walkover(match, form.cleaned_data['winner'])
+            apply_withdrawals(match.division.tournament)
             messages.success(request, _("Walk-over recorded – %(winner)s wins.") % {'winner': match.winner})
             if next_url:
                 return redirect(next_url)
@@ -1432,25 +1470,41 @@ def _compute_medals(division):
 @login_required
 def division_medals(request, pk):
     """Printable medal overview for a single division."""
-    from .models import MedalOverride
     division = get_object_or_404(Division, pk=pk, tournament__owner=request.user)
-    has_override = division.medal_overrides.exists()
+    ctx = _division_medal_context(division)
+    ctx['all_done'] = not division.matches.filter(status__in=['pending', 'in_progress']).exists()
+    return render(request, 'tournaments/division_medals.html', ctx)
 
+
+def _division_medal_context(division):
+    """Medals of a division, either one podium or one per age group × gender."""
+    if division.medals_by_age_group:
+        from .medals import compute_subgroup_medals
+        subgroups = compute_subgroup_medals(division)
+        return {
+            'division': division,
+            'subgroups': subgroups,
+            'has_override': any(sg['override'] for sg in subgroups),
+        }
+    overrides = division.medal_overrides.filter(subgroup='')
+    has_override = overrides.exists()
     if has_override:
-        gold   = [o.team for o in division.medal_overrides.filter(medal='gold').order_by('order')]
-        silver = [o.team for o in division.medal_overrides.filter(medal='silver').order_by('order')]
-        bronze = [o.team for o in division.medal_overrides.filter(medal='bronze').order_by('order')]
+        gold   = [o.team for o in overrides.filter(medal='gold').order_by('order')]
+        silver = [o.team for o in overrides.filter(medal='silver').order_by('order')]
+        bronze = [o.team for o in overrides.filter(medal='bronze').order_by('order')]
     else:
         gold, silver, bronze = _compute_medals(division)
+    return {'division': division, 'gold': gold, 'silver': silver, 'bronze': bronze, 'has_override': has_override}
 
-    return render(request, 'tournaments/division_medals.html', {
-        'division': division,
-        'gold': gold,
-        'silver': silver,
-        'bronze': bronze,
-        'all_done': not division.matches.filter(status__in=['pending', 'in_progress']).exists(),
-        'has_override': has_override,
-    })
+
+@login_required
+def division_medals_mode(request, pk):
+    """Switch between one podium for the category and one podium per age group × gender."""
+    division = get_object_or_404(Division, pk=pk, tournament__owner=request.user)
+    if request.method == 'POST':
+        division.medals_by_age_group = request.POST.get('by_age_group') == '1'
+        division.save(update_fields=['medals_by_age_group'])
+    return redirect('division_medals', pk=pk)
 
 
 @login_required
@@ -1458,10 +1512,32 @@ def division_medals_edit(request, pk):
     """Manually override which teams receive each medal in a division."""
     from .models import MedalOverride
     division = get_object_or_404(Division, pk=pk, tournament__owner=request.user)
-    all_teams = list(division.teams.all().order_by('id'))
+    all_teams = list(division.teams.select_related('player1', 'player2').order_by('name'))
+
+    if division.medals_by_age_group:
+        from .medals import PODIUM, compute_subgroup_medals
+        subgroups = compute_subgroup_medals(division)
+        if request.method == 'POST':
+            division.medal_overrides.exclude(subgroup='').delete()
+            team_by_pk = {str(t.pk): t for t in all_teams}
+            for i, sg in enumerate(subgroups):
+                for medal in PODIUM:
+                    team = team_by_pk.get(request.POST.get(f'sg{i}_{medal}', ''))
+                    if team:
+                        MedalOverride.objects.create(division=division, subgroup=sg['code'],
+                                                     medal=medal, team=team, order=1)
+            return redirect('division_medals', pk=pk)
+        for sg in subgroups:
+            sg['teams'] = [r['team'] for r in sg['ranking']]
+            sg['slots'] = [(m, sg[m][0] if sg[m] else None) for m in PODIUM]
+        return render(request, 'tournaments/division_medals_edit.html', {
+            'division': division,
+            'subgroups': subgroups,
+            'has_override': any(sg['override'] for sg in subgroups),
+        })
 
     if request.method == 'POST':
-        division.medal_overrides.all().delete()
+        division.medal_overrides.filter(subgroup='').delete()
         for medal, count in [('gold', division.gold_count), ('silver', division.silver_count), ('bronze', division.bronze_count)]:
             for i in range(1, count + 1):
                 team_pk = request.POST.get(f'{medal}_{i}')
@@ -1474,12 +1550,8 @@ def division_medals_edit(request, pk):
         return redirect('division_medals', pk=pk)
 
     # Pre-populate form from existing overrides or computed values
-    if division.medal_overrides.exists():
-        pre_gold   = [o.team for o in division.medal_overrides.filter(medal='gold').order_by('order')]
-        pre_silver = [o.team for o in division.medal_overrides.filter(medal='silver').order_by('order')]
-        pre_bronze = [o.team for o in division.medal_overrides.filter(medal='bronze').order_by('order')]
-    else:
-        pre_gold, pre_silver, pre_bronze = _compute_medals(division)
+    ctx = _division_medal_context(division)
+    pre_gold, pre_silver, pre_bronze = ctx['gold'], ctx['silver'], ctx['bronze']
 
     def slots(medal_name, count, preselected):
         return [
@@ -1493,7 +1565,7 @@ def division_medals_edit(request, pk):
         'gold_slots':   slots('gold',   division.gold_count,   pre_gold),
         'silver_slots': slots('silver', division.silver_count, pre_silver),
         'bronze_slots': slots('bronze', division.bronze_count, pre_bronze),
-        'has_override': division.medal_overrides.exists(),
+        'has_override': ctx['has_override'],
     })
 
 
@@ -1503,7 +1575,10 @@ def division_medals_reset(request, pk):
     if request.method == 'POST':
         from .models import MedalOverride
         division = get_object_or_404(Division, pk=pk, tournament__owner=request.user)
-        division.medal_overrides.all().delete()
+        if division.medals_by_age_group:
+            division.medal_overrides.exclude(subgroup='').delete()
+        else:
+            division.medal_overrides.filter(subgroup='').delete()
     return redirect('division_medals', pk=pk)
 
 
@@ -1530,10 +1605,14 @@ def tournament_bigscreen(request, pk):
         .select_related('division', 'team1', 'team2')
     }
     courts = [{'number': c, 'match': active.get(str(c))} for c in range(1, court_count + 1)]
+    from .live_info import apply_estimates, compute_delay
+    delay = compute_delay(tournament)
+    apply_estimates(matches, delay)
     return render(request, 'tournaments/bigscreen.html', {
         'tournament': tournament,
         'matches': matches,
         'courts': courts,
+        'delay': delay,
     })
 
 
@@ -1711,11 +1790,13 @@ def tournament_schedule(request, pk):
         .exists()
     )
     now = timezone.now()
+    from .live_info import compute_delay
     return render(request, 'tournaments/schedule.html', {
         'tournament': tournament,
         'matches': matches,
         'now': now,
         'has_unscheduled': has_unscheduled,
+        'delay': compute_delay(tournament, now),
     })
 
 
@@ -1782,16 +1863,18 @@ def tournament_reset_schedule(request, pk):
     """GET: confirmation page. POST: delete all matches if confirmed."""
     tournament = get_object_or_404(Tournament, pk=pk, owner=request.user)
     if request.method == 'POST':
-        if request.POST.get('confirm', '').strip() != 'NULSTIL KAMPPROGRAM':
-            messages.error(request, _("You must type RESET SCHEDULE to confirm."))
-            return render(request, 'tournaments/tournament_confirm_reset.html', {'tournament': tournament})
+        if not _confirm_ok(request, 'RESET SCHEDULE', 'NULSTIL KAMPPROGRAM', 'RESET PROGRAMME'):
+            messages.error(request, _("You must type %(word)s to confirm.") % {'word': _("RESET SCHEDULE")})
+            return render(request, 'tournaments/tournament_confirm_reset.html',
+                          {'tournament': tournament, 'confirm_word': _("RESET SCHEDULE")})
         Match.objects.filter(division__tournament=tournament).delete()
         if tournament.schedule_locked:
             tournament.schedule_locked = False
             tournament.save(update_fields=['schedule_locked'])
         messages.success(request, _("All matches deleted and match number counter reset."))
         return redirect('tournament_detail', pk=pk)
-    return render(request, 'tournaments/tournament_confirm_reset.html', {'tournament': tournament})
+    return render(request, 'tournaments/tournament_confirm_reset.html',
+                  {'tournament': tournament, 'confirm_word': _("RESET SCHEDULE")})
 
 
 # ---------------------------------------------------------------------------

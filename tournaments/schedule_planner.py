@@ -129,22 +129,32 @@ def generate_time_schedule(tournament):
 # Greedy scheduler
 # ---------------------------------------------------------------------------
 
-def _schedule_greedy(tournament, matches, days):
-    """Multi-day greedy scheduler. Returns number of scheduled matches."""
+def _schedule_greedy(tournament, matches, days, start_at=None, busy=None):
+    """Multi-day greedy scheduler. Returns number of scheduled matches.
+
+    start_at / busy are used to re-plan only the pending matches in the middle of
+    the tournament: nothing is placed before start_at, and ``busy`` gives the
+    current state (courts in use, players playing or resting, finished feeders).
+    """
     day_windows = _build_day_windows(days)
+    if start_at is not None:
+        day_windows = [w for w in day_windows if w['end'] > start_at]
+        for w in day_windows:
+            w['start'] = max(w['start'], start_at)
     if not day_windows:
         return 0
+    busy = busy or {}
 
     # court_free[(day_pk, court_num)] = next free datetime for that court
     court_free = {
-        (w['day'].pk, c): w['start']
+        (w['day'].pk, c): max(w['start'], busy.get('courts', {}).get(c, w['start']))
         for w in day_windows
         for c in range(1, w['court_count'] + 1)
     }
 
-    player_free = {}        # player_pk → datetime
-    bracket_slot_end = {}   # (div_id, round, slot) → datetime
-    playoff_group_end = {}  # (div_id, day_pk) → datetime
+    player_free = dict(busy.get('players', {}))              # player_pk → datetime
+    bracket_slot_end = dict(busy.get('bracket_slots', {}))   # (div_id, round, slot) → datetime
+    playoff_group_end = dict(busy.get('group_ends', {}))     # (div_id, day_pk) → datetime
     break_td = timedelta(minutes=tournament.player_break_time)
 
     current_priority_group = None
@@ -245,6 +255,75 @@ def _schedule_greedy(tournament, matches, days):
     from .models import Match as MatchModel
     MatchModel.objects.bulk_update(updated, ['scheduled_time', 'court'])
     return len(updated)
+
+
+# ---------------------------------------------------------------------------
+# Re-plan the pending matches from now (last-minute changes)
+# ---------------------------------------------------------------------------
+
+def replan_pending(tournament, now=None):
+    """Give new times and courts to every pending match, starting from now.
+
+    Finished and running matches are kept. Courts in use become free when their
+    match is expected to end; players keep their break after the last match.
+    Returns the number of re-planned matches.
+    """
+    from .models import Match
+
+    if not tournament.days.exists():
+        return 0
+    now = now or timezone.now()
+    # Round up to the time grid so the new times look tidy (10:02 → 10:05).
+    minute = (now.minute // _SLOT_MINUTES + 1) * _SLOT_MINUTES
+    start_at = now.replace(second=0, microsecond=0) + timedelta(minutes=minute - now.minute)
+    break_td = timedelta(minutes=tournament.player_break_time)
+
+    def duration(m):
+        return tournament.single_match_duration if m.division.discipline == 'single' else tournament.double_match_duration
+
+    courts, players, bracket_slots, group_ends = {}, {}, {}, {}
+    days = list(tournament.days.order_by('date', 'start_time'))
+    today = next((d for d in days if d.date == timezone.localdate(now)), None)
+    done = (
+        Match.objects.filter(division__tournament=tournament, status__in=['in_progress', 'completed'])
+        .select_related('division', 'team1', 'team2')
+    )
+    for m in done:
+        if m.status == 'in_progress':
+            started = m.started_at or now
+            end = max(started + timedelta(minutes=duration(m)), start_at)
+            if m.court and str(m.court).isdigit():
+                courts[int(m.court)] = max(courts.get(int(m.court), start_at), end)
+        else:
+            end = min(m.finished_at or now, now)
+        for t in (m.team1, m.team2):
+            for pk in ((t.player1_id, t.player2_id) if t else ()):
+                if pk:
+                    # The scheduler adds the break itself.
+                    players[pk] = max(players.get(pk, end), end)
+        if m.bracket_slot is not None:
+            bracket_slots[(m.division_id, m.match_round, m.bracket_slot)] = end
+        if m.phase == 'group' and today:
+            key = (m.division_id, today.pk)
+            group_ends[key] = max(group_ends.get(key, end), end)
+    # Players who are still resting: never earlier than the end of their rest.
+    from players.models import Player
+    for p in Player.objects.filter(owner=tournament.owner, rest_until__gt=now).only('pk', 'rest_until'):
+        players[p.pk] = max(players.get(p.pk, now), p.rest_until - break_td)
+
+    pending = list(
+        Match.objects
+        .filter(division__tournament=tournament, status='pending')
+        .exclude(match_number=None)
+        .exclude(walkover=True)
+        .order_by('division__schedule_priority', 'match_round', 'division', 'match_number')
+        .select_related('division', 'division__group_day', 'division__playoff_day',
+                        'team1__player1', 'team1__player2', 'team2__player1', 'team2__player2')
+    )
+    if not pending:
+        return 0
+    busy = {'courts': courts, 'players': players, 'bracket_slots': bracket_slots, 'group_ends': group_ends}
+    return _schedule_greedy(tournament, pending, days, start_at=start_at, busy=busy)
 
 
 # ---------------------------------------------------------------------------

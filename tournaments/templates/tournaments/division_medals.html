@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-{% load i18n %}
+{% load i18n tournament_extras %}
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>{% trans "Medals" %} – {{ division.name }}</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F3F8;</text></svg>">
 <style>
+.school-tag { display:inline-block; margin-left:0.4em; padding:0 0.5em; border-radius:99px; font-size:0.75em; font-weight:600; background:#f4f4f5; color:#52525b; }
   body {
     font-family: Arial, Helvetica, sans-serif;
     background: #f4f7fb;
@@ -64,7 +65,16 @@
     padding: 1rem;
   }
 
+  .mode-bar { max-width:700px; margin:0 auto 1rem; display:flex; gap:0.4rem; align-items:center; flex-wrap:wrap; font-size:0.85rem; color:#475569; }
+  .mode-btn { border:1.5px solid #d4d4d8; background:#fff; border-radius:99px; padding:0.35rem 0.9rem; font-size:0.85rem; cursor:pointer; font-family:inherit; }
+  .mode-btn.on { background:#111; color:#fff; border-color:#111; box-shadow: inset 0 -3px 0 #EB1C60; }
+  .criteria-note { max-width:700px; margin:0 auto 1rem; font-size:0.8rem; color:#64748b; }
+  details.ranking { padding:0.4rem 1.25rem 0.8rem; font-size:0.8rem; }
+  details.ranking summary { cursor:pointer; color:#64748b; }
+  details.ranking table { width:100%; border-collapse:collapse; margin-top:0.4rem; }
+  details.ranking th, details.ranking td { text-align:left; padding:0.25rem 0.35rem; border-bottom:1px solid #f1f5f9; }
   @media print {
+    .mode-bar, .criteria-note, details.ranking { display:none; }
     @page { size: A4 portrait; margin: 15mm; }
     body { background: none; padding: 0; }
     .screen-header { display: none; }
@@ -81,6 +91,13 @@
   <a href="{% url 'tournament_run' division.tournament.pk %}" class="btn btn-secondary">← {% trans "Back" %}</a>
 </div>
 
+<form method="post" action="{% url 'division_medals_mode' division.pk %}" class="mode-bar">
+  {% csrf_token %}
+  <span>{% trans "Medals" %}:</span>
+  <button type="submit" name="by_age_group" value="0" class="mode-btn{% if not division.medals_by_age_group %} on{% endif %}">{% trans "One podium for the category" %}</button>
+  <button type="submit" name="by_age_group" value="1" class="mode-btn{% if division.medals_by_age_group %} on{% endif %}">{% trans "Per age group and gender" %}</button>
+</form>
+
 {% if has_override %}
 <div style="max-width:700px; margin: 0 auto 1rem; background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:0.6rem 0.9rem; font-size:0.82rem; color:#92400e;">
   ✏️ {% trans "Showing manual overrides." %} <a href="{% url 'division_medals_edit' division.pk %}" style="color:#92400e;">{% trans "Edit" %}</a> {% trans "or" %} <a href="{% url 'division_medals_reset' division.pk %}" style="color:#92400e;" onclick="return confirm('{% trans "Reset to automatic calculation?" %}')">{% trans "reset to automatic" %}</a>.
@@ -93,6 +110,38 @@
 </div>
 {% endif %}
 
+{% if division.medals_by_age_group %}
+<div class="criteria-note">
+  {% trans "All players of the category are ranked together, in this order: stage reached (champion, finalist, semi-finalist…), position in their group, % of matches won, set difference and point difference. The best three of each age group and gender get the medals." %}
+</div>
+{% for sg in subgroups %}
+<div class="medal-card">
+  <div class="medal-header">
+    <div class="medal-icon">🏅</div>
+    <div>
+      <div class="medal-title">{{ sg.label }}</div>
+      <div class="medal-subtitle">{% blocktrans count n=sg.ranking|length %}{{ n }} participant{% plural %}{{ n }} participants{% endblocktrans %}{% if sg.override %} · ✏️ {% trans "manual" %}{% endif %}</div>
+    </div>
+  </div>
+  {% for t in sg.gold %}<div class="medal-row">🥇 {{ t.name }}{{ t|team_school }}</div>{% endfor %}
+  {% for t in sg.silver %}<div class="medal-row">🥈 {{ t.name }}{{ t|team_school }}</div>{% endfor %}
+  {% for t in sg.bronze %}<div class="medal-row">🥉 {{ t.name }}{{ t|team_school }}</div>{% endfor %}
+  <details class="ranking">
+    <summary>{% trans "Full ranking" %}</summary>
+    <table>
+      <thead><tr><th>#</th><th>{% trans "Player" %}</th><th>{% trans "Stage" %}</th><th>{% trans "Group pos." %}</th><th>{% trans "% won" %}</th><th>{% trans "Sets" %}</th><th>{% trans "Points" %}</th></tr></thead>
+      <tbody>
+      {% for r in sg.ranking %}
+        <tr><td>{{ forloop.counter }}</td><td>{{ r.team.name }}</td><td>{{ r.stage|stage_label:division }}</td><td>{{ r.group_pos|default:"–" }}</td><td>{{ r.win_pct }}%</td><td>{{ r.set_diff|signed }}</td><td>{{ r.point_diff|signed }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </details>
+</div>
+{% empty %}
+<div class="empty-note">{% trans "This category has no participants yet." %}</div>
+{% endfor %}
+{% else %}
 {% if gold %}
 <div class="medal-card">
   <div class="medal-header">
@@ -105,7 +154,7 @@
   {% for team in gold %}
   <div class="medal-row">
     <span class="medal-num">{{ forloop.counter }}.</span>
-    {{ team.name }}
+    {{ team.name }}{{ team|team_school }}
   </div>
   {% endfor %}
 </div>
@@ -123,7 +172,7 @@
   {% for team in silver %}
   <div class="medal-row">
     <span class="medal-num">{{ forloop.counter }}.</span>
-    {{ team.name }}
+    {{ team.name }}{{ team|team_school }}
   </div>
   {% endfor %}
 </div>
@@ -141,7 +190,7 @@
   {% for team in bronze %}
   <div class="medal-row">
     <span class="medal-num">{{ forloop.counter }}.</span>
-    {{ team.name }}
+    {{ team.name }}{{ team|team_school }}
   </div>
   {% endfor %}
 </div>
@@ -155,6 +204,7 @@
   {% trans "No matches have been completed yet." %}
   {% endif %}
 </div>
+{% endif %}
 {% endif %}
 
 </body>

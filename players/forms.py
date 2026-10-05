@@ -13,7 +13,7 @@ def _division_choices(owner):
         list[tuple[str, str]]: Choice tuples for select widgets.
     """
     cats = DivisionCategory.objects.filter(owner=owner).values_list('name', flat=True)
-    return [('', _("— Select division —"))] + [(c, c) for c in cats]
+    return [('', _("— Select age group —"))] + [(c, c) for c in cats]
 
 
 class PlayerForm(forms.ModelForm):
@@ -21,7 +21,8 @@ class PlayerForm(forms.ModelForm):
 
     class Meta:
         model = Player
-        fields = ['name', 'age', 'gender', 'division']
+        fields = ['name', 'age', 'gender', 'division', 'school']
+        widgets = {'school': forms.TextInput(attrs={'list': 'school-options', 'autocomplete': 'off'})}
 
     def __init__(self, *args, owner=None, **kwargs):
         """Configure owner-specific division choices.
@@ -32,8 +33,24 @@ class PlayerForm(forms.ModelForm):
             **kwargs: Keyword arguments passed to ``ModelForm``.
         """
         super().__init__(*args, **kwargs)
+        self.school_options = []
         if owner is not None:
             self.fields['division'].widget = forms.Select(choices=_division_choices(owner))
+            self.school_options = school_options(owner)
+
+    def clean_school(self):
+        value = ' '.join(self.cleaned_data.get('school', '').split())
+        # Reuse the existing spelling when only upper/lower case differs.
+        for existing in self.school_options:
+            if existing.lower() == value.lower():
+                return existing
+        return value
+
+
+def school_options(owner):
+    """Schools/clubs already used by this club's players, alphabetically."""
+    names = Player.objects.filter(owner=owner).exclude(school='').values_list('school', flat=True).distinct()
+    return sorted(set(names), key=str.lower)
 
 
 class TeamForm(forms.ModelForm):

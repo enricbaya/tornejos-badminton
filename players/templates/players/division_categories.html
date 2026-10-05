@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}{% trans "Divisions / categories" %}{% endblock %}
+{% block title %}{% trans "Age groups" %}{% endblock %}
 {% block content %}
 <div class="content-col">
     <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1.2rem;">
-        <h1 style="margin:0;">{% trans "Divisions / categories" %}</h1>
+        <h1 style="margin:0;">{% trans "Age groups" %}</h1>
         <a href="{% url 'player_list' %}" class="btn btn-secondary" style="margin-left:auto;">← {% trans "Player list" %}</a>
     </div>
 
     <p style="color:#475569; margin-bottom:1.5rem;">
-        {% trans "Here you define the divisions/categories used to group players and teams (e.g. U9, U11, A, B, C, Beginner …). These choices appear in forms throughout the site." %}
+        {% trans "Here you define the age groups used to label players and teams (e.g. Benjamí, Aleví, Infantil…). They are not the tournament categories: those are created inside each tournament and can mix several age groups." %}
     </p>
 
     {% if messages %}
@@ -21,13 +21,13 @@
     {% endif %}
 
     <div class="card" style="margin-bottom:1.5rem;">
-        <h2 style="margin-top:0; font-size:1rem; color:var(--accent-text,#c8174f);">{% trans "Add category" %}</h2>
+        <h2 style="margin-top:0; font-size:1rem; color:var(--accent-text,#c8174f);">{% trans "Add age group" %}</h2>
         <form method="post" style="display:flex; gap:0.6rem; align-items:flex-end; flex-wrap:wrap;">
             {% csrf_token %}
             <div class="form-group" style="margin:0; flex:1; min-width:160px;">
-                <label for="id_name" style="font-size:0.85rem;">{% trans "Name (e.g. U13, A, Beginner)" %}</label>
+                <label for="id_name" style="font-size:0.85rem;">{% trans "Name (e.g. Aleví, Infantil, Sènior)" %}</label>
                 <input type="text" id="id_name" name="name" maxlength="30"
-                       placeholder="{% trans 'Type category name…' %}"
+                       placeholder="{% trans 'Type age group name…' %}"
                        style="width:100%; padding:0.5rem 0.7rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.95rem;">
             </div>
             <button type="submit" class="btn btn-primary" style="height:2.4rem; padding:0 1.2rem;">{% trans "Add" %}</button>
@@ -35,7 +35,7 @@
     </div>
 
     <div class="card" style="margin-bottom:1.5rem;">
-        <h2 style="margin-top:0; font-size:1rem; color:var(--accent-text,#c8174f);">{% trans "Your categories" %}</h2>
+        <h2 style="margin-top:0; font-size:1rem; color:var(--accent-text,#c8174f);">{% trans "Your age groups" %}</h2>
         {% if categories %}
         <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
             <thead>
@@ -53,7 +53,7 @@
                 <td style="padding:0.5rem 0.7rem; text-align:right;">
                     <form method="post" action="{% url 'division_category_delete' cat.pk %}"
                           style="display:inline;"
-                          onsubmit="return confirm('{% blocktrans with name=cat.name %}Delete category {{ name }}?{% endblocktrans %}');">
+                          onsubmit="return confirm('{% blocktrans with name=cat.name %}Delete age group {{ name }}?{% endblocktrans %}');">
                         {% csrf_token %}
                         <button type="submit"
                                 style="background:none; border:none; cursor:pointer; color:#ef4444; font-size:0.85rem; padding:0.2rem 0.5rem;">
@@ -66,20 +66,20 @@
             </tbody>
         </table>
         {% else %}
-        <p style="color:#94a3b8; margin:0;">{% trans "No categories yet." %}</p>
+        <p style="color:#94a3b8; margin:0;">{% trans "No age groups yet." %}</p>
         {% endif %}
     </div>
 
     {% if default_categories %}
     <div class="card" style="background:#fafafa; border:1px dashed #cbd5e1;">
-        <h2 style="margin-top:0; font-size:0.95rem; color:#475569;">{% trans "Default categories" %}</h2>
+        <h2 style="margin-top:0; font-size:0.95rem; color:#475569;">{% trans "Default age groups" %}</h2>
         <p style="font-size:0.85rem; color:#64748b; margin-bottom:0.8rem;">
-            {% trans "Click to add the typical badminton categories at once:" %}
+            {% trans "Click to add the typical age groups at once:" %}
             {% for c in default_categories %}<code style="background:#e2e8f0; border-radius:3px; padding:1px 5px; font-size:0.8rem;">{{ c }}</code> {% endfor %}
         </p>
         <form method="post" action="{% url 'division_category_seed_defaults' %}">
             {% csrf_token %}
-            <button type="submit" class="btn btn-secondary">{% trans "Add default categories" %}</button>
+            <button type="submit" class="btn btn-secondary">{% trans "Add default age groups" %}</button>
         </form>
     </div>
     {% endif %}

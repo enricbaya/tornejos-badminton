@@ -37,6 +37,8 @@
         <a href="{% url 'tournament_run' tournament.pk %}" class="btn btn-primary">🏸 {% trans "Tournament run" %}</a>
         <a href="{% url 'tournament_edit' tournament.pk %}" class="btn btn-secondary">✏ {% trans "Edit setup" %}</a>
         <a href="{% url 'tournament_schedule' tournament.pk %}" class="btn btn-secondary">📅 {% trans "Time schedule" %}</a>
+        <a href="{% url 'tournament_registrations' tournament.pk %}" class="btn btn-secondary">📝 {% trans "Registrations" %}{% if pending_registrations %} <span class="badge" style="background:var(--accent); color:#fff;">{{ pending_registrations }}</span>{% endif %}</a>
+        <a href="{% url 'tournament_medal_table' tournament.pk %}" class="btn btn-secondary">🏅 {% trans "Medal table" %}</a>
         <a href="{% url 'tournament_export' tournament.pk %}" class="btn btn-secondary">💾 {% trans "Export backup" %}</a>
     </div>
     <div class="detail-panel" id="panel-print" style="display:none;">
@@ -46,8 +48,11 @@
         <a href="{% url 'tournament_wallchart' tournament.pk %}" class="btn btn-secondary" target="_blank">📋 {% trans "Result chart" %}</a>
         <a href="{% url 'tournament_court_signs' tournament.pk %}" class="btn btn-secondary" target="_blank">🏸 {% trans "Court signs" %}</a>
         <a href="{% url 'tournament_court_links' tournament.pk %}" class="btn btn-secondary">📱 {% trans "Court referees" %}</a>
+        <a href="{% url 'tournament_diplomas' tournament.pk %}" class="btn btn-secondary" target="_blank">📜 {% trans "Diplomas" %}</a>
     </div>
     <div class="detail-panel" id="panel-admin" style="display:none;">
+        <a href="{% url 'connection_test' %}" class="btn btn-secondary" target="_blank">📶 {% trans "Venue connection test" %}</a>
+        <a href="{% url 'club_backup' %}" class="btn btn-secondary">💾 {% trans "Backup everything" %}</a>
         <a href="{% url 'tournament_reset_schedule' tournament.pk %}" class="btn btn-danger">🔄 {% trans "Reset match programme" %}</a>
         <form method="post" action="{% url 'tournament_rebuild_playoff_labels' tournament.pk %}" style="display:inline;">
             {% csrf_token %}
@@ -156,6 +161,9 @@
                 <label style="font-size:0.82rem;">🥉</label>{{ division_form.bronze_count }}
                 <span style="font-size:0.72rem; color:#94a3b8;">(0, 1 {% trans "or" %} 2)</span>
             </div>
+            <label style="display:flex; gap:0.4rem; align-items:center; font-size:0.82rem; flex-basis:100%;" title="{{ division_form.medals_by_age_group.help_text }}">
+                {{ division_form.medals_by_age_group }} {% trans "Medals per age group and gender (3 per combination)" %}
+            </label>
         </div>
         <button type="submit" class="btn btn-primary">+ {% trans "Create division" %}</button>
     </form>
