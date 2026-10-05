@@ -120,6 +120,9 @@ class Tournament(models.Model):
         default=False, verbose_name=_("Online registration open"),
         help_text=_("Families and schools can register players with the public registration link."),
     )
+    is_demo = models.BooleanField(
+        default=False, verbose_name=_("Demo tournament"),
+        help_text=_("Practice tournament to train the judge table and the referees. Not counted in the statistics."))
     court_access_enabled = models.BooleanField(
         default=False,
         verbose_name=_("Court referees enabled"),

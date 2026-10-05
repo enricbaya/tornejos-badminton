@@ -52,7 +52,7 @@ def public_landing(request):
     today = timezone.localdate()
     tournaments = (
         Tournament.objects
-        .filter(owner__isnull=False)
+        .filter(owner__isnull=False, is_demo=False)  # the training tournament is not for families
         .select_related('owner')
         .order_by('owner__username', '-date', 'name')
     )
@@ -253,7 +253,12 @@ def public_player(request, pk, player_pk):
     from .live_info import apply_estimates, compute_delay
     delay = compute_delay(tournament)
     apply_estimates(upcoming, delay)
+    season = None
+    if not tournament.is_demo:
+        from .stats import player_season_stats
+        season = player_season_stats(player, tournament.date)
     return render(request, 'tournaments/public/player.html', {
+        'season': season,
         'tournament': tournament,
         'delay': delay,
         'player': player,

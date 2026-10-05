@@ -71,6 +71,7 @@
       <span>{{ active.division.name }}</span>
       {% if active.started_at %}<span>· <span class="timer" data-start="{{ active.started_at|date:'U' }}"></span></span>{% endif %}
     </div>
+    {% if active|podium %}<div style="margin-bottom:0.3rem;">{{ active|podium_badge:'big' }}</div>{% endif %}
     <div class="c-players">{{ active.team1.name }}{{ active.team1|team_school }} <span class="vs">vs</span> {{ active.team2.name }}{{ active.team2|team_school }}</div>
 
     <form method="post" action="{% url 'court_result' tournament.pk court sig active.pk %}" id="score-form">
@@ -129,6 +130,7 @@
       {% if m.scheduled_time %}<span>· {{ m.scheduled_time|time:"H:i" }}</span>{% endif %}
       {% if m.court %}<span>· {% trans "Court" %} {{ m.court }}</span>{% endif %}
     </div>
+    {% if m|podium %}<div style="margin-bottom:0.3rem;">{{ m|podium_badge }}</div>{% endif %}
     <div class="c-players">{{ m.team1.name }}{{ m.team1|team_school }} <span class="vs">vs</span> {{ m.team2.name }}{{ m.team2|team_school }}</div>
     {% if m.is_suggested and m.is_advanced and plan.due %}
       <div class="c-adv">{% blocktrans with n=plan.due.match_number t=plan.due.scheduled_time|time:"H:i" %}The match planned on this court was #{{ n }} ({{ t }}){% endblocktrans %}: {{ plan.due_blockers|join:" · " }}</div>

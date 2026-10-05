@@ -1,6 +1,7 @@
 {% load i18n tournament_extras %}
 {# Right column of the tournament-run page: refreshed every few seconds by tournament_live #}
-<div class="calls-panel" id="calls-panel" data-ids="{% for c in calls %}{% if not c.match.called_at %}{{ c.match.pk }} {% endif %}{% endfor %}">
+<div class="calls-panel" id="calls-panel" data-ids="{% for c in calls %}{% if not c.match.called_at %}{{ c.match.pk }} {% endif %}{% endfor %}"
+     data-podium="{% for c in calls %}{% if c.match|podium %}{{ c.match.pk }} {% endif %}{% endfor %}">
   {% include 'tournaments/partials/_calls.html' %}
 </div>
 
@@ -8,9 +9,10 @@
 <div class="next-panel live-panel">
   <div class="next-panel-header" style="background:var(--accent,#EB1C60);"><span>⚡ {% trans "In progress" %} ({{ active_matches|length }})</span></div>
   {% for match in active_matches %}
-  <div class="live-row playing">
+  <div class="live-row playing{% if match|podium %} podium-row{% endif %}">
     <div class="court-tag big">{% trans "Court" %} {{ match.court }}</div>
     <div class="live-body">
+      {% if match|podium %}<div>{{ match|podium_badge }}</div>{% endif %}
       <div class="live-meta">#{{ match.match_number }} · {{ match.division.name }}{% if match.started_at %} · <span class="court-timer inline" data-started-at="{{ match.started_at|date:'U' }}">0:00</span>{% endif %}</div>
       <div class="live-teams">{{ match.team1.name }} <span class="vs">vs</span> {{ match.team2.name }}</div>
       <div class="live-actions">
@@ -31,10 +33,11 @@
   <div class="next-panel-header"><span>🏸 {% trans "Next match on each court" %}</span></div>
   {% for e in plan %}
   {% with m=e.next %}
-  <div class="live-row">
+  <div class="live-row{% if m|podium %} podium-row{% endif %}">
     <div class="court-tag big{% if e.active %} busy{% endif %}">{% trans "Court" %} {{ e.court }}</div>
     <div class="live-body">
       {% if m %}
+      {% if m|podium %}<div>{{ m|podium_badge }}</div>{% endif %}
       <div class="live-meta">
         {% if e.active %}{% trans "after the current match" %}{% elif e.proposal %}<b class="now">{% trans "now" %}</b>{% endif %}
         {% if e.proposal and e.advanced %}<span class="adv-badge small">⏩ {% trans "Advanced" %}</span>{% endif %}

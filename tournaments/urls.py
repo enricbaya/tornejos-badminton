@@ -4,8 +4,18 @@ from . import court_views
 from . import day_views
 from . import final_views
 from . import registration_views
+from . import planb_views
+from . import stats_views
 
 urlpatterns = [
+    path('<int:pk>/plan-b/', planb_views.tournament_planb, name='tournament_planb'),
+    path('<int:pk>/court-sheets/', planb_views.tournament_court_sheets, name='tournament_court_sheets'),
+    path('<int:pk>/quick-results/', planb_views.tournament_quick_results, name='tournament_quick_results'),
+    path('match/<int:pk>/quick-result/', planb_views.match_quick_result, name='match_quick_result'),
+    path('stats/', stats_views.club_stats, name='club_stats'),
+    path('<int:pk>/school-report/', stats_views.tournament_school_report, name='tournament_school_report'),
+    path('demo/create/', stats_views.demo_create, name='demo_create'),
+    path('demo/delete/', stats_views.demo_delete, name='demo_delete'),
     path('', views.tournament_list, name='tournament_list'),
     path('create/', views.tournament_create, name='tournament_create'),
     path('<int:pk>/', views.tournament_detail, name='tournament_detail'),

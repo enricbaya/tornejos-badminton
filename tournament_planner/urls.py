@@ -62,7 +62,14 @@ def service_worker(request):
     return TemplateResponse(request, 'pwa/sw.js', content_type='application/javascript')
 
 
+def robots(request):
+    from django.http import HttpResponse
+    from tournaments.middleware import robots_txt
+    return HttpResponse(robots_txt(), content_type='text/plain')
+
+
 urlpatterns = [
+    path('robots.txt', robots, name='robots_txt'),
     path('i18n/', include('django.conf.urls.i18n')),
     path('sw.js', service_worker, name='service_worker'),
     path('', public_landing, name='home'),

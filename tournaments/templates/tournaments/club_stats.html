@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Statistics" %} {{ season }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.st-seasons { display:flex; gap:0.35rem; flex-wrap:wrap; }
+.st-seasons a { padding:0.3rem 0.75rem; border-radius:999px; background:#fff; border:1px solid #e4e4e7; text-decoration:none; color:#111; font-size:0.85rem; }
+.st-seasons a.on { background:var(--accent,#EB1C60); border-color:var(--accent,#EB1C60); color:#fff; }
+.st-cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:0.6rem; margin:1rem 0 1.2rem; }
+.st-card { background:#fff; border-radius:12px; padding:0.75rem 0.95rem; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.st-card b { display:block; font-family:var(--heading-font); font-size:1.8rem; line-height:1.05; }
+.st-card span { font-size:0.74rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; }
+.st-section { margin:1.6rem 0 0.5rem; }
+.st-note { font-size:0.82rem; color:#64748b; margin:0.2rem 0 0.6rem; }
+.st-table td.num, .st-table th.num { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.st-bar { display:inline-block; vertical-align:middle; width:70px; height:8px; border-radius:99px; background:#fee2e2; overflow:hidden; margin-left:0.35rem; }
+.st-bar i { display:block; height:100%; background:#16a34a; }
+.st-dur { display:inline-block; vertical-align:middle; height:10px; border-radius:3px; background:#94a3b8; }
+.st-dur.over { background:#f59e0b; }
+.st-tchips { display:flex; gap:0.4rem; flex-wrap:wrap; }
+.st-tchips .chip { background:#fff; border:1px solid #e4e4e7; border-radius:10px; padding:0.35rem 0.7rem; font-size:0.85rem; }
+.st-tchips .chip a { margin-left:0.4rem; font-size:0.78rem; }
+.st-sugg { background:#ecfdf5; border:1px solid #a7f3d0; border-radius:12px; padding:0.7rem 1rem; font-size:0.92rem; margin:0.5rem 0 0.8rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+  <div>
+    <h1>📊 {% blocktrans %}Statistics · season {{ season }}{% endblocktrans %}</h1>
+    <div style="color:#64748b; font-size:0.85rem;">{% trans "School year from September to August. Demo tournaments are not counted." %}</div>
+  </div>
+  {% if seasons|length > 1 %}
+  <div class="st-seasons">{% for s in seasons %}<a href="?season={{ s.start|date:'Y-m-d' }}" class="{% if s.label == season %}on{% endif %}">{{ s.label }}</a>{% endfor %}</div>
+  {% endif %}
+</div>
+
+{% if not tournaments %}
+<div class="card" style="text-align:center; color:#64748b; padding:2.5rem;">{% trans "There are no tournaments in this season yet." %}</div>
+{% else %}
+
+<div class="st-cards">
+  <div class="st-card"><b>{{ tournaments|length }}</b><span>{% trans "Tournaments" %}</span></div>
+  <div class="st-card"><b>{{ totals.players }}</b><span>{% trans "Different players" %}</span></div>
+  <div class="st-card"><b>{{ totals.participations }}</b><span>{% trans "Participations" %}</span></div>
+  <div class="st-card"><b>{{ totals.matches }}</b><span>{% trans "Matches played" %}</span></div>
+  <div class="st-card"><b>{{ totals.schools }}</b><span>{% trans "Schools" %}</span></div>
+</div>
+
+<div class="st-tchips">
+  {% for t in tournaments %}<div class="chip"><b>{{ t.name }}</b> · {{ t.date|date:"j M" }}<a href="{% url 'tournament_school_report' t.pk %}" target="_blank">🏫 {% trans "Report per school" %}</a></div>{% endfor %}
+</div>
+
+<h2 class="st-section">🏫 {% trans "Schools ranking" %}</h2>
+<p class="st-note">{% trans "Ordered by gold, silver and bronze medals, then by matches won. Each player of a doubles pair counts." %}</p>
+<div class="card" style="padding:0; overflow-x:auto;">
+<table class="data-table st-table" style="margin:0;">
+  <thead><tr>
+    <th>#</th><th>{% trans "School" %}</th><th class="num">{% trans "Players" %}</th>
+    {% for t in tournaments %}<th class="num" title="{{ t.name }}">{{ t.date|date:"j/n" }}</th>{% endfor %}
+    <th class="num">{% trans "Won–lost" %}</th><th class="num">{% trans "% won" %}</th>
+    <th class="num">🥇</th><th class="num">🥈</th><th class="num">🥉</th>
+  </tr></thead>
+  <tbody>
+  {% for s in schools %}
+    <tr>
+      <td>{{ s.rank }}</td><td style="font-weight:600;">{{ s.name }}</td><td class="num">{{ s.player_count }}</td>
+      {% for n in s.tournament_counts %}<td class="num" style="color:#64748b;">{{ n|default:"·" }}</td>{% endfor %}
+      <td class="num">{{ s.won }}–{{ s.lost }}</td>
+      <td class="num">{% if s.win_pct is not None %}{{ s.win_pct }}%<span class="st-bar"><i style="width:{{ s.win_pct }}%;"></i></span>{% else %}–{% endif %}</td>
+      <td class="num">{{ s.gold|default:"" }}</td><td class="num">{{ s.silver|default:"" }}</td><td class="num">{{ s.bronze|default:"" }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<p class="st-note">{% trans "The date columns show how many players of each school took part in each tournament." %}</p>
+
+{% if top %}
+<h2 class="st-section">⭐ {% trans "Most matches won" %}</h2>
+<div class="card" style="padding:0; overflow-x:auto;">
+<table class="data-table st-table" style="margin:0;">
+  <thead><tr><th>#</th><th>{% trans "Player" %}</th><th>{% trans "School" %}</th><th class="num">{% trans "Won–lost" %}</th><th class="num">{% trans "% won" %}</th><th class="num">{% trans "Point difference" %}</th></tr></thead>
+  <tbody>
+  {% for r in top %}
+    <tr><td>{{ forloop.counter }}</td><td style="font-weight:600;">{{ r.player.name }}</td><td>{{ r.player.school_display }}</td>
+      <td class="num">{{ r.won }}–{{ r.lost }}</td><td class="num">{{ r.win_pct }}%</td><td class="num">{% if r.point_diff > 0 %}+{% endif %}{{ r.point_diff }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+
+<h2 class="st-section">⏱ {% trans "Real duration of the matches" %}</h2>
+<p class="st-note">{% trans "From “Start” to the result, without walk-overs. Matches started or finished without the app (or longer than 90 minutes) are left out." %}</p>
+{% if durations and durations.categories %}
+  {% if durations.suggest_single %}
+  <div class="st-sugg">💡 {% blocktrans with m=durations.suggest_single med=durations.kinds.single.median n=durations.kinds.single.n %}Singles: the median match lasts {{ med }} min ({{ n }} matches). To plan the next tournament, a slot of <b>{{ m }} min</b> covers 80 % of the matches.{% endblocktrans %}
+    <span style="color:#475569;">{% trans "It is set in each tournament: Edit the configuration → match duration." %}</span></div>
+  {% endif %}
+  <div class="card" style="padding:0; overflow-x:auto;">
+  <table class="data-table st-table" style="margin:0;">
+    <thead><tr><th>{% trans "Category" %}</th><th class="num">{% trans "Matches" %}</th><th class="num">{% trans "Average" %}</th><th class="num">{% trans "Median" %}</th><th class="num">80 %</th><th class="num">{% trans "Shortest–longest" %}</th><th class="num">{% trans "Planned" %}</th><th></th></tr></thead>
+    <tbody>
+    {% for c in durations.categories %}
+      <tr><td style="font-weight:600;">{{ c.name }}</td><td class="num">{{ c.n }}</td><td class="num">{{ c.avg }} min</td><td class="num"><b>{{ c.median }} min</b></td><td class="num">{{ c.p80 }} min</td>
+        <td class="num" style="color:#64748b;">{{ c.min }}–{{ c.max }}</td><td class="num">{% if c.planned %}{{ c.planned }} min{% endif %}</td>
+        <td>{% if c.planned %}<span class="st-dur{% if c.median > c.planned %} over{% endif %}" style="width:{% widthratio c.median 1 3 %}px;" title="{% trans 'Median' %}"></span>{% if c.diff > 0 %} <small style="color:#b45309;">+{{ c.diff }}</small>{% elif c.diff < 0 %} <small style="color:#15803d;">{{ c.diff }}</small>{% endif %}{% endif %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% if durations.tournaments|length > 1 %}
+  <p class="st-note" style="margin-top:0.8rem;">{% for d in durations.tournaments %}<b>{{ d.tournament.name }}</b>: {% blocktrans with med=d.median n=d.n %}median {{ med }} min ({{ n }} matches){% endblocktrans %}{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+  {% endif %}
+{% else %}
+  <p class="st-note">{% trans "No timed matches yet: durations appear once matches are started and finished from the app." %}</p>
+{% endif %}
+{% endif %}
+{% endblock %}

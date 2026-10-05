@@ -1,0 +1,96 @@
+{% load static i18n %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'ca' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<title>{% trans "Report per school" %} – {{ tournament.name }}</title>
+<style>
+  @page { size: A4 portrait; margin: 12mm; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #111; margin: 0; padding: 1rem; background: #f4f7fb; font-size: 10.5pt; }
+  .screen-header { max-width: 900px; margin: 0 auto 1rem; display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; }
+  .screen-header h1 { flex: 1; margin: 0; font-size: 1.3rem; }
+  .screen-header select { font-size: 0.9rem; padding: 0.35rem; }
+  .btn { background: #141414; color: #fff; border: 0; border-radius: 4px; padding: 0.5rem 1.1rem; cursor: pointer; text-decoration: none; font-size: 0.9rem; }
+  .page { background: #fff; max-width: 900px; margin: 0 auto 1.2rem; padding: 10mm; box-shadow: 0 1px 4px rgba(0,0,0,0.12); page-break-after: always; break-after: page; }
+  .page:last-child { page-break-after: auto; break-after: auto; }
+  .head { display: flex; align-items: center; gap: 1rem; border-bottom: 3px solid #EB1C60; padding-bottom: 0.5rem; margin-bottom: 0.8rem; }
+  .head img { height: 52px; }
+  .head h2 { margin: 0; font-size: 17pt; }
+  .head .sub { color: #555; font-size: 9.5pt; }
+  .totals { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 0 0 0.9rem; }
+  .totals div { border: 1px solid #ddd; border-radius: 8px; padding: 0.35rem 0.7rem; }
+  .totals b { font-size: 14pt; margin-right: 0.25rem; }
+  table { width: 100%; border-collapse: collapse; }
+  th { font-size: 8pt; text-transform: uppercase; letter-spacing: 0.04em; text-align: left; border-bottom: 2px solid #111; padding: 0.3rem; }
+  td { border-bottom: 1px solid #ccc; padding: 0.35rem 0.3rem; vertical-align: top; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  .medal { white-space: nowrap; }
+  .muted { color: #777; }
+  .summary td, .summary th { font-size: 9.5pt; }
+  .thanks { margin-top: 1rem; font-size: 9.5pt; color: #444; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .screen-header { display: none; }
+    .page { box-shadow: none; margin: 0; padding: 0; max-width: none; }
+  }
+</style>
+</head>
+<body>
+<div class="screen-header">
+  <h1>🏫 {% trans "Report per school" %} – {{ tournament.name }}</h1>
+  <select onchange="location.search = this.value ? '?school=' + encodeURIComponent(this.value) : ''">
+    <option value="">{% trans "All schools" %}</option>
+    {% for s in all_schools %}<option value="{{ s.name }}"{% if s.name == only %} selected{% endif %}>{{ s.name }}</option>{% endfor %}
+  </select>
+  <button class="btn" onclick="window.print()">🖨 {% trans "Print / Save as PDF" %}</button>
+</div>
+
+{% if not only %}
+<div class="page summary">
+  <div class="head">
+    {% if tournament.logo %}<img src="{{ tournament.logo.url }}" alt="">{% else %}<img src="{% static 'club/logo_negre.png' %}" alt="">{% endif %}
+    <div><h2>{{ tournament.name }}</h2><div class="sub">{{ tournament.date|date:"l j F Y" }} · {% trans "Summary per school" %}</div></div>
+  </div>
+  <table>
+    <thead><tr><th>{% trans "School" %}</th><th class="num">{% trans "Players" %}</th><th class="num">{% trans "Matches won" %}</th><th class="num">🥇</th><th class="num">🥈</th><th class="num">🥉</th></tr></thead>
+    <tbody>
+    {% for s in all_schools %}
+      <tr><td><b>{{ s.name }}</b></td><td class="num">{{ s.totals.players }}</td><td class="num">{{ s.totals.won }}</td>
+        <td class="num">{{ s.totals.gold|default:"" }}</td><td class="num">{{ s.totals.silver|default:"" }}</td><td class="num">{{ s.totals.bronze|default:"" }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% for s in schools %}
+<div class="page">
+  <div class="head">
+    {% if tournament.logo %}<img src="{{ tournament.logo.url }}" alt="">{% else %}<img src="{% static 'club/logo_negre.png' %}" alt="">{% endif %}
+    <div><h2>{{ s.name }}</h2><div class="sub">{{ tournament.name }} · {{ tournament.date|date:"j F Y" }}</div></div>
+  </div>
+  <div class="totals">
+    <div><b>{{ s.totals.players }}</b>{% trans "players" %}</div>
+    <div><b>{{ s.totals.played }}</b>{% trans "matches played" %}</div>
+    <div><b>{{ s.totals.won }}</b>{% trans "won" %}</div>
+    {% if s.totals.gold or s.totals.silver or s.totals.bronze %}<div><b>{% if s.totals.gold %}🥇{{ s.totals.gold }} {% endif %}{% if s.totals.silver %}🥈{{ s.totals.silver }} {% endif %}{% if s.totals.bronze %}🥉{{ s.totals.bronze }}{% endif %}</b></div>{% endif %}
+  </div>
+  <table>
+    <thead><tr><th>{% trans "Player" %}</th><th>{% trans "Category" %}</th><th class="num">{% trans "Won" %}</th><th class="num">{% trans "Lost" %}</th><th class="num">{% trans "Sets" %}</th><th>{% trans "Medal" %}</th></tr></thead>
+    <tbody>
+    {% for r in s.rows %}
+      <tr>
+        <td><b>{{ r.player.name }}</b>{% if r.player.withdrawn %} <span class="muted">({% trans "withdrawn" %})</span>{% endif %}</td>
+        <td>{{ r.categories|join:", " }}</td>
+        <td class="num">{{ r.won }}</td><td class="num">{{ r.lost }}</td>
+        <td class="num muted">{{ r.sets_won }}–{{ r.sets_lost }}</td>
+        <td class="medal">{% for md in r.medals %}{{ md.icon }} {{ md.category }}{% if md.subgroup %} · {{ md.subgroup }}{% endif %}{% if not forloop.last %}<br>{% endif %}{% endfor %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="thanks">{% trans "Thank you for taking part! The results of every player are on the tournament page of the app." %}</p>
+</div>
+{% endfor %}
+</body>
+</html>

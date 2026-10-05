@@ -1,3 +1,4 @@
+import logging
 import json
 from datetime import datetime, timedelta
 
@@ -65,7 +66,7 @@ def tournament_list(request):
         HttpResponse: Rendered tournament list page.
     """
     tournaments = Tournament.objects.filter(owner=request.user).prefetch_related('divisions').order_by('-date')
-    return render(request, 'tournaments/tournament_list.html', {'tournaments': tournaments})
+    return render(request, 'tournaments/tournament_list.html', {'tournaments': tournaments, 'has_demo': any(t.is_demo for t in tournaments)})
 
 
 @login_required
@@ -1165,7 +1166,10 @@ def match_start(request, pk):
                     if not p.has_arrived:
                         p.has_arrived = True
                         p.save(update_fields=['has_arrived'])
-        errors = check_match_startable(match)
+        force_rest = request.POST.get('force_rest') == '1'
+        errors = check_match_startable(match, ignore_rest=force_rest)
+        # Only the rest is missing: the table may decide to start anyway.
+        can_force = bool(errors) and not force_rest and not check_match_startable(match, ignore_rest=True)
         court = (request.POST.get('court') or '').strip()
         error = None
         if errors:
@@ -1179,13 +1183,13 @@ def match_start(request, pk):
         if ajax:
             # The run page shows the reason next to the button it was clicked from.
             if error is None:
-                _do_start(match, court)
+                _do_start(match, court, force_rest)
                 messages.success(request, _("Match #%(n)s is now in progress.") % {'n': match.match_number or match.pk})
-            return JsonResponse({'ok': error is None, 'error': error or ''})
+            return JsonResponse({'ok': error is None, 'error': error or '', 'can_force': can_force})
         if error:
             messages.error(request, error)
         else:
-            _do_start(match, court)
+            _do_start(match, court, force_rest)
             messages.success(request, _("Match #%(n)s is now in progress.") % {'n': match.match_number or match.pk})
     elif ajax:
         return JsonResponse({'ok': False, 'error': _("This match is no longer pending.")})
@@ -1194,7 +1198,10 @@ def match_start(request, pk):
     return redirect('tournament_detail', pk=match.division.tournament.pk)
 
 
-def _do_start(match, court):
+def _do_start(match, court, forced_rest=False):
+    if forced_rest:
+        logging.getLogger('btp.matches').info(
+            'match_start_forced_rest match=%s court=%s', match.pk, court)
     match.status = 'in_progress'
     match.court = court
     match.started_at = timezone.now()

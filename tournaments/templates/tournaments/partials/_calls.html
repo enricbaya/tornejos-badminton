@@ -4,14 +4,25 @@
   {% if delay %}<span class="delay-pill late">⏱ +{{ delay }} min</span>{% else %}<span class="delay-pill">⏱ {% trans "On time" %}</span>{% endif %}
 </div>
 {% for e in plan %}{% if not e.active %}
-{% if e.proposal %}{% with m=e.proposal %}
-<div class="call-item{% if m.called_at %} called{% endif %}{% if e.advanced %} advanced{% endif %}" data-match="{{ m.pk }}"
-     data-say="{% blocktrans with court=e.court %}Court {{ court }}{% endblocktrans %}. {{ m.team1.name }} {% trans 'against' %} {{ m.team2.name }}. {{ m.division.name }}.">
+{% if e.proposal %}{% with m=e.proposal %}{% with pd=m|podium %}
+<div class="call-item{% if m.called_at %} called{% endif %}{% if e.advanced %} advanced{% endif %}{% if pd %} podium-call podium-{{ pd.code }}{% endif %}" data-match="{{ m.pk }}"
+     data-say="{% if pd %}{% blocktrans with what=pd.title %}Attention! {{ what }}.{% endblocktrans %} {% endif %}{% blocktrans with court=e.court %}Court {{ court }}{% endblocktrans %}. {{ m.team1.name }} {% trans 'against' %} {{ m.team2.name }}. {{ m.division.name }}.">
   <div class="call-court"><small>{% trans "Court" %}</small>{{ e.court }}</div>
   <div class="call-body">
+    {% if pd %}<div>{{ m|podium_badge }}</div>{% endif %}
     {% if e.advanced %}
       <div class="adv-badge">⏩ {% trans "Advanced match" %}</div>
       {% if e.due %}<div class="adv-why">{% blocktrans with n=e.due.match_number t=e.due.scheduled_time|time:"H:i" %}Planned here: #{{ n }} ({{ t }}){% endblocktrans %} — {{ e.due_blockers|join:" · " }}</div>
+      {% if e.can_force %}
+      <form method="post" action="{% url 'match_start' e.due.pk %}" class="inline-form force-form"
+            data-confirm="{% blocktrans with n=e.due.match_number w=e.due_blockers|join:', ' %}Match #{{ n }}: {{ w }}. Start anyway?{% endblocktrans %}">
+        {% csrf_token %}
+        <input type="hidden" name="court" value="{{ e.court }}">
+        <input type="hidden" name="mark_arrived" value="1">
+        <input type="hidden" name="force_rest" value="1">
+        <input type="hidden" name="next" value="{% url 'tournament_run' tournament.pk %}">
+        <button type="submit" class="btn btn-secondary btn-sm">⏱ {% blocktrans with n=e.due.match_number c=e.court %}Start #{{ n }} anyway on court {{ c }}{% endblocktrans %}</button>
+      </form>{% endif %}
       {% else %}<div class="adv-why">{% trans "No more matches planned on this court." %}</div>{% endif %}
     {% endif %}
     <div class="call-names">{{ m.team1.name }}{{ m.team1|team_school }} <span>vs</span> {{ m.team2.name }}{{ m.team2|team_school }}</div>
@@ -33,15 +44,37 @@
     </div>
   </div>
 </div>
-{% endwith %}{% else %}
+{% endwith %}{% endwith %}{% else %}
 <div class="call-item idle">
   <div class="call-court"><small>{% trans "Court" %}</small>{{ e.court }}</div>
   <div class="call-body">
     {% if e.waiting %}<div class="call-names" style="color:#b45309;">⏳ {% blocktrans count m=e.wait_min %}Free — the planned match can start in {{ m }} minute{% plural %}Free — the planned match can start in {{ m }} minutes{% endblocktrans %}</div>
     {% else %}<div class="call-names" style="color:#64748b;">{% trans "Free — no match can start now" %}</div>{% endif %}
-    {% if e.due %}<div class="call-sub">{% blocktrans with n=e.due.match_number t=e.due.scheduled_time|time:"H:i" %}Planned here: #{{ n }} ({{ t }}){% endblocktrans %} — {{ e.due_blockers|join:" · " }}</div>{% endif %}
+    {% if e.due %}<div class="call-sub">{% blocktrans with n=e.due.match_number t=e.due.scheduled_time|time:"H:i" %}Planned here: #{{ n }} ({{ t }}){% endblocktrans %} — {{ e.due_blockers|join:" · " }}</div>
+    {% if e.can_force %}
+      <form method="post" action="{% url 'match_start' e.due.pk %}" class="inline-form force-form"
+            data-confirm="{% blocktrans with n=e.due.match_number w=e.due_blockers|join:', ' %}Match #{{ n }}: {{ w }}. Start anyway?{% endblocktrans %}">
+        {% csrf_token %}
+        <input type="hidden" name="court" value="{{ e.court }}">
+        <input type="hidden" name="mark_arrived" value="1">
+        <input type="hidden" name="force_rest" value="1">
+        <input type="hidden" name="next" value="{% url 'tournament_run' tournament.pk %}">
+        <button type="submit" class="btn btn-secondary btn-sm">⏱ {% blocktrans with n=e.due.match_number c=e.court %}Start #{{ n }} anyway on court {{ c }}{% endblocktrans %}</button>
+      </form>{% endif %}{% endif %}
   </div>
 </div>
 {% endif %}
 {% endif %}{% empty %}{% endfor %}
+{% for e in plan %}{% if e.active and e.next and e.next.team1 and e.next.team2 %}{% with pd=e.next|podium %}{% if pd %}
+<div class="call-item podium-soon"
+     data-say="{% blocktrans with what=pd.title court=e.court %}Attention! Coming soon on court {{ court }}: {{ what }}.{% endblocktrans %} {{ e.next.team1.name }} {% trans 'against' %} {{ e.next.team2.name }}.">
+  <div class="call-court"><small>{% trans "Court" %}</small>{{ e.court }}</div>
+  <div class="call-body">
+    <div class="call-sub">📣 {% trans "Coming soon, after the current match" %}</div>
+    <div>{{ e.next|podium_badge }}</div>
+    <div class="call-names">{{ e.next.team1.name }}{{ e.next.team1|team_school }} <span>vs</span> {{ e.next.team2.name }}{{ e.next.team2|team_school }}</div>
+    <div class="call-actions"><button type="button" class="btn btn-secondary btn-sm js-say" title="{% trans 'Read aloud' %}">🔊 {% trans "Announce" %}</button></div>
+  </div>
+</div>
+{% endif %}{% endwith %}{% endif %}{% endfor %}
 {% if not any_free %}<div class="call-empty">{% trans "All courts are in use. Nobody to call right now." %}</div>{% endif %}

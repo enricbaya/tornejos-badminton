@@ -183,3 +183,25 @@ def court_tag(match):
         return format_html('<span class="court-tag" title="{}">{} {}</span>',
                            _("Court planned in the time schedule"), _("Court"), match.court)
     return ''
+
+
+@register.filter
+def podium(match):
+    """Podium info of a match (final, semi-final, quarter-final, 3rd place, final round-robin) or None."""
+    from ..podium import podium_info
+    if match is None:
+        return None
+    if not hasattr(match, 'podium'):
+        match.podium = podium_info(match)
+    return match.podium
+
+
+@register.filter
+def podium_badge(match, size=''):
+    """Gold badge for matches that can end on the podium ('' for ordinary matches)."""
+    info = podium(match)
+    if not info:
+        return ''
+    return format_html('<span class="podium-badge podium-{} {}">{} {} <small>{}</small></span>',
+                       info['code'], 'podium-big' if size == 'big' else '',
+                       info['icon'], info['label'], info['where'])

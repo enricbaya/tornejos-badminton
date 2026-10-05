@@ -125,10 +125,13 @@ def set_player_rest(match):
 # Guard: can a match start?
 # ---------------------------------------------------------------------------
 
-def check_match_startable(match):
+def check_match_startable(match, ignore_rest=False):
     """
     Return a list of human-readable error strings if any player is busy.
     Empty list means the match can start.
+
+    ``ignore_rest``: the judge table decided to start although a player has not finished
+    the set rest (e.g. the player says they are ready). Playing / not arrived still block.
     """
     playing_pks, resting = get_busy_info()
     now = timezone.now()
@@ -141,7 +144,7 @@ def check_match_startable(match):
                 continue
             if player.pk in playing_pks:
                 errors.append(_('%(name)s is already playing a match') % {'name': player.name})
-            elif player.pk in resting and resting[player.pk] > now:
+            elif player.pk in resting and resting[player.pk] > now and not ignore_rest:
                 remaining = int((resting[player.pk] - now).total_seconds() // 60) + 1
                 errors.append(_('%(name)s is still resting (approx. %(min)s min)') % {'name': player.name, 'min': remaining})
             elif not player.has_arrived:

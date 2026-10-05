@@ -29,6 +29,19 @@
 .pp-div { margin-bottom:1.2rem; }
 .pp-div h3 { margin:0 0 0.4rem; }
 .pp-div tr.me td { background:var(--brand-soft); font-weight:700; }
+.ss-cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:0.6rem; margin:0.4rem 0 1rem; }
+.ss-card { background:#fff; border-radius:12px; padding:0.7rem 0.9rem; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.ss-card b { display:block; font-family:var(--heading-font); font-size:1.5rem; line-height:1.1; }
+.ss-card span { font-size:0.72rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; }
+.ss-card small { display:block; font-size:0.75rem; color:#64748b; }
+.ss-bar { height:10px; border-radius:99px; background:#fee2e2; overflow:hidden; margin-top:0.35rem; }
+.ss-bar i { display:block; height:100%; background:#16a34a; }
+.ss-t { background:#fff; border-radius:12px; padding:0.7rem 0.9rem; margin-bottom:0.5rem; box-shadow:0 1px 3px rgba(0,0,0,0.06); display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0.3rem 0.8rem; align-items:center; }
+.ss-t .name { font-weight:700; }
+.ss-t .name small { font-weight:400; color:#64748b; margin-left:0.3rem; }
+.ss-t .nums { font-size:0.85rem; color:#334155; white-space:nowrap; text-align:right; }
+.ss-t .bar { grid-column:1 / -1; }
+.ss-medal { display:inline-block; font-size:0.8rem; background:#fffbeb; border:1px solid #fde68a; border-radius:99px; padding:0 0.5rem; margin:0.15rem 0.2rem 0 0; }
 </style>
 {% endblock %}
 
@@ -92,6 +105,27 @@
   </li>
   {% endfor %}
 </ul>
+{% endif %}
+
+{% if season %}
+<h2>📊 {% blocktrans with s=season.season %}Season {{ s }}{% endblocktrans %}</h2>
+<div class="ss-cards">
+  <div class="ss-card"><b>{{ season.total.tournaments }}</b><span>{% trans "Tournaments" %}</span></div>
+  <div class="ss-card"><b>{{ season.total.won }}–{{ season.total.lost }}</b><span>{% trans "Won–lost" %}</span>
+    {% if season.total.win_pct is not None %}<div class="ss-bar" title="{{ season.total.win_pct }}%"><i style="width:{{ season.total.win_pct }}%;"></i></div><small>{{ season.total.win_pct }}% {% trans "won" %}</small>{% endif %}</div>
+  <div class="ss-card"><b>{{ season.total.sets_won }}–{{ season.total.sets_lost }}</b><span>{% trans "Sets" %}</span></div>
+  <div class="ss-card"><b>{{ season.total.points_won }}</b><span>{% trans "Points scored" %}</span><small>{% blocktrans with n=season.total.points_lost %}{{ n }} against{% endblocktrans %}</small></div>
+  <div class="ss-card"><b>{% if season.total.medals.gold %}🥇{{ season.total.medals.gold }} {% endif %}{% if season.total.medals.silver %}🥈{{ season.total.medals.silver }} {% endif %}{% if season.total.medals.bronze %}🥉{{ season.total.medals.bronze }}{% endif %}{% if not season.total.medals.gold and not season.total.medals.silver and not season.total.medals.bronze %}–{% endif %}</b><span>{% trans "Medals" %}</span></div>
+</div>
+{% for r in season.rows %}
+<div class="ss-t">
+  <div class="name">{% if r.tournament.pk == tournament.pk %}{{ r.tournament.name }}{% else %}<a href="{% url 'public_player' r.tournament.pk player.pk %}">{{ r.tournament.name }}</a>{% endif %}<small>{{ r.tournament.date|date:"j M Y" }}</small>
+    <div>{% for md in r.medals %}<span class="ss-medal">{{ md.icon }} {{ md.category }}{% if md.subgroup %} · {{ md.subgroup }}{% endif %}</span>{% endfor %}</div></div>
+  <div class="nums">{% blocktrans with w=r.won l=r.lost %}{{ w }} won · {{ l }} lost{% endblocktrans %}<br><span style="color:#64748b;">{% blocktrans with sw=r.sets_won sl=r.sets_lost pw=r.points_won pl=r.points_lost %}sets {{ sw }}–{{ sl }} · points {{ pw }}–{{ pl }}{% endblocktrans %}</span></div>
+  {% if r.win_pct is not None %}<div class="bar"><div class="ss-bar"><i style="width:{{ r.win_pct }}%;"></i></div></div>{% endif %}
+</div>
+{% endfor %}
+<p style="font-size:0.78rem; color:#64748b; margin:0.2rem 0 1.4rem;">{% trans "Walk-overs are not counted as played matches. Medals appear when the category has finished." %}</p>
 {% endif %}
 
 <h2>{% trans "Standings" %}</h2>

@@ -164,6 +164,7 @@ def court_plan(tournament, now=None):
                      'proposal': None, 'advanced': False, 'not_arrived': [], 'waiting': False})
 
     used, called_players = set(), set()
+    called_on = {}  # player pk -> court where they are proposed
 
     def take(entry, m, advanced):
         entry['proposal'] = m
@@ -171,6 +172,8 @@ def court_plan(tournament, now=None):
         entry['not_arrived'] = m.not_arrived
         used.add(m.pk)
         called_players.update(players_of(m))
+        for pk in players_of(m):
+            called_on[pk] = entry['court']
 
     free = [e for e in plan if e['active'] is None]
     # 1) free courts whose planned match can be played now
@@ -191,6 +194,8 @@ def court_plan(tournament, now=None):
             e['wait_min'] = d.rest_wait
             used.add(d.pk)
             called_players.update(players_of(d))
+            for pk in players_of(d):
+                called_on[pk] = e['court']
             continue
         for m in pending:
             if m.pk in used or m.blockers or (players_of(m) & called_players):
@@ -201,6 +206,19 @@ def court_plan(tournament, now=None):
                 continue
             take(e, m, True)
             break
+        d = e['due']
+        if e['proposal'] is not None and d is not None and not e['due_blockers']:
+            # The planned match could be played, but one of its players is called on another court.
+            from django.utils.translation import gettext as _
+            e['due_blockers'] = [
+                _("%(name)s is called on court %(court)s") % {'name': p.name, 'court': called_on[p.pk]}
+                for t in (d.team1, d.team2) if t for p in t.players if p.pk in called_on]
+    # The table may start the planned match before the rest is over ("Start anyway") when rest
+    # is the only problem and its players are not called on another court.
+    for e in free:
+        d = e['due']
+        e['can_force'] = bool(d is not None and d.rest_wait and not any(
+            called_on.get(pk, e['court']) != e['court'] for pk in players_of(d)))
     # What to show as "next" on each court: the proposal on a free court; on a busy court the
     # first match planned there that is not already proposed somewhere else.
     for e in plan:

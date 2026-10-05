@@ -83,6 +83,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'csp.middleware.CSPMiddleware',
     'tournaments.middleware.SetLanguageCookieMiddleware',
+    'tournaments.middleware.NoIndexMiddleware',
     # django-axes must be the LAST middleware so it can observe the
     # final response/login outcome from all preceding middleware.
     'axes.middleware.AxesMiddleware',

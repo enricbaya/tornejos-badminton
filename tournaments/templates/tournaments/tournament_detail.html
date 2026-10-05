@@ -55,6 +55,9 @@
         <a href="{% url 'tournament_export' tournament.pk %}" class="btn btn-secondary">💾 {% trans "Export backup" %}</a>
     </div>
     <div class="detail-panel" id="panel-print" style="display:none;">
+        <a href="{% url 'tournament_planb' tournament.pk %}" class="btn btn-primary">🖨 {% trans "Plan B and printing" %}</a>
+        <a href="{% url 'tournament_court_sheets' tournament.pk %}" class="btn btn-secondary" target="_blank">📋 {% trans "Court sheets" %}</a>
+        <a href="{% url 'tournament_school_report' tournament.pk %}" class="btn btn-secondary" target="_blank">🏫 {% trans "Report per school" %}</a>
         <a href="{% url 'tournament_program_print' tournament.pk %}" class="btn btn-secondary" target="_blank">📋 {% trans "Print programme" %}</a>
         <a href="{% url 'tournament_schedule_print' tournament.pk %}" class="btn btn-secondary" target="_blank">🖨 {% trans "Print time schedule" %}</a>
         <a href="{% url 'tournament_scoresheet' tournament.pk %}" class="btn btn-secondary" target="_blank">🖨 {% trans "Score sheets" %}</a>

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load i18n tournament_extras %}
+{% block title %}{% trans "Quick result entry" %} – {{ tournament.name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.qr-filter { display:flex; flex-wrap:wrap; gap:0.35rem; margin:0.6rem 0 1rem; }
+.qr-filter a { padding:0.3rem 0.75rem; border-radius:999px; background:#fff; border:1px solid #e4e4e7; text-decoration:none; color:#111; font-size:0.85rem; }
+.qr-filter a.on { background:var(--accent,#EB1C60); border-color:var(--accent,#EB1C60); color:#fff; }
+.qr-list { display:grid; gap:0.5rem; }
+.qr-row { display:grid; grid-template-columns: 5.2rem minmax(0,1fr) auto auto; gap:0.8rem; align-items:center; background:#fff; border-radius:12px;
+  padding:0.6rem 0.8rem; box-shadow:0 1px 2px rgba(0,0,0,0.05); border-left:5px solid #e4e4e7; }
+.qr-row.saved { border-left-color:#16a34a; background:#f0fdf4; }
+.qr-row.saved input, .qr-row.saved button { display:none; }
+.qr-meta { font-size:0.8rem; color:#475569; line-height:1.3; }
+.qr-meta b { display:block; font-size:1rem; color:#111; }
+.qr-names { line-height:1.55; font-weight:600; min-width:0; }
+.qr-names div { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.qr-names .cat { font-weight:400; font-size:0.78rem; color:#64748b; }
+.qr-sets { display:grid; grid-template-columns:repeat(3, 3rem); grid-template-rows:auto auto; gap:0.25rem 0.35rem; }
+.qr-sets input { width:3rem; font-size:1.05rem; text-align:center; padding:0.3rem 0.1rem; border:1.5px solid #cbd5e1; border-radius:6px; }
+.qr-sets input:focus { outline:none; border-color:var(--accent,#EB1C60); }
+.qr-msg { grid-column:1 / -1; font-size:0.85rem; font-weight:600; color:#991b1b; display:none; }
+.qr-row.saved .qr-msg { color:#15803d; display:block; }
+@media (max-width:700px) { .qr-row { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+  <div>
+    <h1>⌨️ {% trans "Quick result entry" %}</h1>
+    <div style="color:#64748b; font-size:0.85rem;">{{ tournament.name }} · {% blocktrans with p=points_to_win %}sets to {{ p }} points{% endblocktrans %}</div>
+  </div>
+  <div class="btn-group">
+    <a href="{% url 'tournament_planb' tournament.pk %}" class="btn btn-secondary">🖨 {% trans "Plan B and printing" %}</a>
+    <a href="{% url 'tournament_run' tournament.pk %}" class="btn btn-secondary">← {% trans "Tournament run" %}</a>
+  </div>
+</div>
+<p style="font-size:0.88rem; color:#475569; margin-top:0;">{% trans "Type the points of each set (top row: first player, bottom row: second player) and press Enter. The winner is worked out from the sets. Results typed here do not give rest time, because the match was played earlier." %}</p>
+
+{% if courts %}
+<div class="qr-filter">
+  <a href="?" class="{% if not court %}on{% endif %}">{% trans "All courts" %}</a>
+  {% for c in courts %}<a href="?court={{ c }}" class="{% if court == c %}on{% endif %}">{% trans "Court" %} {{ c }}</a>{% endfor %}
+</div>
+{% endif %}
+
+<div class="qr-list">
+{% for m in matches %}
+  <form class="qr-row" method="post" action="{% url 'match_quick_result' m.pk %}" autocomplete="off">
+    {% csrf_token %}
+    <div class="qr-meta"><b>{% if m.scheduled_time %}{{ m.scheduled_time|time:"H:i" }}{% else %}–{% endif %}</b>{% if m.court %}{% trans "Court" %} {{ m.court }}{% endif %}<br>#{{ m.match_number|default:"" }}</div>
+    <div class="qr-names">
+      <div>{{ m.team1.name }}{{ m.team1|team_school }}</div>
+      <div>{{ m.team2.name }}{{ m.team2|team_school }}</div>
+      <div class="cat">{{ m.division.name }}{% if m.status == 'in_progress' %} · <b style="color:var(--accent,#EB1C60);">{% trans "In progress" %}</b>{% endif %} {{ m|podium_badge }}</div>
+    </div>
+    <div class="qr-sets">
+      {% for i in "123" %}<input type="number" inputmode="numeric" min="0" max="{{ max_points }}" placeholder="S{{ i }}" name="s{{ i }}a" aria-label="{% blocktrans %}Set {{ i }}{% endblocktrans %} – {{ m.team1.name }}">{% endfor %}
+      {% for i in "123" %}<input type="number" inputmode="numeric" min="0" max="{{ max_points }}" placeholder="S{{ i }}" name="s{{ i }}b" aria-label="{% blocktrans %}Set {{ i }}{% endblocktrans %} – {{ m.team2.name }}">{% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primary btn-sm">✔ {% trans "Save" %}</button>
+    <div class="qr-msg"></div>
+  </form>
+{% empty %}
+  <p style="color:#64748b;">{% trans "Every match has a result. Well done!" %}</p>
+{% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  var T_FAIL = '{% filter escapejs %}{% trans "Could not contact the server. Try again." %}{% endfilter %}';
+  var T_SAVED = '{% filter escapejs %}{% trans "Saved" %}{% endfilter %}';
+  function token() { var m = document.cookie.match(/csrftoken=([^;]+)/); return m ? m[1] : ''; }
+  document.querySelectorAll('.qr-row').forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var msg = form.querySelector('.qr-msg');
+      fetch(form.action, {method: 'POST', body: new FormData(form), credentials: 'same-origin',
+                          headers: {'X-CSRFToken': token(), 'X-Requested-With': 'XMLHttpRequest'}})
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.ok) {
+            form.classList.add('saved');
+            msg.textContent = '✔ ' + T_SAVED + ': ' + d.score + (d.winner ? ' · 🏆 ' + d.winner : '');
+            var next = form.nextElementSibling;
+            while (next && next.classList.contains('saved')) next = next.nextElementSibling;
+            if (next) { var i = next.querySelector('input[type=number]'); if (i) i.focus(); }
+          } else {
+            msg.textContent = '⛔ ' + d.error; msg.style.display = 'block';
+          }
+        })
+        .catch(function () { msg.textContent = '⛔ ' + T_FAIL; msg.style.display = 'block'; });
+    });
+  });
+  var first = document.querySelector('.qr-row input[type=number]');
+  if (first) first.focus();
+})();
+</script>
+{% endblock %}

@@ -45,3 +45,37 @@ class SetLanguageCookieMiddleware:
                 samesite=self.COOKIE_SAMESITE,
             )
         return response
+
+
+# Search engines and AI crawlers must not index or learn from the tournament pages
+# (names and schools of school-age players).
+ROBOTS_TAG = 'noindex, nofollow, noarchive, nosnippet, noimageindex, noai, noimageai'
+
+AI_CRAWLERS = [
+    'GPTBot', 'ChatGPT-User', 'OAI-SearchBot', 'ClaudeBot', 'Claude-Web', 'Claude-User',
+    'Claude-SearchBot', 'anthropic-ai', 'Google-Extended', 'GoogleOther', 'CCBot',
+    'PerplexityBot', 'Perplexity-User', 'Bytespider', 'Applebot-Extended', 'Amazonbot',
+    'meta-externalagent', 'meta-externalfetcher', 'FacebookBot', 'cohere-ai', 'cohere-training-data-crawler',
+    'Diffbot', 'ImagesiftBot', 'Omgilibot', 'Omgili', 'YouBot', 'AI2Bot', 'Ai2Bot-Dolma',
+    'MistralAI-User', 'DuckAssistBot', 'Timpibot', 'PetalBot', 'Scrapy',
+]
+
+
+def robots_txt():
+    lines = []
+    for bot in AI_CRAWLERS:
+        lines += [f'User-agent: {bot}', 'Disallow: /', '']
+    lines += ['User-agent: *', 'Disallow: /', '']
+    return '\n'.join(lines)
+
+
+class NoIndexMiddleware:
+    """Adds ``X-Robots-Tag`` to every response (also JSON, images and downloads)."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        response.setdefault('X-Robots-Tag', ROBOTS_TAG)
+        return response

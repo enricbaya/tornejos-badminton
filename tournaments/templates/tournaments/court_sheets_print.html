@@ -1,0 +1,87 @@
+{% load static tournament_extras i18n %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'ca' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<title>{% trans "Court sheets" %} – {{ tournament.name }}</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #111; margin: 0; padding: 1rem; background: #f4f7fb; font-size: 10.5pt; }
+  .screen-header { max-width: 980px; margin: 0 auto 1rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+  .screen-header h1 { flex: 1; margin: 0; font-size: 1.3rem; }
+  .btn { background: #141414; color: #fff; border: 0; border-radius: 4px; padding: 0.5rem 1.1rem; cursor: pointer; text-decoration: none; font-size: 0.9rem; }
+  .sheet { background: #fff; max-width: 980px; margin: 0 auto 1.2rem; padding: 8mm; box-shadow: 0 1px 4px rgba(0,0,0,0.12); page-break-after: always; break-after: page; }
+  .sheet:last-child { page-break-after: auto; break-after: auto; }
+  .sheet-head { display: flex; align-items: center; gap: 1rem; border-bottom: 3px solid #111; padding-bottom: 0.4rem; margin-bottom: 0.5rem; }
+  .court { font-size: 26pt; font-weight: 800; border: 3px solid #111; border-radius: 8px; padding: 0 0.6rem; line-height: 1.15; white-space: nowrap; }
+  .sheet-head .title { flex: 1; }
+  .sheet-head .title b { display: block; font-size: 13pt; }
+  .note { font-size: 8.5pt; color: #444; margin: 0 0 0.4rem; }
+  table { width: 100%; border-collapse: collapse; }
+  th { font-size: 8pt; text-transform: uppercase; letter-spacing: 0.04em; text-align: left; border-bottom: 2px solid #111; padding: 0.25rem 0.3rem; }
+  td { border-bottom: 1px solid #999; padding: 0.35rem 0.3rem; vertical-align: middle; }
+  td.time { font-weight: 700; white-space: nowrap; width: 3.2rem; }
+  td.num { white-space: nowrap; width: 2.4rem; color: #333; }
+  td.cat { font-size: 8.5pt; width: 6.5rem; }
+  td.players { line-height: 1.35; }
+  td.players .tbd { color: #666; font-style: italic; }
+  .school-tag { font-size: 7.5pt; color: #555; margin-left: 0.3em; }
+  td.set { width: 3.4rem; text-align: center; }
+  .box { display: inline-block; width: 1.35rem; height: 1.15rem; border: 1.5px solid #111; border-radius: 2px; }
+  .box-row { display: flex; gap: 2px; justify-content: center; margin: 1px 0; }
+  td.ok { width: 1.6rem; text-align: center; }
+  .done { color: #15803d; font-weight: 700; font-size: 8.5pt; }
+  .podium-mark { font-size: 7.5pt; font-weight: 700; color: #92400e; }
+  tr { page-break-inside: avoid; break-inside: avoid; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .screen-header { display: none; }
+    .sheet { box-shadow: none; margin: 0; padding: 0; max-width: none; }
+  }
+</style>
+</head>
+<body>
+<div class="screen-header">
+  <h1>📋 {% trans "Court sheets" %} – {{ tournament.name }}{% if only_open %} · {% trans "Only those still to play" %}{% endif %}</h1>
+  <button class="btn" onclick="window.print()">🖨 {% trans "Print / Save as PDF" %}</button>
+</div>
+{% for s in sheets %}
+<div class="sheet">
+  <div class="sheet-head">
+    <div class="court">{% trans "Court" %} {{ s.court }}</div>
+    <div class="title"><b>{{ tournament.name }}</b>{% if s.day %}{{ s.day|date:"l j F Y" }}{% endif %}</div>
+    <div style="font-size:8.5pt; text-align:right;">{% trans "Referee" %}: ____________________</div>
+  </div>
+  <p class="note">{% trans "Play the matches in this order (the judge table may call another one). Write the points of every set; a third set only when it is 1–1. Tick ✓ when the result has been typed in the app." %}</p>
+  <table>
+    <thead><tr>
+      <th>{% trans "Time" %}</th><th>#</th><th>{% trans "Category" %}</th><th>{% trans "Players" %}</th>
+      {% for i in sets %}<th style="text-align:center;">{% blocktrans %}Set {{ i }}{% endblocktrans %}</th>{% endfor %}
+      <th>✓</th>
+    </tr></thead>
+    <tbody>
+    {% for m in s.matches %}
+      <tr>
+        <td class="time">{% if m.scheduled_time %}{{ m.scheduled_time|time:"H:i" }}{% endif %}</td>
+        <td class="num">#{{ m.match_number|default:"" }}</td>
+        <td class="cat">{{ m.division.name }}{% with pd=m|podium %}{% if pd %}<br><span class="podium-mark">{{ pd.icon }} {{ pd.label }}</span>{% endif %}{% endwith %}</td>
+        <td class="players">
+          {% if m.team1 %}{{ m.team1.name }}{{ m.team1|team_school }}{% else %}<span class="tbd">{{ m.bracket_label|bracket_label_i18n }}</span>{% endif %}<br>
+          {% if m.team2 %}{{ m.team2.name }}{{ m.team2|team_school }}{% elif m.team1 %}<span class="tbd">–</span>{% endif %}
+        </td>
+        {% if m.status == 'completed' %}
+          <td colspan="3" class="done">✔ {{ m.score|default:"WO" }}{% if m.winner %} · {{ m.winner.name }}{% endif %}</td><td class="ok">✓</td>
+        {% else %}
+          {% for i in sets %}<td class="set"><div class="box-row"><span class="box"></span><span class="box"></span></div><div class="box-row"><span class="box"></span><span class="box"></span></div></td>{% endfor %}
+          <td class="ok"><span class="box"></span></td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% empty %}
+<div class="sheet"><p>{% trans "There are no matches with a court yet. Generate the time schedule first." %}</p></div>
+{% endfor %}
+</body>
+</html>

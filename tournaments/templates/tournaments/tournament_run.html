@@ -623,7 +623,8 @@
         <a href="{% url 'tournament_schedule' tournament.pk %}" class="btn btn-secondary btn-sm">📅 {% trans "Time schedule" %}</a>
         <a href="{% url 'tournament_program_print' tournament.pk %}" class="btn btn-secondary btn-sm" target="_blank">📋 {% trans "Match programme" %}</a>
         <a href="{% url 'tournament_wallchart' tournament.pk %}" class="btn btn-secondary btn-sm" target="_blank">📋 {% trans "Result chart" %}</a>
-        <a href="{% url 'tournament_scoresheet' tournament.pk %}" class="btn btn-secondary btn-sm" target="_blank">🖨 {% trans "Score sheets" %}</a>
+        <a href="{% url 'tournament_planb' tournament.pk %}" class="btn btn-secondary btn-sm">🖨 {% trans "Plan B and printing" %}</a>
+        <a href="{% url 'tournament_quick_results' tournament.pk %}" class="btn btn-secondary btn-sm">⌨️ {% trans "Quick result entry" %}</a>
         <a href="{% url 'tournament_court_links' tournament.pk %}" class="btn btn-secondary btn-sm">📱 {% trans "Court referees" %}{% if tournament.court_access_enabled %} ●{% endif %}</a>
       </div>
     </div>
@@ -664,12 +665,15 @@
   if (!side) return;
   var known = null;
   function token() { var m = document.cookie.match(/csrftoken=([^;]+)/); return m ? m[1] : ''; }
-  function beep() {
+  function beep(fanfare) {
     try {
       var ctx = new (window.AudioContext || window.webkitAudioContext)();
-      [0, 0.25].forEach(function (t) {
+      // Podium matches (final, semi-final…): a short rising fanfare instead of the double beep.
+      var notes = fanfare ? [[0, 523], [0.18, 659], [0.36, 784], [0.6, 1047]] : [[0, 880], [0.25, 880]];
+      notes.forEach(function (n) {
+        var t = n[0];
         var o = ctx.createOscillator(), g = ctx.createGain();
-        o.frequency.value = 880; o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = n[1]; o.connect(g); g.connect(ctx.destination);
         g.gain.setValueAtTime(0.15, ctx.currentTime + t); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.2);
         o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.22);
       });
@@ -687,8 +691,10 @@
     var panel = document.getElementById('calls-panel');
     if (!panel) return;
     var ids = (panel.dataset.ids || '').trim().split(/\s+/).filter(Boolean);
-    if (known !== null && ids.some(function (id) { return known.indexOf(id) === -1; })) {
-      beep(); panel.classList.remove('flash'); void panel.offsetWidth; panel.classList.add('flash');
+    var podium = (panel.dataset.podium || '').trim().split(/\s+/).filter(Boolean);
+    var fresh = known === null ? [] : ids.filter(function (id) { return known.indexOf(id) === -1; });
+    if (fresh.length) {
+      beep(fresh.some(function (id) { return podium.indexOf(id) !== -1; })); panel.classList.remove('flash'); void panel.offsetWidth; panel.classList.add('flash');
     }
     known = ids;
   }
@@ -826,6 +832,8 @@
 // Start a match without leaving the page; if it cannot start, show why next to the button.
 (function () {
   var T_FAIL = '{% filter escapejs %}{% trans "Could not contact the server. Try again." %}{% endfilter %}';
+  var T_FORCE = '{% filter escapejs %}{% trans "Start anyway" %}{% endfilter %}';
+  var T_FORCE_Q = '{% filter escapejs %}{% trans "The player has not finished the rest. Start anyway?" %}{% endfilter %}';
   function token() { var m = document.cookie.match(/csrftoken=([^;]+)/); return m ? m[1] : ''; }
   var recent = {};  // form action -> {text, t}: keeps the reason visible across the live refresh
   function boxFor(form) {
@@ -844,8 +852,12 @@
     var form = e.target;
     if (!/\/match\/\d+\/start\/$/.test(form.getAttribute('action') || form.action || '')) return;
     e.preventDefault();
+    if (form.dataset.confirm && !window.confirm(form.dataset.confirm)) return;
     var data = new FormData(form);
     if (e.submitter && e.submitter.name) data.set(e.submitter.name, e.submitter.value);
+    send(form, data);
+  });
+  function send(form, data) {
     var box;
     if (form.id === 'court-dialog-form') {
       box = document.getElementById('court-dialog-error');
@@ -863,9 +875,22 @@
         if (d.ok) { window.location.reload(); return; }
         restore(); box.textContent = '⛔ ' + d.error; box.style.display = '';
         if (form.id !== 'court-dialog-form') recent[form.getAttribute('action')] = {text: box.textContent, t: Date.now()};
+        if (d.can_force) {
+          // Only the rest is missing: the table may start anyway (e.g. the player says they are ready).
+          var fb = document.createElement('button');
+          fb.type = 'button'; fb.className = 'btn btn-secondary btn-sm force-btn';
+          fb.textContent = '⏱ ' + T_FORCE;
+          fb.addEventListener('click', function () {
+            if (!window.confirm(d.error + '\n\n' + T_FORCE_Q)) return;
+            data.set('force_rest', '1');
+            send(form, data);
+          });
+          box.appendChild(document.createTextNode(' '));
+          box.appendChild(fb);
+        }
       })
       .catch(function () { restore(); box.textContent = '⛔ ' + T_FAIL; box.style.display = ''; });
-  });
+  }
 })();
 </script>
 

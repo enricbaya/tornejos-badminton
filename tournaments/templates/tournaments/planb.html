@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Plan B and printing" %} – {{ tournament.name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.pb-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:0.8rem; margin:1rem 0 1.4rem; }
+.pb-card { background:#fff; border-radius:12px; padding:0.9rem 1rem; box-shadow:0 1px 3px rgba(0,0,0,0.06); display:flex; flex-direction:column; gap:0.45rem; }
+.pb-card h3 { margin:0; font-size:1.02rem; }
+.pb-card p { margin:0; font-size:0.85rem; color:#475569; flex:1; }
+.pb-card .btn { align-self:flex-start; }
+.pb-steps { background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:0.9rem 1.1rem; font-size:0.92rem; }
+.pb-steps ol { margin:0.4rem 0 0; padding-left:1.3rem; }
+.pb-steps li { margin:0.25rem 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+  <div>
+    <h1>🖨 {% trans "Plan B and printing" %}</h1>
+    <div style="color:#64748b; font-size:0.85rem;">{{ tournament.name }}</div>
+  </div>
+  <div class="btn-group">
+    <a href="{% url 'tournament_run' tournament.pk %}" class="btn btn-secondary">← {% trans "Tournament run" %}</a>
+  </div>
+</div>
+
+<div class="pb-steps">
+  <b>{% trans "If the connection fails in the sports hall" %}</b>
+  <ol>
+    <li>{% trans "Print the court sheets and the time schedule the morning of the tournament (they are also useful with connection)." %}</li>
+    <li>{% trans "Give each referee the sheet of their court: they play the matches in order and write the sets down." %}</li>
+    <li>{% trans "When the connection is back, type the results in “Quick result entry”. Each result moves the players on in the final phase, as usual." %}</li>
+  </ol>
+</div>
+
+<div class="pb-grid">
+  <div class="pb-card">
+    <h3>📋 {% trans "Court sheets" %}</h3>
+    <p>{% trans "One sheet per court with its matches in order, players, school and boxes for the three sets." %}</p>
+    <div class="btn-group">
+      <a href="{% url 'tournament_court_sheets' tournament.pk %}" target="_blank" class="btn btn-primary btn-sm">🖨 {% trans "All matches" %}</a>
+      <a href="{% url 'tournament_court_sheets' tournament.pk %}?pending=1" target="_blank" class="btn btn-secondary btn-sm">{% trans "Only those still to play" %}</a>
+    </div>
+  </div>
+  <div class="pb-card">
+    <h3>🕘 {% trans "Time schedule" %}</h3>
+    <p>{% trans "Every match with its time and court, to hang at the entrance or at the judge table." %}</p>
+    <a href="{% url 'tournament_schedule_print' tournament.pk %}" target="_blank" class="btn btn-secondary btn-sm">🖨 {% trans "Print time schedule" %}</a>
+  </div>
+  <div class="pb-card">
+    <h3>📝 {% trans "Score sheets" %}</h3>
+    <p>{% trans "One score sheet per match, for the referees who want to count every point." %}</p>
+    <a href="{% url 'tournament_scoresheet' tournament.pk %}" target="_blank" class="btn btn-secondary btn-sm">🖨 {% trans "Score sheets" %}</a>
+  </div>
+  <div class="pb-card">
+    <h3>📊 {% trans "Result chart" %}</h3>
+    <p>{% trans "The groups and brackets to fill in by hand on a wall." %}</p>
+    <a href="{% url 'tournament_wallchart' tournament.pk %}" target="_blank" class="btn btn-secondary btn-sm">🖨 {% trans "Result chart" %}</a>
+  </div>
+  <div class="pb-card">
+    <h3>📖 {% trans "Programme" %}</h3>
+    <p>{% trans "Categories, groups and final phases, for the families and the schools." %}</p>
+    <a href="{% url 'tournament_program_print' tournament.pk %}" target="_blank" class="btn btn-secondary btn-sm">🖨 {% trans "Print programme" %}</a>
+  </div>
+  <div class="pb-card" style="border:2px solid var(--accent,#EB1C60);">
+    <h3>⌨️ {% trans "Quick result entry" %}</h3>
+    <p>{% blocktrans count n=pending %}{{ n }} match without a result. Type the sets written on the sheets, one after another.{% plural %}{{ n }} matches without a result. Type the sets written on the sheets, one after another.{% endblocktrans %}</p>
+    <a href="{% url 'tournament_quick_results' tournament.pk %}" class="btn btn-primary btn-sm">{% trans "Enter results" %} →</a>
+  </div>
+</div>
+<p style="font-size:0.8rem; color:#64748b;">{% trans "Tip: in the print window choose “Save as PDF” to keep a copy on the computer or a pen drive." %}</p>
+{% endblock %}

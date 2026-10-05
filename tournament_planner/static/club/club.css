@@ -136,3 +136,16 @@ a.player-link:hover { color: var(--accent-text); border-bottom-color: var(--acce
              border-radius: 7px; padding: 0.05rem 0.45rem; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.02em;
              white-space: nowrap; text-transform: uppercase; vertical-align: middle; }
 .court-tag.playing { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ── Matches that can end on the podium (final, semi-final, quarter-final, 3rd place) ── */
+.podium-badge { display: inline-block; background: linear-gradient(135deg, #fde68a, #f59e0b); color: #451a03;
+  border: 1px solid #d97706; border-radius: 999px; padding: 0.1rem 0.6rem; font-weight: 800; font-size: 0.8rem;
+  text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
+.podium-badge small { font-weight: 600; text-transform: none; letter-spacing: 0; }
+.podium-badge.podium-quarter, .podium-badge.podium-league { background: #fef3c7; border-color: #f59e0b; }
+.podium-badge.podium-big { font-size: 1.1rem; padding: 0.25rem 0.9rem; }
+.call-item.podium-call { background: linear-gradient(135deg, #fffbeb, #fde68a) !important; border: 2px solid #f59e0b !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25); }
+.call-item.podium-call.podium-final { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.45); }
+.podium-row { background: #fffbeb !important; }
+.call-item.podium-soon { background: #fffbeb !important; border: 1px dashed #f59e0b !important; }

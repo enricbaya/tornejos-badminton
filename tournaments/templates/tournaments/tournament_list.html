@@ -10,6 +10,19 @@
         <a href="{% url 'club_backup' %}" class="btn btn-secondary" title="{% trans 'Download a copy of all tournaments and players (do it just before and just after each tournament)' %}">💾 {% trans "Backup everything" %}</a>
     </div>
 </div>
+<div class="card" style="padding:0.75rem 1rem; display:flex; gap:0.8rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem; border-left:5px solid #f59e0b;">
+    <div style="flex:1; min-width:240px; font-size:0.88rem; color:#475569;">
+        🎓 <b>{% trans "Demo tournament" %}</b> — {% trans "A small tournament with fictitious players (2 categories, 3 courts, starting now) to train the judge table, reception and the referees. It does not count in the statistics." %}
+    </div>
+    <form method="post" action="{% url 'demo_create' %}" style="margin:0;" {% if has_demo %}onsubmit="return confirm('{% filter escapejs %}{% trans 'The current demo tournament will be replaced by a new one. Continue?' %}{% endfilter %}');"{% endif %}>
+        {% csrf_token %}<button type="submit" class="btn btn-secondary btn-sm">{% if has_demo %}🔄 {% trans "Start the demo again" %}{% else %}🎓 {% trans "Create demo tournament" %}{% endif %}</button>
+    </form>
+    {% if has_demo %}
+    <form method="post" action="{% url 'demo_delete' %}" style="margin:0;" onsubmit="return confirm('{% filter escapejs %}{% trans 'Delete the demo tournament and its fictitious players?' %}{% endfilter %}');">
+        {% csrf_token %}<button type="submit" class="btn btn-secondary btn-sm" style="color:#b91c1c;">🗑 {% trans "Delete demo" %}</button>
+    </form>
+    {% endif %}
+</div>
 {% if tournaments %}
 <table class="data-table">
     <thead>
@@ -25,7 +38,7 @@
     <tbody>
     {% for tournament in tournaments %}
     <tr style="cursor:pointer;" onclick="window.location='{% url 'tournament_detail' tournament.pk %}'">
-        <td style="font-weight:600; color:var(--brand-dark,#000);">{{ tournament.name }}</td>
+        <td style="font-weight:600; color:var(--brand-dark,#000);">{{ tournament.name }}{% if tournament.is_demo %} <span class="badge" style="background:#fef3c7; color:#92400e;">🎓 {% trans "Demo" %}</span>{% endif %}</td>
         <td>{{ tournament.date }}</td>
         <td>{{ tournament.court_count }}</td>
         <td>{{ tournament.start_time|time:"H:i"|default:"–" }}</td>

@@ -6,6 +6,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
 <title>{{ tournament.name }}</title>
 <link rel="icon" type="image/png" href="{% static 'club/favicon-64.png' %}">
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -87,7 +88,7 @@
   .main {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     height: calc(100vh - 82px - 34px);   /* full height minus topbar and footer */
     padding: 1.5rem 2.5rem;
     gap: 1rem;
@@ -99,12 +100,13 @@
     border: 1.5px solid var(--card-border);
     border-radius: 10px;
     display: grid;
-    grid-template-columns: 120px 1fr auto;
+    grid-template-columns: 9.5rem 1fr auto;
     align-items: center;
     gap: 0;
     overflow: hidden;
-    flex: 1;
-    max-height: 160px;
+    /* Natural height: a card is never squashed (that cut off the court number); the cards
+       that do not fit are hidden by the script at the end of the page. */
+    flex: 0 0 auto;
   }
 
   /* Left: time + court */
@@ -115,22 +117,29 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    padding: 0.6rem 0.8rem;
-    gap: 0.25rem;
+    padding: 0.3rem 0.6rem;
+    gap: 0.2rem;
   }
   .match-time {
-    font-size: 2rem;
+    font-size: clamp(1.1rem, 3.4vh, 2rem);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: #fff;
     line-height: 1;
   }
+  /* The court must stay readable however many courts / matches there are */
   .match-court {
-    font-size: 1rem;
-    color: var(--gold);
-    font-weight: 600;
-    letter-spacing: 0.05em;
+    font-family: 'Barlow', 'Inter', sans-serif;
+    font-size: clamp(1rem, 3vh, 1.7rem);
+    color: #000;
+    background: #fff;
+    border-radius: 6px;
+    padding: 0 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
     text-transform: uppercase;
+    line-height: 1.2;
+    white-space: nowrap;
   }
   .match-no {
     font-size: 1rem;
@@ -218,7 +227,7 @@
   /* Courts now playing */
   .courts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
     gap: 0.6rem;
     margin-bottom: 1rem;
   }
@@ -231,9 +240,14 @@
     display: flex; gap: 0.8rem; align-items: center;
   }
   .court-tile.free { border-left-color: var(--green); opacity: 0.6; }
-  .court-num { font-size: 2.1rem; font-weight: 800; color: var(--gold); min-width: 2.4rem; text-align: center; }
+  .court-num { font-size: clamp(1.8rem, 4.5vh, 2.6rem); font-weight: 800; color: var(--gold); min-width: 2.4rem; text-align: center; line-height: 1; }
   .court-tile.free .court-num { color: var(--green); }
-  .court-players { font-size: 1.05rem; font-weight: 600; line-height: 1.25; }
+  .court-players { font-size: clamp(0.85rem, 1.25vw, 1.05rem); font-weight: 600; line-height: 1.25; }
+  .court-tile.podium { border-left-color: #f59e0b; background: linear-gradient(135deg, #2a1f05, #171717); border-color: #f59e0b; }
+  .match-card.podium { border: 2px solid #f59e0b; box-shadow: 0 0 18px rgba(245,158,11,0.35); }
+  .podium-badge { display: inline-block; background: linear-gradient(135deg, #fde68a, #f59e0b); color: #451a03; border-radius: 999px;
+    padding: 0.05rem 0.6rem; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
+  .podium-badge small { font-weight: 600; text-transform: none; letter-spacing: 0; }
   .court-players .vs-small { color: var(--muted); font-size: 0.8rem; font-weight: 400; }
   .court-div { font-size: 0.78rem; color: var(--muted); }
 </style>
@@ -264,9 +278,10 @@
   <div class="courts-grid">
     {% for court in courts %}
     {% if court.match %}
-    <div class="court-tile">
+    <div class="court-tile{% if court.match|podium %} podium{% endif %}">
       <div class="court-num">{{ court.number }}</div>
       <div>
+        {% if court.match|podium %}<div>{{ court.match|podium_badge }}</div>{% endif %}
         <div class="court-players">{{ court.match.team1.name }}{{ court.match.team1|team_school }} <span class="vs-small">vs</span> {{ court.match.team2.name }}{{ court.match.team2|team_school }}</div>
         <div class="court-div">{{ court.match.division.name }}{% if court.match.match_number %} · #{{ court.match.match_number }}{% endif %}</div>
       </div>
@@ -283,13 +298,12 @@
   {% if matches %}
   <div class="upcoming-label">{% trans "Upcoming matches" %}</div>
   {% for match in matches %}
-  <div class="match-card">
+  <div class="match-card{% if match|podium %} podium{% endif %}">
 
     <div class="match-meta">
       <div class="match-time">{% if match.estimated_time %}~{{ match.estimated_time|time:"H:i" }}{% else %}{{ match.scheduled_time|time:"H:i" }}{% endif %}</div>
 
       {% if match.court %}<div class="match-court">{% trans "Court" %} {{ match.court }}</div>{% endif %}
-      {% if match.match_number %}<div class="match-no">#{{ match.match_number }}</div>{% endif %}
     </div>
 
     <div class="match-teams">
@@ -305,7 +319,8 @@
     </div>
 
     <div class="match-division">
-      <div class="division-name">{{ match.division.name }}</div>
+      {% if match|podium %}<div style="margin-bottom:0.2rem;">{{ match|podium_badge }}</div>{% endif %}
+      <div class="division-name">{{ match.division.name }}{% if match.match_number %} · #{{ match.match_number }}{% endif %}</div>
       <div class="discipline-label">{{ match.division.get_discipline_display }}</div>
     </div>
 
@@ -344,6 +359,16 @@
   }
   updateClock();
   setInterval(updateClock, 10000);
+
+  // ── Never show a half-cut card: hide the upcoming matches that do not fit ──
+  (function () {
+    var main = document.querySelector('.main');
+    if (!main) return;
+    var bottom = main.getBoundingClientRect().bottom;
+    document.querySelectorAll('.match-card').forEach(function (c) {
+      if (c.getBoundingClientRect().bottom > bottom + 2) c.style.display = 'none';
+    });
+  })();
 
   // ── Auto-refresh page every 60 seconds ─────────────────────────────────
   setTimeout(() => location.reload(), 30000);
