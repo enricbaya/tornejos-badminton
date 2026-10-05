@@ -1,3 +1,33 @@
+# Badminton Tournament Planner — Club Bàdminton Igualada edition
+
+> **Branch `club`** of a fork of [MFuglsang/badminton_tournament_planner](https://github.com/MFuglsang/badminton_tournament_planner),
+> adapted by Club Bàdminton Igualada (Catalonia) to run school tournaments.
+> Interface in Catalan (plus the original languages).
+
+What this edition adds on top of the original, in short:
+
+- **Tournament day**: plan per court with *advanced* matches, loudspeaker panel with spoken calls,
+  reception desk, withdraw / walk-over / re-plan from now, delay indicator, court referee pages
+  (signed links), big screen, highlighted podium matches (quarter-finals → final).
+- **Flexible formats**: groups + final round-robin or knockout, the best per group or overall,
+  third-place match, final phase split by gender or age group, wished matches per player.
+- **Plan B**: printable court sheets, time schedule, score sheets and quick result entry.
+- **After the tournament**: medal table, diplomas, report per school, season statistics
+  (players, schools, real match duration).
+- **Operations**: registrations (Excel template and public form), demo tournament for training,
+  one-click backup, no indexing by search engines or AI crawlers.
+
+Deployment: `docker compose` (PostgreSQL, gunicorn, nginx, nightly backup). See the original
+documentation below.
+
+### Branding
+
+The code is GPL-3.0 like the original project. The logos and pictures in
+`tournament_planner/static/club/` (club and sponsor) are **not** covered by that licence: they belong to
+Club Bàdminton Igualada and its sponsors. If you reuse this code for another club, replace them with your own.
+
+---
+
 # Badminton Tournament Planner
 
 A web-based application for planning and running badminton tournaments.
