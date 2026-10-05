@@ -240,6 +240,10 @@
 .run-match-actions { display: flex; column-gap: 0.3rem; row-gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap; }
 .run-match-court { color: #0f766e; font-weight: 600; font-size: 0.78rem; white-space: nowrap; }
 .start-error { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; border-radius:6px; padding:0.4rem 0.6rem; margin:0.4rem 0; font-size:0.9rem; font-weight:600; }
+.voice-card .voice-row { display:flex; flex-direction:column; gap:0.2rem; font-size:0.8rem; color:#475569; margin-bottom:0.55rem; }
+.voice-card .voice-row.check { flex-direction:row; align-items:center; gap:0.4rem; }
+.voice-card select { font-size:0.85rem; padding:0.3rem; border-radius:6px; border:1px solid #d4d4d8; max-width:100%; }
+.voice-card .voice-tip { font-size:0.75rem; color:#64748b; margin:0.55rem 0 0; }
 .court-dialog-btn { min-width: 3rem; min-height: 2.6rem; font-size: 1.05rem !important; }
 .court-dialog-btn.planned { background: var(--accent,#EB1C60) !important; color: #fff !important; border-color: var(--accent,#EB1C60) !important; box-shadow: 0 0 0 3px rgba(235,28,96,0.25); }
 .court-dialog-btn.planned:disabled { background: #fde2ea !important; color: #9f1239 !important; }
@@ -616,6 +620,20 @@
     <div class="panels-row">
     <div id="live-side" data-url="{% url 'tournament_live' tournament.pk %}">{% include 'tournaments/partials/_run_side.html' %}</div>
 
+    {# Loudspeaker voice: outside the live-refreshed column so the choice is kept #}
+    <div class="card voice-card" style="padding:0.85rem 1rem;">
+      <div class="section-label" style="margin-top:0;">🔊 {% trans "Loudspeaker voice" %}</div>
+      <label class="voice-row">{% trans "Voice" %}
+        <select id="voice-select"><option value="">{% trans "Automatic" %}</option></select>
+      </label>
+      <label class="voice-row">{% trans "Speed" %} <span id="voice-rate-val"></span>
+        <input type="range" id="voice-rate" min="0.6" max="1.2" step="0.05" value="0.9">
+      </label>
+      <label class="voice-row check"><input type="checkbox" id="voice-chime" checked> {% trans "Ding-dong before every call" %}</label>
+      <button type="button" class="btn btn-secondary btn-sm" id="voice-test">▶ {% trans "Test" %}</button>
+      <p class="voice-tip">{% trans "Tip: Microsoft Edge has natural Catalan voices (for example “Joana Online (Natural)”), much clearer than the usual ones." %}</p>
+    </div>
+
     {# Quick links #}
     <div class="card" style="padding:0.85rem 1rem;">
       <div class="section-label" style="margin-top:0;">{% trans "Quick links" %}</div>
@@ -679,14 +697,7 @@
       });
     } catch (e) {}
   }
-  function say(text) {
-    if (!window.speechSynthesis) return;
-    var u = new SpeechSynthesisUtterance(text);
-    u.lang = document.documentElement.lang || 'ca';
-    var v = speechSynthesis.getVoices().filter(function (x) { return x.lang && x.lang.indexOf(u.lang.slice(0, 2)) === 0; })[0];
-    if (v) u.voice = v;
-    speechSynthesis.speak(u);
-  }
+  function say(text) { if (window.megaphoneSay) window.megaphoneSay(text); }
   function checkNewCalls() {
     var panel = document.getElementById('calls-panel');
     if (!panel) return;
@@ -825,6 +836,84 @@
   dialog.addEventListener('click', function (e) {
     if (e.target === dialog) dialog.close();
   });
+})();
+</script>
+
+<script>
+// Loudspeaker voice: chime, slower speech with pauses, chosen voice (remembered on this computer).
+(function () {
+  var sel = document.getElementById('voice-select');
+  var rate = document.getElementById('voice-rate');
+  var rateVal = document.getElementById('voice-rate-val');
+  var chime = document.getElementById('voice-chime');
+  var T_TEST = '{% filter escapejs %}{% blocktrans with c=3 %}Court {{ c }}{% endblocktrans %}.|{% trans "Loudspeaker test." %}|{% blocktrans with c=3 %}Court {{ c }}{% endblocktrans %}.{% endfilter %}';
+  var lang = (document.documentElement.lang || 'ca').slice(0, 2);
+  function load(k, d) { try { var v = localStorage.getItem('megaphone-' + k); return v === null ? d : v; } catch (e) { return d; } }
+  function store(k, v) { try { localStorage.setItem('megaphone-' + k, v); } catch (e) {} }
+  if (!window.speechSynthesis) { if (sel) sel.closest('.voice-card').style.display = 'none'; return; }
+  rate.value = load('rate', '0.9');
+  chime.checked = load('chime', '1') === '1';
+  function showRate() { rateVal.textContent = '×' + Number(rate.value).toFixed(2); }
+  showRate();
+  function voices() {
+    var all = speechSynthesis.getVoices();
+    function score(v) {
+      var l = (v.lang || '').toLowerCase();
+      return (l.indexOf(lang) === 0 ? 0 : l.indexOf('es') === 0 ? 2 : 4) - (/natural|online|neural/i.test(v.name) ? 1 : 0);
+    }
+    return all.slice().sort(function (a, b) { return score(a) - score(b) || a.name.localeCompare(b.name); });
+  }
+  function fill() {
+    var list = voices();
+    if (!list.length) return;
+    var saved = load('voice', '');
+    sel.innerHTML = '';
+    list.forEach(function (v) {
+      var o = document.createElement('option');
+      o.value = v.name;
+      o.textContent = (/natural|online|neural/i.test(v.name) ? '★ ' : '') + v.name + ' (' + v.lang + ')';
+      sel.appendChild(o);
+    });
+    sel.value = list.some(function (v) { return v.name === saved; }) ? saved : list[0].name;
+  }
+  fill();
+  speechSynthesis.onvoiceschanged = fill;
+  sel.addEventListener('change', function () { store('voice', sel.value); });
+  rate.addEventListener('input', function () { showRate(); store('rate', rate.value); });
+  chime.addEventListener('change', function () { store('chime', chime.checked ? '1' : '0'); });
+
+  function dingDong() {
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [[0, 784], [0.45, 622]].forEach(function (n) {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = n[1]; o.connect(g); g.connect(ctx.destination);
+        var t = ctx.currentTime + n[0];
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+        o.start(t); o.stop(t + 0.85);
+      });
+      return 1300;
+    } catch (e) { return 0; }
+  }
+  // Text parts are separated by "|": each one is spoken on its own, with a short pause in between.
+  window.megaphoneSay = function (text) {
+    speechSynthesis.cancel();
+    var voice = speechSynthesis.getVoices().filter(function (v) { return v.name === sel.value; })[0];
+    var parts = String(text).replace(/\s+[\/·]\s+/g, ', ').split('|').map(function (p) { return p.trim(); }).filter(Boolean);
+    var i = 0;
+    function next() {
+      if (i >= parts.length) return;
+      var u = new SpeechSynthesisUtterance(parts[i++]);
+      u.lang = voice ? voice.lang : (document.documentElement.lang || 'ca');
+      if (voice) u.voice = voice;
+      u.rate = Number(rate.value) || 0.9;
+      u.onend = function () { setTimeout(next, 450); };
+      speechSynthesis.speak(u);
+    }
+    setTimeout(next, chime.checked ? dingDong() : 0);
+  };
+  document.getElementById('voice-test').addEventListener('click', function () { window.megaphoneSay(T_TEST); });
 })();
 </script>
 

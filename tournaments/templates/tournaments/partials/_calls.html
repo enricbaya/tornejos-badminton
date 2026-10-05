@@ -6,7 +6,7 @@
 {% for e in plan %}{% if not e.active %}
 {% if e.proposal %}{% with m=e.proposal %}{% with pd=m|podium %}
 <div class="call-item{% if m.called_at %} called{% endif %}{% if e.advanced %} advanced{% endif %}{% if pd %} podium-call podium-{{ pd.code }}{% endif %}" data-match="{{ m.pk }}"
-     data-say="{% if pd %}{% blocktrans with what=pd.title %}Attention! {{ what }}.{% endblocktrans %} {% endif %}{% blocktrans with court=e.court %}Court {{ court }}{% endblocktrans %}. {{ m.team1.name }} {% trans 'against' %} {{ m.team2.name }}. {{ m.division.name }}.">
+     data-say="{% if pd %}{% blocktrans with what=pd.title %}Attention! {{ what }}.{% endblocktrans %}|{% endif %}{% blocktrans with court=e.court %}Court {{ court }}{% endblocktrans %}.|{{ m.team1.name }} {% trans 'against' %} {{ m.team2.name }}.|{{ m.division.name }}.|{% blocktrans with court=e.court %}Court {{ court }}{% endblocktrans %}.">
   <div class="call-court"><small>{% trans "Court" %}</small>{{ e.court }}</div>
   <div class="call-body">
     {% if pd %}<div>{{ m|podium_badge }}</div>{% endif %}
@@ -67,7 +67,7 @@
 {% endif %}{% empty %}{% endfor %}
 {% for e in plan %}{% if e.active and e.next and e.next.team1 and e.next.team2 %}{% with pd=e.next|podium %}{% if pd %}
 <div class="call-item podium-soon"
-     data-say="{% blocktrans with what=pd.title court=e.court %}Attention! Coming soon on court {{ court }}: {{ what }}.{% endblocktrans %} {{ e.next.team1.name }} {% trans 'against' %} {{ e.next.team2.name }}.">
+     data-say="{% blocktrans with what=pd.title court=e.court %}Attention! Coming soon on court {{ court }}: {{ what }}.{% endblocktrans %}|{{ e.next.team1.name }} {% trans 'against' %} {{ e.next.team2.name }}.|{% blocktrans with court=e.court %}Court {{ court }}{% endblocktrans %}.">
   <div class="call-court"><small>{% trans "Court" %}</small>{{ e.court }}</div>
   <div class="call-body">
     <div class="call-sub">📣 {% trans "Coming soon, after the current match" %}</div>
