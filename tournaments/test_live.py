@@ -61,6 +61,35 @@ class CourtPlanTest(TestCase):
         r = self.c.get(reverse('tournament_run', args=[self.t.pk]))
         self.assertContains(r, 'adv-badge')
 
+    def test_short_rest_waits_for_planned_match_instead_of_advancing(self):
+        # C rests 40 more seconds: #2 is neither proposed (cannot start yet) nor replaced
+        c = self.p['C'].player1
+        c.rest_until = timezone.now() + timedelta(seconds=40)
+        c.save()
+        plan = self.plan()
+        self.assertIsNone(plan[2]['proposal'])
+        self.assertTrue(plan[2]['waiting'])
+        self.assertEqual(plan[2]['next'], self.m2)
+        self.assertEqual(plan[2]['wait_min'], 1)
+        r = self.c.get(reverse('tournament_run', args=[self.t.pk]))
+        self.assertContains(r, '⏳')
+
+    def test_ajax_start_reports_why_it_cannot_start(self):
+        c = self.p['C'].player1
+        c.rest_until = timezone.now() + timedelta(seconds=40)
+        c.save()
+        r = self.c.post(reverse('match_start', args=[self.m2.pk]), {'court': '2', 'mark_arrived': '1'},
+                        HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertFalse(r.json()['ok'])
+        self.assertIn('C', r.json()['error'])
+        self.m2.refresh_from_db()
+        self.assertEqual(self.m2.status, 'pending')
+        r = self.c.post(reverse('match_start', args=[self.m1.pk]), {'court': '1'},
+                        HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertTrue(r.json()['ok'])
+        self.m1.refresh_from_db()
+        self.assertEqual(self.m1.status, 'in_progress')
+
     def test_busy_court_shows_next_planned(self):
         self.m1.status, self.m1.started_at = 'in_progress', timezone.now()
         self.m1.save()

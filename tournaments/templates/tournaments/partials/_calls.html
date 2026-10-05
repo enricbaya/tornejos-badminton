@@ -37,7 +37,8 @@
 <div class="call-item idle">
   <div class="call-court"><small>{% trans "Court" %}</small>{{ e.court }}</div>
   <div class="call-body">
-    <div class="call-names" style="color:#64748b;">{% trans "Free — no match can start now" %}</div>
+    {% if e.waiting %}<div class="call-names" style="color:#b45309;">⏳ {% blocktrans count m=e.wait_min %}Free — the planned match can start in {{ m }} minute{% plural %}Free — the planned match can start in {{ m }} minutes{% endblocktrans %}</div>
+    {% else %}<div class="call-names" style="color:#64748b;">{% trans "Free — no match can start now" %}</div>{% endif %}
     {% if e.due %}<div class="call-sub">{% blocktrans with n=e.due.match_number t=e.due.scheduled_time|time:"H:i" %}Planned here: #{{ n }} ({{ t }}){% endblocktrans %} — {{ e.due_blockers|join:" · " }}</div>{% endif %}
   </div>
 </div>

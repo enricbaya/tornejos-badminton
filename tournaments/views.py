@@ -1156,6 +1156,7 @@ def match_start(request, pk):
     """
     match = get_object_or_404(Match, pk=pk, division__tournament__owner=request.user)
     next_url = request.POST.get('next') or ''
+    ajax = request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if request.method == 'POST' and match.status == 'pending':
         if request.POST.get('mark_arrived') == '1':
             # Started from the loudspeaker panel after calling the players: they are here.
@@ -1165,25 +1166,39 @@ def match_start(request, pk):
                         p.has_arrived = True
                         p.save(update_fields=['has_arrived'])
         errors = check_match_startable(match)
+        court = (request.POST.get('court') or '').strip()
+        error = None
         if errors:
-            messages.error(request, _("Cannot start match: ") + ' · '.join(errors))
-        else:
-            court = (request.POST.get('court') or '').strip()
-            if not court:
-                messages.error(request, _("Please choose a court before starting the match."))
-            elif Match.objects.filter(
-                division__tournament=match.division.tournament, status='in_progress', court=court
-            ).exclude(pk=match.pk).exists():
-                messages.error(request, _("Court %(court)s is already in use.") % {'court': court})
-            else:
-                match.status = 'in_progress'
-                match.court = court
-                match.started_at = timezone.now()
-                match.save(update_fields=['status', 'court', 'started_at'])
+            error = _("Cannot start match: ") + ' · '.join(errors)
+        elif not court:
+            error = _("Please choose a court before starting the match.")
+        elif Match.objects.filter(
+            division__tournament=match.division.tournament, status='in_progress', court=court
+        ).exclude(pk=match.pk).exists():
+            error = _("Court %(court)s is already in use.") % {'court': court}
+        if ajax:
+            # The run page shows the reason next to the button it was clicked from.
+            if error is None:
+                _do_start(match, court)
                 messages.success(request, _("Match #%(n)s is now in progress.") % {'n': match.match_number or match.pk})
+            return JsonResponse({'ok': error is None, 'error': error or ''})
+        if error:
+            messages.error(request, error)
+        else:
+            _do_start(match, court)
+            messages.success(request, _("Match #%(n)s is now in progress.") % {'n': match.match_number or match.pk})
+    elif ajax:
+        return JsonResponse({'ok': False, 'error': _("This match is no longer pending.")})
     if next_url:
         return redirect(next_url)
     return redirect('tournament_detail', pk=match.division.tournament.pk)
+
+
+def _do_start(match, court):
+    match.status = 'in_progress'
+    match.court = court
+    match.started_at = timezone.now()
+    match.save(update_fields=['status', 'court', 'started_at'])
 
 
 @login_required

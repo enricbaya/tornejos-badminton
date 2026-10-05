@@ -12,6 +12,9 @@ CALL_AHEAD_MINUTES = 10
 ON_TIME_MINUTES = 5
 # At most this many 'due soon' calls on top of the free courts.
 MAX_SOON_CALLS = 2
+# A free court waits for its planned match (instead of advancing another one) when the
+# only thing stopping it is a rest that ends within this many minutes.
+SHORT_REST_WAIT = 3
 
 
 def compute_delay(tournament, now=None):
@@ -78,10 +81,25 @@ def _blockers(match, playing, resting, now, court_of_player):
                 c = court_of_player.get(p.pk)
                 out.append(_("%(name)s is playing on court %(court)s") % {'name': p.name, 'court': c}
                            if c else _("%(name)s is playing") % {'name': p.name})
-            elif p.pk in resting and resting[p.pk] > now + timedelta(minutes=1):
+            elif p.pk in resting and resting[p.pk] > now:
+                # Same rule as check_match_startable: any remaining rest blocks the start.
                 mins = int((resting[p.pk] - now).total_seconds() // 60) + 1
                 out.append(_("%(name)s is resting (%(min)s min)") % {'name': p.name, 'min': mins})
     return out
+
+
+def _rest_wait(match, playing, resting, now):
+    """Minutes until every player has rested, when rest is the only blocker; else None."""
+    if match.team1 is None or match.team2 is None:
+        return None
+    wait = 0
+    for t in (match.team1, match.team2):
+        for p in t.players:
+            if p.withdrawn or p.pk in playing:
+                return None
+            if p.pk in resting and resting[p.pk] > now:
+                wait = max(wait, int((resting[p.pk] - now).total_seconds() // 60) + 1)
+    return wait or None
 
 
 def _not_arrived(match):
@@ -131,6 +149,8 @@ def court_plan(tournament, now=None):
     for m in pending:
         m.blockers = _blockers(m, playing, resting, now, court_of_player)
         m.not_arrived = _not_arrived(m)
+        # Minutes until the match can start when only rest stops it (None otherwise).
+        m.rest_wait = _rest_wait(m, playing, resting, now) if m.blockers else 0
 
     def players_of(m):
         return {p.pk for t in (m.team1, m.team2) if t for p in t.players}
@@ -141,7 +161,7 @@ def court_plan(tournament, now=None):
         due = next((m for m in pending if str(m.court or '') == key), None)
         plan.append({'court': c, 'active': active_by_court.get(key), 'due': due,
                      'due_blockers': due.blockers if due else [],
-                     'proposal': None, 'advanced': False, 'not_arrived': []})
+                     'proposal': None, 'advanced': False, 'not_arrived': [], 'waiting': False})
 
     used, called_players = set(), set()
 
@@ -162,6 +182,16 @@ def court_plan(tournament, now=None):
     for e in free:
         if e['proposal'] is not None:
             continue
+        d = e['due']
+        if (d is not None and d.rest_wait and d.rest_wait <= SHORT_REST_WAIT
+                and not (players_of(d) & called_players)):
+            # The planned match can start in a moment: wait for it rather than advancing
+            # another one (which would delay the planned match for a whole game).
+            e['waiting'] = True
+            e['wait_min'] = d.rest_wait
+            used.add(d.pk)
+            called_players.update(players_of(d))
+            continue
         for m in pending:
             if m.pk in used or m.blockers or (players_of(m) & called_players):
                 continue
@@ -176,6 +206,9 @@ def court_plan(tournament, now=None):
     for e in plan:
         if e['proposal'] is not None:
             e['next'] = e['proposal']
+        elif e['waiting']:
+            e['next'] = e['due']
+            e['next_blockers'] = e['due'].blockers
         else:
             key = str(e['court'])
             e['next'] = next((m for m in pending if str(m.court or '') == key and m.pk not in used), None)

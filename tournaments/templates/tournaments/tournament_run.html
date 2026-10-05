@@ -239,6 +239,7 @@
 .run-match-score { color: #374151; white-space: nowrap; font-size: 0.8rem; }
 .run-match-actions { display: flex; column-gap: 0.3rem; row-gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap; }
 .run-match-court { color: #0f766e; font-weight: 600; font-size: 0.78rem; white-space: nowrap; }
+.start-error { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; border-radius:6px; padding:0.4rem 0.6rem; margin:0.4rem 0; font-size:0.9rem; font-weight:600; }
 .court-dialog-btn { min-width: 3rem; min-height: 2.6rem; font-size: 1.05rem !important; }
 .court-dialog-btn.planned { background: var(--accent,#EB1C60) !important; color: #fff !important; border-color: var(--accent,#EB1C60) !important; box-shadow: 0 0 0 3px rgba(235,28,96,0.25); }
 .court-dialog-btn.planned:disabled { background: #fde2ea !important; color: #9f1239 !important; }
@@ -640,6 +641,7 @@
     <h3 style="margin-top:0;">{% trans "Choose court" %}</h3>
     <p id="court-dialog-match" style="color:#64748b; font-size:0.85rem;"></p>
     <p id="court-dialog-planned" style="font-size:0.95rem; margin:0.4rem 0; display:none;"></p>
+    <p id="court-dialog-error" class="start-error" style="display:none;"></p>
     <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin:1rem 0;">
       {% for c in court_choices %}
       <button type="submit" name="court" value="{{ c }}" class="btn btn-secondary court-dialog-btn" {% if c|stringformat:"s" in occupied_courts %}disabled title="{% trans 'Court occupied' %}"{% endif %}>{{ c }}</button>
@@ -703,6 +705,7 @@
       side.innerHTML = d.side;
       if (courts) courts.innerHTML = d.courts;
       updateDialog(d.occupied || []);
+      if (window.reapplyStartErrors) window.reapplyStartErrors();
       checkNewCalls();
     }).catch(function () {}).then(function () { loading = false; });
   }
@@ -808,11 +811,60 @@
     } else {
       plannedInfo.style.display = 'none';
     }
+    var errBox = document.getElementById('court-dialog-error');
+    errBox.style.display = 'none'; errBox.textContent = '';
     dialog.showModal();
     if (plannedBtn && !plannedBtn.disabled) plannedBtn.focus();
   });
   dialog.addEventListener('click', function (e) {
     if (e.target === dialog) dialog.close();
+  });
+})();
+</script>
+
+<script>
+// Start a match without leaving the page; if it cannot start, show why next to the button.
+(function () {
+  var T_FAIL = '{% filter escapejs %}{% trans "Could not contact the server. Try again." %}{% endfilter %}';
+  function token() { var m = document.cookie.match(/csrftoken=([^;]+)/); return m ? m[1] : ''; }
+  var recent = {};  // form action -> {text, t}: keeps the reason visible across the live refresh
+  function boxFor(form) {
+    var box = form.parentNode.querySelector('.start-error');
+    if (!box) { box = document.createElement('div'); box.className = 'start-error'; form.parentNode.appendChild(box); }
+    return box;
+  }
+  window.reapplyStartErrors = function () {
+    var now = Date.now();
+    document.querySelectorAll('#live-side form').forEach(function (f) {
+      var r = recent[f.getAttribute('action')];
+      if (r && now - r.t < 60000) { var b = boxFor(f); b.textContent = r.text; b.style.display = ''; }
+    });
+  };
+  document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (!/\/match\/\d+\/start\/$/.test(form.getAttribute('action') || form.action || '')) return;
+    e.preventDefault();
+    var data = new FormData(form);
+    if (e.submitter && e.submitter.name) data.set(e.submitter.name, e.submitter.value);
+    var box;
+    if (form.id === 'court-dialog-form') {
+      box = document.getElementById('court-dialog-error');
+    } else {
+      box = boxFor(form);
+    }
+    delete recent[form.getAttribute('action')];
+    box.style.display = 'none';
+    form.querySelectorAll('button').forEach(function (b) { b.dataset.wasDisabled = b.disabled ? '1' : ''; b.disabled = true; });
+    function restore() { form.querySelectorAll('button').forEach(function (b) { b.disabled = b.dataset.wasDisabled === '1'; }); }
+    fetch(form.action, {method: 'POST', body: data, credentials: 'same-origin',
+                        headers: {'X-CSRFToken': token(), 'X-Requested-With': 'XMLHttpRequest'}})
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.ok) { window.location.reload(); return; }
+        restore(); box.textContent = '⛔ ' + d.error; box.style.display = '';
+        if (form.id !== 'court-dialog-form') recent[form.getAttribute('action')] = {text: box.textContent, t: Date.now()};
+      })
+      .catch(function () { restore(); box.textContent = '⛔ ' + T_FAIL; box.style.display = ''; });
   });
 })();
 </script>
